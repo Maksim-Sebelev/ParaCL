@@ -1,0 +1,6 @@
+.venv
+build
+.vscode/
+settings.json
+*.png
+Doxyfile
