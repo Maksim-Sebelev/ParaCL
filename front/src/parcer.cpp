@@ -74,7 +74,7 @@ handleStmt(tokenIt& it)
     {
         next(it, token_t::WH);
         next(it, token_t::LCIB);
-
+        
         auto condition = handleExpr(it);
 
         next(it, token_t::RCIB);
