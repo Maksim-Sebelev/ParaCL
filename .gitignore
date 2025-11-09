@@ -4,3 +4,6 @@ build
 settings.json
 *.png
 Doxyfile
+parser.tab.hpp
+parser.tab.cpp
+lexer.yy.cpp

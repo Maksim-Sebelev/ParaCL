@@ -3,14 +3,8 @@
 #include <iostream>
 #include <cstdio>
 
-// Объявляем внешние переменные Bison/Flex
 extern FILE* yyin;
 extern int yyparse();
-
-// Объявляем внешние переменные из лексера
-extern int current_num_value;
-extern std::string current_var_value;
-extern int current_line;
 
 int main(int argc, char* argv[]) {
     if (argc > 1) {

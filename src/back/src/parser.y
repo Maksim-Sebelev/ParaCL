@@ -1,5 +1,4 @@
 %{
-#include "token_t.hpp"
 #include "lexer.hpp"
 #include <iostream>
 #include <cstdio>
@@ -32,7 +31,7 @@ void yyerror(const char* s) {
 %token WH IN AS PRINT
 %token SC
 
-%type <num_value> expression simple_expression term factor
+%type <num_value> expression simple_expression term factor assignment_expression
 
 %%
 
@@ -41,7 +40,6 @@ program:
     ;
 
 statements:
-    /* empty */
     | statements statement
     ;
 
@@ -84,11 +82,11 @@ input_statement:
 
 expression:
     simple_expression { $$ = $1; }
-    | expression ISAB simple_expression  { $$ = ($1 > $3) ? 1 : 0; }
+    | expression ISAB  simple_expression { $$ = ($1 >  $3) ? 1 : 0; }
     | expression ISABE simple_expression { $$ = ($1 >= $3) ? 1 : 0; }
-    | expression ISLS simple_expression  { $$ = ($1 < $3) ? 1 : 0; }
+    | expression ISLS  simple_expression { $$ = ($1 <  $3) ? 1 : 0; }
     | expression ISLSE simple_expression { $$ = ($1 <= $3) ? 1 : 0; }
-    | expression ISEQ simple_expression  { $$ = ($1 == $3) ? 1 : 0; }
+    | expression ISEQ  simple_expression { $$ = ($1 == $3) ? 1 : 0; }
     ;
 
 simple_expression:
@@ -123,6 +121,14 @@ factor:
           delete $1;
       }
     | LCIB expression RCIB { $$ = $2; }
+    | assignment_expression { $$ = $1; }
     ;
+
+assignment_expression:
+    VAR AS expression {
+        variables[*$1] = $3;
+        $$ = $3;
+        delete $1;
+    }
 
 %%
