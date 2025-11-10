@@ -77,5 +77,5 @@ fi
 
 "@PYTHON_RUN_TEST_SCRIPT@" \
         "@CMAKE_BINARY_DIR@/@TRIANGLES_EXE@" \
-        "@TRIANGLES_TEST_DAT_DIR@/$test_name.dat" \
-        "@TRIANGLES_TEST_ANS_DIR@/$test_name.ans"
+        "@PARACL_E2E_DAT_DIR@/$test_name.pcl" \
+        "@PARACL_E2E_ANS_DIR@/$test_name.ans"
