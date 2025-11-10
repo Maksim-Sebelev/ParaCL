@@ -244,7 +244,7 @@ target_hard_debug_options(${PARACL_EXE})
 
 # =============================================================================================================
 
-if(BUILD_TESTING)
+if (BUILD_TESTING)
     enable_testing()
     include(CTest)
 
@@ -257,7 +257,6 @@ if(BUILD_TESTING)
     include(${CMAKE_E2E_TESTS_SETTING_DIR}/e2e-paracl-python-script.cmake)
     include(${CMAKE_E2E_TESTS_SETTING_DIR}/add-e2e-to-target-function.cmake)
 
-    # target_e2e_test test_target run_script test_dir ans_dir
     target_e2e_test(${CMAKE_BINARY_DIR}/${PARACL_EXE}
         ${PYTHON_RUN_TEST_SCRIPT}
         ${PARACL_E2E_DAT_DIR}

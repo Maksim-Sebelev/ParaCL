@@ -76,6 +76,6 @@ else
 fi
 
 "@PYTHON_RUN_TEST_SCRIPT@" \
-        "@CMAKE_BINARY_DIR@/@TRIANGLES_EXE@" \
+        "@CMAKE_BINARY_DIR@/@PARACL_EXE@" \
         "@PARACL_E2E_DAT_DIR@/$test_name.pcl" \
         "@PARACL_E2E_ANS_DIR@/$test_name.ans"
