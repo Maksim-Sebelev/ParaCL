@@ -64,9 +64,10 @@ def main():
         print(f"Error reading answer file: {e}")
         sys.exit(1)
 
-        print(content)
-        print(program_stdout)
-        print(program_stderr)
+    print(content)
+    print(program_stdout)
+    print(program_stderr)
+
 
 
 if __name__ == "__main__":
