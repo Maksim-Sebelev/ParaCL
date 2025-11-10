@@ -83,45 +83,55 @@ def main():
         color_print(Colors.GREEN, "TEST PASSED")
         return 0
 
+    if expected_numbers == program_output:
+        color_print(Colors.GREEN, "TEST PASSED")
+        return 0
+
     print()
 
     errors = 0
     good_program_out = 0
     len_out = len(program_output)
-    len_ans = len(answer_content)
-    
-    for i in range(0, min(len_out, len_ans)):
-        if program_output[i] != answer_content[i]:
+    len_ans = len(expected_numbers)
+
+    for i in range(min(len_out, len_ans)):
+        if program_output[i] != expected_numbers[i]:
             errors += 1
-            color_print(Colors.RED, f"program output: {program_output[i]}\ncorrect value: {answer_content[i]}", end = '\n\n')
+            color_print(Colors.RED, f"position {i}: program output: {program_output[i]}\nexpected: {expected_numbers[i]}", end='\n\n')
         else:
             good_program_out += 1
-            color_print(Colors.GREEN, f"program output: {program_output[i]}\ncorrect value: {answer_content[i]}", end = '\n\n')
+            color_print(Colors.GREEN, f"position {i}: program output: {program_output[i]}\nexpected: {expected_numbers[i]}", end='\n\n')
 
-    if (len_out < len_ans):
-        for i in range(len_out, len_ans - len_out):
+    if len_out < len_ans:
+        for i in range(len_out, len_ans):
             errors += 1
-            color_print(Colors.RED, f"program output: NONE\ncorrect value: {answer_content[i]}", end = '\n\n')
+            color_print(Colors.RED, f"position {i}: program output: NONE\nexpected: {expected_numbers[i]}", end='\n\n')
 
-    if (len_out > len_ans):
-        for i in range(len_ans, len_out - len_ans):
+    if len_out > len_ans:
+        for i in range(len_ans, len_out):
             errors += 1
-            color_print(Colors.RED, f"program output: {program_output[i]}\ncorrect value: NONE", end = '\n\n')
+            color_print(Colors.RED, f"position {i}: program output: {program_output[i]}\nexpected: NONE", end='\n\n')
 
-   
-    color_print(Colors.WHITE, "\n\nINFO:", end = '\n\n')
+    color_print(Colors.WHITE, "INFO:", end='\n\n')
 
-    color_print(Colors.WHITE, f"[ errors / answerts quant ]: {errors}/{len_ans}", end = '\n\n')
+    color_print(Colors.WHITE, f"[ total numbers expected ]: {len_ans}")
+    color_print(Colors.WHITE, f"[ total numbers received ]: {len_out}") 
+    color_print(Colors.WHITE, f"[ errors / total ]: {errors}/{len_ans}", end='\n\n')
 
-    percent_of_accuracy = (good_program_out / len_ans) * 100
-    percent_of_errors = 100 - percent_of_accuracy
+    if len_ans > 0:
+        percent_of_accuracy = (good_program_out / len_ans) * 100
+        percent_of_errors = 100 - percent_of_accuracy
+    elif len_ans == 0 and len_out == 0:
+        percent_of_accuracy = 100
+        percent_of_errors = 0
+    else:
+        percent_of_accuracy = 0
+        percent_of_errors = 100
 
     color_print(Colors.GREEN, f"[ percentage of accuracy ]: {round(percent_of_accuracy, 2)}%")
-    color_print(Colors.RED  , f"[ percentage of errors   ]: {round(percent_of_errors  , 2)}%")
+    color_print(Colors.RED,   f"[ percentage of errors   ]: {round(percent_of_errors, 2)}%")
 
-    
-
-    color_print(Colors.RED, "")
+    color_print(Colors.RED, "\n\nTEST FAILED")
     return 1
 
 if __name__ == "__main__":
