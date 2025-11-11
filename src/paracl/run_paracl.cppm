@@ -1,14 +1,5 @@
 module;
 
-<<<<<<< HEAD
-//---------------------------------------------------------------------------------------------------------------
-
-#if defined(LOGGER)
-#include "pineaplog.hpp"
-#endif /* defined(LOGGER) */
-
-=======
->>>>>>> ebe64e3 (commit)
 #include <iostream>
 #include <cstdlib>
 #include <vector>
