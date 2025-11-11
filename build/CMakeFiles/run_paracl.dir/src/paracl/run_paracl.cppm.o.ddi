@@ -1,0 +1,28 @@
+{
+"rules": [
+{
+"primary-output": "CMakeFiles/run_paracl.dir/src/paracl/run_paracl.cppm.o",
+"provides": [
+{
+"logical-name": "run_paracl",
+"is-interface": true
+}
+],
+"requires": [
+{
+"logical-name": "options_parser"
+}
+,
+{
+"logical-name": "paraCL"
+}
+,
+{
+"logical-name": "paracl_extension"
+}
+]
+}
+],
+"version": 0,
+"revision": 0
+}

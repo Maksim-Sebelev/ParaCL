@@ -1,0 +1,32 @@
+{
+	"bmi-installation" : null,
+	"compiler-frontend-variant" : "GNU",
+	"compiler-id" : "GNU",
+	"compiler-simulate-id" : "",
+	"config" : "Release",
+	"cxx-modules" : {},
+	"database-info" : null,
+	"dir-cur-bld" : "/home/matvey/work/ParaCL/build",
+	"dir-cur-src" : "/home/matvey/work/ParaCL",
+	"dir-top-bld" : "/home/matvey/work/ParaCL/build",
+	"dir-top-src" : "/home/matvey/work/ParaCL",
+	"exports" : [],
+	"forward-modules-from-target-dirs" : [],
+	"include-dirs" : [],
+	"language" : "CXX",
+	"linked-target-dirs" : 
+	[
+		"/home/matvey/work/ParaCL/build/CMakeFiles/options_parse.dir",
+		"/home/matvey/work/ParaCL/build/CMakeFiles/run_paracl.dir",
+		"/home/matvey/work/ParaCL/build/CMakeFiles/paracl_extension.dir"
+	],
+	"module-dir" : "/home/matvey/work/ParaCL/build/CMakeFiles/paracl.dir",
+	"sources" : 
+	{
+		"CMakeFiles/paracl.dir/src/main.cpp.o" : 
+		{
+			"language" : "CXX",
+			"source" : "/home/matvey/work/ParaCL/src/main.cpp"
+		}
+	}
+}

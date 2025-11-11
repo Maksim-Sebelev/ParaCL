@@ -1,0 +1,61 @@
+{
+	"modules" : 
+	{
+		"paraCL" : 
+		{
+			"bmi" : "/home/matvey/work/ParaCL/build/CMakeFiles/run_paracl.dir/paraCL.gcm",
+			"is-private" : false
+		},
+		"parse_paracl_exit_code" : 
+		{
+			"bmi" : "/home/matvey/work/ParaCL/build/CMakeFiles/run_paracl.dir/parse_paracl_exit_code.gcm",
+			"is-private" : false
+		},
+		"run_paracl" : 
+		{
+			"bmi" : "/home/matvey/work/ParaCL/build/CMakeFiles/run_paracl.dir/run_paracl.gcm",
+			"is-private" : false
+		}
+	},
+	"references" : 
+	{
+		"options_parser" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "CMakeFiles/options_parse.dir/options_parser.gcm"
+		},
+		"paraCL" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "CMakeFiles/run_paracl.dir/paraCL.gcm"
+		},
+		"paracl_extension" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "CMakeFiles/paracl_extension.dir/paracl_extension.gcm"
+		},
+		"parse_paracl_exit_code" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "CMakeFiles/run_paracl.dir/parse_paracl_exit_code.gcm"
+		},
+		"run_paracl" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "CMakeFiles/run_paracl.dir/run_paracl.gcm"
+		}
+	},
+	"usages" : 
+	{
+		"options_parser" : 
+		[
+			"paracl_extension"
+		],
+		"run_paracl" : 
+		[
+			"options_parser",
+			"paraCL",
+			"paracl_extension"
+		]
+	}
+}

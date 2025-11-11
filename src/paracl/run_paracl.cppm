@@ -1,7 +1,14 @@
 module;
 
+<<<<<<< HEAD
 //---------------------------------------------------------------------------------------------------------------
 
+#if defined(LOGGER)
+#include "pineaplog.hpp"
+#endif /* defined(LOGGER) */
+
+=======
+>>>>>>> ebe64e3 (commit)
 #include <iostream>
 #include <cstdlib>
 #include <vector>
@@ -10,21 +17,23 @@ module;
 
 #include "global/global.hpp"
 #include "global/custom_console_output.hpp"
+#include "paraCL.hpp"
 
 #include "lexer.hpp"
 #include "parser.tab.hpp"
 
 import paracl_extension;
 import options_parser;
+import paraCL;
 
 extern FILE* yyin;
 extern int yyparse();
 
-//---------------------------------------------------------------------------------------------------------------
+extern ParaCL::Parser::ProgramAST program;
+
 
 export module run_paracl;
 
-//---------------------------------------------------------------------------------------------------------------
 
 int  no_sources_action      ();
 int  one_source_action      (const std::string& source);
@@ -32,11 +41,9 @@ int  one_source_action      (const std::string& source);
 [[noreturn]]
 void failed_open_source_file(const std::string& source);
 
-//---------------------------------------------------------------------------------------------------------------
 
 export namespace ParaCL
 {
-//---------------------------------------------------------------------------------------------------------------
 
 int run_paracl(const OptionsParsing::program_options_t& program_options)
 {
@@ -54,11 +61,11 @@ int run_paracl(const OptionsParsing::program_options_t& program_options)
     builtin_unreachable_wrapper("now we dont parse any situations");
 }
 
-//---------------------------------------------------------------------------------------------------------------
 
 } /* export namespace ParaCL */
 
-//---------------------------------------------------------------------------------------------------------------
+
+
 
 int no_sources_action()
 {
@@ -68,7 +75,6 @@ int no_sources_action()
     return yyparse();
 }
 
-//---------------------------------------------------------------------------------------------------------------
 
 int one_source_action(const std::string& source)
 {
@@ -78,14 +84,15 @@ int one_source_action(const std::string& source)
         failed_open_source_file(source); // exit 1
 
     yyin = input_file;
+
     int result = yyparse();
+    ParaCL::Parser::dump(program);
     
     fclose(input_file);
 
     return result;
 }
 
-//---------------------------------------------------------------------------------------------------------------
 
 [[noreturn]]
 void failed_open_source_file(const std::string& source)
@@ -93,5 +100,3 @@ void failed_open_source_file(const std::string& source)
     std::cerr << RED BOLD "No such file: " RESET_CONSOLE_OUT WHITE << source << "\n";
     exit(EXIT_FAILURE);
 }
-
-//---------------------------------------------------------------------------------------------------------------

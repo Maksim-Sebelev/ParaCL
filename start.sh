@@ -55,7 +55,16 @@ function find_option
     return 1
 }
 
-echo "$0"
+function need_test
+{
+    find_option "test" "$@"
+}
+
+function need_logger
+{
+    find_option "logger" "$@"
+}
+
 
 project_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -100,6 +109,14 @@ cmake_command="cmake \
 -B ${build_dir} \
 -DCMAKE_CXX_COMPILER=clang++ \
 -DCMAKE_BUILD_TYPE=Release"
+
+if need_test "$@"; then
+    cmake_command="$cmake_command -DBUILD_TESTING=ON"
+fi
+
+if need_logger "$@"; then
+    cmake_command="$cmake_command -DLOGGER=ON"
+fi
 
 custom_echo "${CONSOLE_COLOR_WHITE}" "" "${cmake_command}"
 eval ${cmake_command}

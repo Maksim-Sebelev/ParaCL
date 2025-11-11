@@ -1,0 +1,20 @@
+{
+"rules": [
+{
+"primary-output": "CMakeFiles/options_parse.dir/src/options_parser/options_parser.cppm.o",
+"provides": [
+{
+"logical-name": "options_parser",
+"is-interface": true
+}
+],
+"requires": [
+{
+"logical-name": "paracl_extension"
+}
+]
+}
+],
+"version": 0,
+"revision": 0
+}

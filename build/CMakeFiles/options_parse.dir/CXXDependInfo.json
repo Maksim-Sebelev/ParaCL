@@ -1,0 +1,38 @@
+{
+	"bmi-installation" : null,
+	"compiler-frontend-variant" : "GNU",
+	"compiler-id" : "GNU",
+	"compiler-simulate-id" : "",
+	"config" : "Release",
+	"cxx-modules" : 
+	{
+		"CMakeFiles/options_parse.dir/src/options_parser/options_parser.cppm.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src/options_parser",
+			"source" : "/home/matvey/work/ParaCL/src/options_parser/options_parser.cppm",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		}
+	},
+	"database-info" : null,
+	"dir-cur-bld" : "/home/matvey/work/ParaCL/build",
+	"dir-cur-src" : "/home/matvey/work/ParaCL",
+	"dir-top-bld" : "/home/matvey/work/ParaCL/build",
+	"dir-top-src" : "/home/matvey/work/ParaCL",
+	"exports" : [],
+	"forward-modules-from-target-dirs" : [],
+	"include-dirs" : 
+	[
+		"/home/matvey/work/ParaCL/include"
+	],
+	"language" : "CXX",
+	"linked-target-dirs" : 
+	[
+		"/home/matvey/work/ParaCL/build/CMakeFiles/paracl_extension.dir"
+	],
+	"module-dir" : "/home/matvey/work/ParaCL/build/CMakeFiles/options_parse.dir",
+	"sources" : {}
+}

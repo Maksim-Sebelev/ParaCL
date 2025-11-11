@@ -3,6 +3,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <vector>
+#include <memory>
+#include "paraCL.hpp"
 #include "parser.tab.hpp"
 
 int current_line = 1;
@@ -18,6 +21,7 @@ void process_variable(const char* text);
 extern FILE* yyin;
 
 int eof_reached = 0;
+
 %}
 
 %option noyywrap

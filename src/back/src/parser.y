@@ -1,16 +1,17 @@
 %{
-#include "lexer.hpp"
 #include <iostream>
 #include <cstdio>
 #include <unordered_map>
 #include <memory>
+#include <vector>
+
+#include "paraCL.hpp"
+#include "lexer.hpp"
 
 extern FILE* yyin;
 extern int yylex();
 extern int yyparse();
 extern int get_current_line();
-
-std::unordered_map<std::string, int> variables;
 
 void yyerror(const char* s) {
     std::cerr << "Error at line " << get_current_line() << ": " << s << std::endl;
@@ -26,11 +27,16 @@ void yyerror(const char* s) {
         do { } while(0)
 #endif
 
+ParaCL::Parser::ProgramAST program;
+
 %}
 
 %union {
     int num_value;
     std::string* str_value;
+    ParaCL::Parser::Stmt* stmt;
+    ParaCL::Parser::Expr* expr;
+    std::vector<ParaCL::Parser::Stmt*>* stmt_vector;
 }
 
 %token <num_value> NUM
@@ -41,32 +47,52 @@ void yyerror(const char* s) {
 %token WH IN AS PRINT
 %token SC
 
-%type <num_value> expression simple_expression term factor assignment_expression
+%type <stmt_vector> program statements
+%type <stmt> statement assignment print_statement while_statement input_statement
+%type <expr> expression simple_expression term factor assignment_expression
 
 %%
 
 program:
     statements {
-        DEBUG_COUT_M("Execution completed!"); 
+        for (auto stmt : *$1) {
+            program.statements.push_back(std::unique_ptr<ParaCL::Parser::Stmt>(stmt));
+        }
+        delete $1;
+        DEBUG_COUT_M("AST construction completed!"); 
     }
     ;
 
 statements:
-    | statements statement
+    { 
+        $$ = new std::vector<ParaCL::Parser::Stmt*>(); 
+    }
+    | statements statement {
+        $1->push_back($2);
+        $$ = $1;
+    }
     ;
 
 statement:
-    assignment SC
-    | print_statement SC
-    | while_statement
-    | input_statement SC
+    assignment SC { 
+        $$ = $1;
+    }
+    | print_statement SC { 
+        $$ = $1;
+    }
+    | while_statement {
+        $$ = $1;
+    }
+    | input_statement SC { 
+        $$ = $1;
+    }
     ;
 
 assignment:
     VAR AS expression {
-        variables[*$1] = $3;
+        $$ = new ParaCL::Parser::AssignStmt(*$1, *$3);
         #ifdef DEBUG
-            std::cout << "Assigned " << $3 << " to variable " << *$1 << std::endl;
+            std::cout << "Created assignment for variable " << *$1 << std::endl;
         #endif
         delete $1;
     }
@@ -74,80 +100,98 @@ assignment:
 
 print_statement:
     PRINT expression {
-        DEBUG_COUT_M("Output:");
-        std::cout << $2 << std::endl;
+        $$ = new ParaCL::Parser::PrintStmt(*$2);
     }
     ;
 
 while_statement:
     WH LCIB expression RCIB LCUB statements RCUB {
-        DEBUG_COUT_M("While loop executed");
+        // Конвертируем вектор указателей в вектор unique_ptr для BlockStmt
+        auto body_stmts = std::vector<std::unique_ptr<ParaCL::Parser::Stmt>>();
+        for (auto stmt : *$6) {
+            body_stmts.push_back(std::unique_ptr<ParaCL::Parser::Stmt>(stmt));
+        }
+        auto body = new ParaCL::Parser::BlockStmt(std::move(body_stmts));
+        auto condition = new ParaCL::Parser::Expr(std::move(*$3));
+        $$ = new ParaCL::Parser::WhileStmt(std::unique_ptr<ParaCL::Parser::Expr>(condition), 
+                                           std::unique_ptr<ParaCL::Parser::BlockStmt>(body));
+        #ifdef DEBUG
+            std::cout << "Created while statement" << std::endl;
+        #endif
+        delete $6;
     }
     ;
 
 input_statement:
     IN AS VAR {
-        int value;
-
-        #ifdef DEBUG
-            std::cout << "Enter value for " << *$3 << ": ";
-        #endif
-
-        std::cin >> value;
-        variables[*$3] = value;
-        delete $3;
+        // $$ = new ParaCL::Parser::InputExpr(*$3);
+        // delete $3;
     }
     ;
 
 expression:
     simple_expression { $$ = $1; }
-    | expression ISAB  simple_expression { $$ = ($1 >  $3) ? 1 : 0; }
-    | expression ISABE simple_expression { $$ = ($1 >= $3) ? 1 : 0; }
-    | expression ISLS  simple_expression { $$ = ($1 <  $3) ? 1 : 0; }
-    | expression ISLSE simple_expression { $$ = ($1 <= $3) ? 1 : 0; }
-    | expression ISEQ  simple_expression { $$ = ($1 == $3) ? 1 : 0; }
+    | expression ISAB simple_expression { 
+        $$ = new ParaCL::Parser::BinExpr(ParaCL::token_t::ISAB, *$1, *$3);
+    }
+    | expression ISABE simple_expression { 
+        $$ = new ParaCL::Parser::BinExpr(ParaCL::token_t::ISABE, *$1, *$3);
+    }
+    | expression ISLS simple_expression { 
+        $$ = new ParaCL::Parser::BinExpr(ParaCL::token_t::ISLS, *$1, *$3);
+    }
+    | expression ISLSE simple_expression { 
+        $$ = new ParaCL::Parser::BinExpr(ParaCL::token_t::ISLSE, *$1, *$3);
+    }
+    | expression ISEQ simple_expression { 
+        $$ = new ParaCL::Parser::BinExpr(ParaCL::token_t::ISEQ, *$1, *$3);
+    }
     ;
 
 simple_expression:
     term { $$ = $1; }
-    | simple_expression ADD term { $$ = $1 + $3; }
-    | simple_expression SUB term { $$ = $1 - $3; }
+    | simple_expression ADD term { 
+        $$ = new ParaCL::Parser::BinExpr(ParaCL::token_t::ADD, *$1, *$3);
+    }
+    | simple_expression SUB term { 
+        $$ = new ParaCL::Parser::BinExpr(ParaCL::token_t::SUB, *$1, *$3);
+    }
     ;
 
 term:
     factor { $$ = $1; }
-    | term MUL factor { $$ = $1 * $3; }
+    | term MUL factor { 
+        $$ = new ParaCL::Parser::BinExpr(ParaCL::token_t::MUL, *$1, *$3);
+    }
     | term DIV factor { 
-          if ($3 == 0) {
-              yyerror("Division by zero");
-              $$ = 0;
-          } else {
-              $$ = $1 / $3;
-          }
-      }
+        $$ = new ParaCL::Parser::BinExpr(ParaCL::token_t::DIV, *$1, *$3);
+    }
     ;
 
 factor:
-    NUM { $$ = $1; }
+    NUM { 
+        $$ = new ParaCL::Parser::NumExpr($1);
+    }
     | VAR { 
-          auto it = variables.find(*$1);
-          if (it != variables.end()) {
-              $$ = it->second;
-          } else {
-              yyerror(("Undefined variable: " + *$1).c_str());
-              $$ = 0;
-          }
-          delete $1;
-      }
-    | LCIB expression RCIB { $$ = $2; }
-    | assignment_expression { $$ = $1; }
+        $$ = new ParaCL::Parser::VarExpr(*$1);
+        delete $1;
+    }
+    | LCIB expression RCIB { 
+        $$ = $2;
+    }
+    | assignment_expression { 
+        $$ = $1;
+    }
+    | IN {
+        $$ = new ParaCL::Parser::InputExpr();
+    }
     ;
 
 assignment_expression:
     VAR AS expression {
-        variables[*$1] = $3;
-        $$ = $3;
+        $$ = new ParaCL::Parser::AssignExpr(*$1, *$3);
         delete $1;
     }
+    ;
 
 %%

@@ -1,0 +1,17 @@
+{
+"rules": [
+{
+"primary-output": "CMakeFiles/run_paracl.dir/src/paracl/parse_paracl_exit_code.cppm.o",
+"provides": [
+{
+"logical-name": "parse_paracl_exit_code",
+"is-interface": true
+}
+],
+"requires": [
+]
+}
+],
+"version": 0,
+"revision": 0
+}

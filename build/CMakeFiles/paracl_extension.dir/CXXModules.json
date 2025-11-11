@@ -1,0 +1,19 @@
+{
+	"modules" : 
+	{
+		"paracl_extension" : 
+		{
+			"bmi" : "/home/matvey/work/ParaCL/build/CMakeFiles/paracl_extension.dir/paracl_extension.gcm",
+			"is-private" : false
+		}
+	},
+	"references" : 
+	{
+		"paracl_extension" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "CMakeFiles/paracl_extension.dir/paracl_extension.gcm"
+		}
+	},
+	"usages" : {}
+}

@@ -1,0 +1,17 @@
+{
+"rules": [
+{
+"primary-output": "CMakeFiles/run_paracl.dir/src/back/src/paraCL.cppm.o",
+"provides": [
+{
+"logical-name": "paraCL",
+"is-interface": true
+}
+],
+"requires": [
+]
+}
+],
+"version": 0,
+"revision": 0
+}

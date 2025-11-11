@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.28)
 project(paraCL
     LANGUAGES CXX
+    VERSION 1.1
 )
 
 # =================================================================================================
@@ -22,12 +23,14 @@ if (NOT CMAKE_EXPORT_COMPILE_COMMANDS)
 endif()
 
 option(BUILD_TESTING "Build tests" OFF)
+option(LOGGER "logger" OFF)
 
 # =================================================================================================
 
 set(CMAKE_SETTINGS_DIR ${PROJECT_SOURCE_DIR}/cmake)
 
 include(${CMAKE_SETTINGS_DIR}/debug.cmake)
+include(${CMAKE_SETTINGS_DIR}/logger.cmake)
 
 # =================================================================================================
 # check depecndencies and install it if not found
@@ -89,6 +92,7 @@ target_sources(${PARSER_LIB}
 
 target_include_directories(${PARSER_LIB}
     PRIVATE
+        ${PROJECT_SOURCE_DIR}/src/back/inc
         ${BISON_PARSER_SRC_DIR}/
         ${FLEX_INC_DIR}/
 )
@@ -122,6 +126,7 @@ target_sources(${LEXER_LIB}
 
 target_include_directories(${LEXER_LIB}
     PRIVATE
+        ${PROJECT_SOURCE_DIR}/src/back/inc
         ${BISON_PARSER_SRC_DIR}
 )
 
@@ -149,6 +154,7 @@ target_sources(${PARACL_EXTENSION_LIB}
 )
 
 add_target_debug_options(${PARACL_EXTENSION_LIB} hard)
+target_add_logger(${PARACL_EXTENSION_LIB})
 
 # =================================================================================================
 # add options parser library
@@ -176,13 +182,18 @@ target_include_directories(${OPTIONS_PARSER_LIB}
         ${INC_DIR}
 )
 
-
 target_link_libraries(${OPTIONS_PARSER_LIB}
     PRIVATE
         ${PARACL_EXTENSION_LIB}
 )
 
+target_compile_definitions(${OPTIONS_PARSER_LIB}
+    PRIVATE
+        PARACL_VERSION="${PROJECT_VERSION}"
+)
+
 add_target_debug_options(${OPTIONS_PARSER_LIB} hard)
+target_add_logger(${OPTIONS_PARSER_LIB})
 
 # =================================================================================================
 # run paracl library
@@ -203,11 +214,13 @@ target_sources(${RUN_PARACL_LIB}
         TYPE
             CXX_MODULES
         FILES
+            ${PROJECT_SOURCE_DIR}/src/back/src/paraCL.cppm
             ${RUN_PARACL_SRC}
 )
 
 target_include_directories(${RUN_PARACL_LIB}
     PRIVATE
+        ${PROJECT_SOURCE_DIR}/src/back/inc
         ${INC_DIR}
         ${LEXER_SRC_DIR}
         ${BISON_OUT_DIR}
@@ -222,6 +235,8 @@ target_link_libraries(${RUN_PARACL_LIB}
 )
 
 add_target_debug_options(${RUN_PARACL_LIB} hard)
+target_add_logger(${RUN_PARACL_LIB})
+
 # =================================================================================================
 
 set(PARACL_EXE paracl)
@@ -240,25 +255,24 @@ target_link_libraries(${PARACL_EXE}
 )
 
 add_target_debug_options(${PARACL_EXE} hard)
+target_add_logger(${PARACL_EXE})
 
 # =================================================================================================
 
-if(BUILD_TESTING)
+if (BUILD_TESTING)
     enable_testing()
     include(CTest)
-    
-    set(CMAKE_E2E_TESTS_SETTING_DIR ${CMAKE_SETTINGS_DIR}/tests/e2e)
-
-    include(${CMAKE_E2E_TESTS_SETTING_DIR}/add-e2e-to-target-function.cmake)
-    include(${CMAKE_E2E_TESTS_SETTING_DIR}/e2e-paracl-python-script.cmake)
 
     set(PARACL_E2E_TESTS_DIR ${PROJECT_SOURCE_DIR}/tests/e2e)
     set(PARACL_E2E_DAT_DIR ${PARACL_E2E_TESTS_DIR}/dat)
     set(PARACL_E2E_ANS_DIR ${PARACL_E2E_TESTS_DIR}/ans)
 
+    set(CMAKE_E2E_TESTS_SETTING_DIR ${CMAKE_SETTINGS_DIR}/tests/e2e)
 
-    # target_e2e_test test_target run_script test_dir ans_dir
-    target_e2e_test(${PARACL_EXE}
+    include(${CMAKE_E2E_TESTS_SETTING_DIR}/e2e-paracl-python-script.cmake)
+    include(${CMAKE_E2E_TESTS_SETTING_DIR}/add-e2e-to-target-function.cmake)
+
+    target_e2e_test(${CMAKE_BINARY_DIR}/${PARACL_EXE}
         ${PYTHON_RUN_TEST_SCRIPT}
         ${PARACL_E2E_DAT_DIR}
         ${PARACL_E2E_ANS_DIR}

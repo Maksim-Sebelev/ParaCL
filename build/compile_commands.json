@@ -1,0 +1,50 @@
+[
+{
+  "directory": "/home/matvey/work/ParaCL/build",
+  "command": "/usr/bin/c++ -I/home/matvey/work/ParaCL/src/back/inc -I/home/matvey/work/ParaCL/build/bison-out -I/home/matvey/work/ParaCL/src/front/inc -O3 -DNDEBUG -std=gnu++23 -fmodules-ts -fmodule-mapper=CMakeFiles/parser.dir/bison-out/parser.tab.cpp.o.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles/parser.dir/bison-out/parser.tab.cpp.o -c /home/matvey/work/ParaCL/build/bison-out/parser.tab.cpp",
+  "file": "/home/matvey/work/ParaCL/build/bison-out/parser.tab.cpp",
+  "output": "CMakeFiles/parser.dir/bison-out/parser.tab.cpp.o"
+},
+{
+  "directory": "/home/matvey/work/ParaCL/build",
+  "command": "/usr/bin/c++ -I/home/matvey/work/ParaCL/src/back/inc -I/home/matvey/work/ParaCL/build/bison-out -O3 -DNDEBUG -std=gnu++23 -fmodules-ts -fmodule-mapper=CMakeFiles/lexer.dir/flex-out/lexer.yy.cpp.o.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles/lexer.dir/flex-out/lexer.yy.cpp.o -c /home/matvey/work/ParaCL/build/flex-out/lexer.yy.cpp",
+  "file": "/home/matvey/work/ParaCL/build/flex-out/lexer.yy.cpp",
+  "output": "CMakeFiles/lexer.dir/flex-out/lexer.yy.cpp.o"
+},
+{
+  "directory": "/home/matvey/work/ParaCL/build",
+  "command": "/usr/bin/c++ -O3 -DNDEBUG -std=gnu++23 -fmodules-ts -fmodule-mapper=CMakeFiles/paracl_extension.dir/src/paracl/paracl_extension.cppm.o.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles/paracl_extension.dir/src/paracl/paracl_extension.cppm.o -c /home/matvey/work/ParaCL/src/paracl/paracl_extension.cppm",
+  "file": "/home/matvey/work/ParaCL/src/paracl/paracl_extension.cppm",
+  "output": "CMakeFiles/paracl_extension.dir/src/paracl/paracl_extension.cppm.o"
+},
+{
+  "directory": "/home/matvey/work/ParaCL/build",
+  "command": "/usr/bin/c++ -I/home/matvey/work/ParaCL/include -O3 -DNDEBUG -std=gnu++23 -fmodules-ts -fmodule-mapper=CMakeFiles/options_parse.dir/src/options_parser/options_parser.cppm.o.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles/options_parse.dir/src/options_parser/options_parser.cppm.o -c /home/matvey/work/ParaCL/src/options_parser/options_parser.cppm",
+  "file": "/home/matvey/work/ParaCL/src/options_parser/options_parser.cppm",
+  "output": "CMakeFiles/options_parse.dir/src/options_parser/options_parser.cppm.o"
+},
+{
+  "directory": "/home/matvey/work/ParaCL/build",
+  "command": "/usr/bin/c++ -I/home/matvey/work/ParaCL/src/back/inc -I/home/matvey/work/ParaCL/include -I/home/matvey/work/ParaCL/build/flex-out -I/home/matvey/work/ParaCL/build/bison-out -I/home/matvey/work/ParaCL/src/front/inc -O3 -DNDEBUG -std=gnu++23 -fmodules-ts -fmodule-mapper=CMakeFiles/run_paracl.dir/src/back/src/paraCL.cppm.o.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles/run_paracl.dir/src/back/src/paraCL.cppm.o -c /home/matvey/work/ParaCL/src/back/src/paraCL.cppm",
+  "file": "/home/matvey/work/ParaCL/src/back/src/paraCL.cppm",
+  "output": "CMakeFiles/run_paracl.dir/src/back/src/paraCL.cppm.o"
+},
+{
+  "directory": "/home/matvey/work/ParaCL/build",
+  "command": "/usr/bin/c++ -I/home/matvey/work/ParaCL/src/back/inc -I/home/matvey/work/ParaCL/include -I/home/matvey/work/ParaCL/build/flex-out -I/home/matvey/work/ParaCL/build/bison-out -I/home/matvey/work/ParaCL/src/front/inc -O3 -DNDEBUG -std=gnu++23 -fmodules-ts -fmodule-mapper=CMakeFiles/run_paracl.dir/src/paracl/run_paracl.cppm.o.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles/run_paracl.dir/src/paracl/run_paracl.cppm.o -c /home/matvey/work/ParaCL/src/paracl/run_paracl.cppm",
+  "file": "/home/matvey/work/ParaCL/src/paracl/run_paracl.cppm",
+  "output": "CMakeFiles/run_paracl.dir/src/paracl/run_paracl.cppm.o"
+},
+{
+  "directory": "/home/matvey/work/ParaCL/build",
+  "command": "/usr/bin/c++ -I/home/matvey/work/ParaCL/src/back/inc -I/home/matvey/work/ParaCL/include -I/home/matvey/work/ParaCL/build/flex-out -I/home/matvey/work/ParaCL/build/bison-out -I/home/matvey/work/ParaCL/src/front/inc -O3 -DNDEBUG -std=gnu++23 -fmodules-ts -fmodule-mapper=CMakeFiles/run_paracl.dir/src/paracl/parse_paracl_exit_code.cppm.o.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles/run_paracl.dir/src/paracl/parse_paracl_exit_code.cppm.o -c /home/matvey/work/ParaCL/src/paracl/parse_paracl_exit_code.cppm",
+  "file": "/home/matvey/work/ParaCL/src/paracl/parse_paracl_exit_code.cppm",
+  "output": "CMakeFiles/run_paracl.dir/src/paracl/parse_paracl_exit_code.cppm.o"
+},
+{
+  "directory": "/home/matvey/work/ParaCL/build",
+  "command": "/usr/bin/c++ -O3 -DNDEBUG -std=gnu++23 -fmodules-ts -fmodule-mapper=CMakeFiles/paracl.dir/src/main.cpp.o.modmap -MD -fdeps-format=p1689r5 -x c++ -o CMakeFiles/paracl.dir/src/main.cpp.o -c /home/matvey/work/ParaCL/src/main.cpp",
+  "file": "/home/matvey/work/ParaCL/src/main.cpp",
+  "output": "CMakeFiles/paracl.dir/src/main.cpp.o"
+}
+]
