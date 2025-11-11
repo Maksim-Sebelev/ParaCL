@@ -1,4 +1,0 @@
-ninja_dyndep_version = 1.0
-build CMakeFiles/options_parse.dir/src/options_parser/options_parser.cppm.o | CMakeFiles/options_parse.dir/options_parser.gcm: dyndep | CMakeFiles/paracl_extension.dir/paracl_extension.gcm
-  restat = 1
-
