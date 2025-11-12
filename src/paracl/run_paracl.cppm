@@ -62,10 +62,15 @@ int run_paracl(const OptionsParsing::program_options_t& program_options)
 
 int no_sources_action()
 {
-    std::cout << "Enter your program (Ctrl+D to finish):" << std::endl;
+    // std::cout << "Enter your program (Ctrl+D to finish):" << std::endl;
 
     yyin = stdin;
-    return yyparse();
+    int result =  yyparse();
+
+    // ParaCL::dump(program);
+    ParaCL::compile(program);
+
+    return result;
 }
 
 
@@ -79,7 +84,8 @@ int one_source_action(const std::string& source)
     yyin = input_file;
 
     int result = yyparse();
-    ParaCL::dump(program);
+
+    // ParaCL::dump(program);
     ParaCL::compile(program);
     
     fclose(input_file);

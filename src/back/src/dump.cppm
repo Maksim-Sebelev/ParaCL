@@ -78,6 +78,13 @@ void dumpExpr(std::ostream& out, const ParaCL::Expr* expr) {
         label = "Input";
         out << "  \"" << nodeId << "\" [label=\"" << label << "\"];\n";
     }
+    else if (auto assign = dynamic_cast<const ParaCL::AssignExpr*>(expr)) {
+        label = "Assign expr: " + assign->name;
+        out << "  \"" << nodeId << "\" [label=\"" << label << "\", style=filled, fillcolor=\"lightblue\"];\n";
+
+        dumpExpr(out, assign->value.get());
+        out << "  \"" << nodeId << "\" -> \"" << ptrToStr(assign->value.get()) << "\";\n";
+    }
     else {
         throw std::runtime_error("dump: Unknown expression!");
     }

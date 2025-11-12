@@ -151,6 +151,17 @@ handleExpr(const ParaCL::Expr* expr, SymbolTable& table)
         std::cin >> value;
         return value;
     }
+    else if (auto assignExpr = dynamic_cast<const ParaCL::AssignExpr*>(expr))
+    {
+        auto e = dynamic_cast<const ParaCL::Expr*>(assignExpr->value.get());
+        if (!e) throw std::runtime_error("BinExpr children are not Expr");
+
+        auto result = handleExpr(e, table);
+
+        table.declare(assignExpr->name, result);
+
+        return result;
+    }
     else
     {
         throw std::runtime_error("Unknown expression class");
