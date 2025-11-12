@@ -1,0 +1,32 @@
+digraph AST {
+  node [shape=box];
+  "Program" [label="Program"];
+  "0x598625000020" [label="Assign: i", style=filled, fillcolor="lightblue"];
+  "0x598624ffff40" [label="+", style=filled, fillcolor="lightyellow"];
+  "0x598624ffff20" [label="Num: 2"];
+  "0x598624ffffe0" [label="Assign expr: j", style=filled, fillcolor="lightblue"];
+  "0x598624ffff90" [label="+", style=filled, fillcolor="lightyellow"];
+  "0x598624ffff70" [label="Num: 1"];
+  "0x598624ffabb0" [label="Assign expr: k", style=filled, fillcolor="lightblue"];
+  "0x598624ffffc0" [label="Num: 1"];
+  "0x598624ffabb0" -> "0x598624ffffc0";
+  "0x598624ffff90" -> "0x598624ffff70";
+  "0x598624ffff90" -> "0x598624ffabb0";
+  "0x598624ffffe0" -> "0x598624ffff90";
+  "0x598624ffff40" -> "0x598624ffff20";
+  "0x598624ffff40" -> "0x598624ffffe0";
+  "0x598625000020" -> "0x598624ffff40";
+  "Program" -> "0x598625000020";
+  "0x5986250000b0" [label="Print"];
+  "0x598625000080" [label="Var: k"];
+  "0x5986250000b0" -> "0x598625000080";
+  "Program" -> "0x5986250000b0";
+  "0x598625000060" [label="Print"];
+  "0x5986250000f0" [label="Var: j"];
+  "0x598625000060" -> "0x5986250000f0";
+  "Program" -> "0x598625000060";
+  "0x5986250000d0" [label="Print"];
+  "0x598625000150" [label="Var: i"];
+  "0x5986250000d0" -> "0x598625000150";
+  "Program" -> "0x5986250000d0";
+}

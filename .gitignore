@@ -1,5 +1,5 @@
 .venv
-build
+build/
 .vscode/
 settings.json
 *.png
