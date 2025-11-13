@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <optional>
 #include <limits>
 #include <stdexcept>
@@ -138,7 +139,12 @@ handleExpr(const ParaCL::Expr* expr, SymbolTable& table)
     else if (auto var = dynamic_cast<const ParaCL::VarExpr*>(expr)) {
         auto* varValue = table.lookup(var->name);
         if (!varValue)
-            throw std::runtime_error("Var [ " + var->name + " ] doesn't found in table");
+        {
+            // throw std::runtime_error("Var [ " + var->name + " ] doesn't found in table");
+            std::cerr << "error: ‘" << var->name << "’ was not declared in this scope\n"
+                      << "paracl: failed with exit code 1";
+            exit(EXIT_FAILURE);
+        }
 
         return varValue->value;
     }
@@ -178,6 +184,7 @@ executeBinOp(int leftOp, int rightOp, token_t binOp)
     case token_t::ISLS:  return leftOp <  rightOp;
     case token_t::ISLSE: return leftOp <= rightOp;
     case token_t::ISEQ:  return leftOp == rightOp;
+    case token_t::ISNE:  return leftOp != rightOp;
     default: throw std::runtime_error("Unknown bin operation");
     }
 }

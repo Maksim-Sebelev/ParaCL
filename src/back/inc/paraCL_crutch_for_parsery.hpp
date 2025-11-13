@@ -17,12 +17,13 @@ enum class token_t
     MUL,
     DIV,
 
-    // >, >=, <, <=, ==  tokens
+    // >, >=, <, <=, ==, !=  tokens
     ISAB,
     ISABE,
     ISLS,
     ISLSE,
     ISEQ,
+    ISNE,
 
     // (, ), {, }  tokens
     LCIB,
@@ -57,6 +58,7 @@ const std::unordered_map<std::string, token_t> tokenMap =
     { "<",     token_t::ISLS  },
     { "<=",    token_t::ISLSE },
     { "==",    token_t::ISEQ  },
+    { "!=",    token_t::ISNE  },
 
     { "(",     token_t::LCIB  },
     { ")",     token_t::RCIB  },

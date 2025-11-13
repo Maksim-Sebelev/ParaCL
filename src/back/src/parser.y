@@ -42,7 +42,7 @@ ParaCL::ProgramAST program;
 %token <num_value> NUM
 %token <str_value> VAR
 %token ADD SUB MUL DIV
-%token ISAB ISABE ISLS ISLSE ISEQ
+%token ISAB ISABE ISLS ISLSE ISEQ ISNE
 %token LCIB RCIB LCUB RCUB
 %token WH IN AS PRINT
 %token SC
@@ -160,6 +160,13 @@ expression:
     | expression ISEQ simple_expression { 
         $$ = new ParaCL::BinExpr(
             ParaCL::token_t::ISEQ, 
+            std::unique_ptr<ParaCL::Expr>($1), 
+            std::unique_ptr<ParaCL::Expr>($3)
+        );
+    }
+    | expression ISNE simple_expression { 
+        $$ = new ParaCL::BinExpr(
+            ParaCL::token_t::ISNE, 
             std::unique_ptr<ParaCL::Expr>($1), 
             std::unique_ptr<ParaCL::Expr>($3)
         );

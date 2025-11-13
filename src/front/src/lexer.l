@@ -48,6 +48,7 @@ NEWLINE     \n
 "<"     { return ISLS; }
 "<="    { return ISLSE; }
 "=="    { return ISEQ; }
+"!="    { return ISNE; }
 
 "("     { return LCIB; }
 ")"     { return RCIB; }
@@ -61,7 +62,7 @@ NEWLINE     \n
 
 ";"     { return SC; }
 
-{DIGIT}+    { 
+[+-]?{DIGIT}+    { 
                 process_number(yytext); 
                 yylval.num_value = current_num_value;
                 return NUM; 
