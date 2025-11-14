@@ -5,9 +5,11 @@
 
 extern int current_num_value;
 extern std::string current_var_value;
-extern int current_line;
 
 int yylex();
-int get_current_line();
+
+std::string get_current_code_place();
+std::string get_marked_line_with_error();
+
 
 #endif // LEXER_HPP

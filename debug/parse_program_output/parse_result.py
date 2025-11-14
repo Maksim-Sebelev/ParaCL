@@ -19,7 +19,6 @@ def color_print(color, arg, **kwargs):
     print(f"{color}{arg}{Colors.RESET}", **kwargs)
 
 def extract_numbers(text):
-    """Извлекает все целые числа из текста"""
     numbers = []
     for token in text.split():
         try:
@@ -31,43 +30,75 @@ def extract_numbers(text):
 
 def main():
     if len(sys.argv) != 4:
-        print(f"Usage: {sys.argv[0]} <program_exe> <test>.pcl <answer>.ans")
-        sys.exit(1)
+        print(f"Usage: {sys.argv[0]} <paracl_exe> <test>.pcl <answer>.ans")
+        return 1
 
     executable, test_input, test_answer = sys.argv[1:4]
 
-    try:
-        with open(test_input, 'r') as f:
-            result = subprocess.run(
-                [executable],
-                stdin=f,
-                capture_output=True,
-                text=True
-            )
-
-        if result.returncode != 0:
-            color_print(Colors.RED, f"Error: Program failed with exit code {result.returncode}")
-            print(f"stderr: {result.stderr}")
-            print(f"stdout: {result.stdout}")
-            sys.exit(1)
-
-        program_stdout = result.stdout
-        program_stderr = result.stderr
-
-    except Exception as e:
-        color_print(Colors.RED, f"Error running program: {e}")
-        sys.exit(1)
+    expect_death = False
+    exit_code = 0
 
     try:
         with open(test_answer, 'r') as f:
-            answer_content = f.read().strip()
-        
-        expected_numbers = extract_numbers(answer_content)        
-        program_output = extract_numbers(program_stdout)
+            answer_content = f.read()
+
+        if answer_content.partition(':')[0] == "DEATH_WITH":
+            expect_death = True
+            if len(answer_content.partition(':')) <= 2:
+                color_print(Colors.RED, "bad format of ans file")
+                return 1
+
+            exit_code = int(answer_content.partition(':')[2])
+
+        else:
+            answer_content.strip()
 
     except Exception as e:
-        color_print(Colors.RED, f"Error reading files: {e}")
-        sys.exit(1)    
+        color_print(Colors.RED, f"Error reading file: {e}")
+        sys.exit(1)
+
+    result = subprocess.run(
+        [executable, test_input],
+        capture_output=True,
+        text=True
+    )
+
+
+    if expect_death and result.returncode == exit_code:
+        color_print(Colors.GREEN, "TEST PASSED")
+        return 0
+
+    if expect_death and result.returncode != exit_code:
+        color_print(Colors.WHITE, "Expect DEATH", end = '\n\n')
+        color_print(Colors.GREEN, f"[ expected exit code ]: {exit_code}")
+        color_print(Colors.RED,   f"[ program  exit code ]: {result.returncode}", end = '\n\n')
+        color_print(Colors.RED, "\n\nTEST FAILED")
+        return 1
+
+        color_print(Colors.RED, f"Error: Program failed with exit code {result.returncode}")
+        print(f"stderr: {result.stderr}")
+        print(f"stdout: {result.stdout}")
+
+        color_print(Colors.RED, "\n\nTEST FAILED")
+
+        return 1
+
+    if not expect_death and result.returncode != 0:
+        color_print(Colors.RED, f"Error: Program failed with exit code {result.returncode}\nBut expect good work.")
+        print(f"stderr: {result.stderr}")
+        print(f"stdout: {result.stdout}")
+
+        color_print(Colors.RED, "\n\nTEST FAILED")
+        return 1
+
+    program_stdout = result.stdout
+    program_stderr = result.stderr
+
+    expected_numbers = extract_numbers(answer_content)        
+    program_output = extract_numbers(program_stdout)
+
+
+
     if program_stderr:
         print(f"{Colors.YELLOW}Program stderr:{Colors.RESET}")
         print(program_stderr)
@@ -86,31 +117,33 @@ def main():
     for i in range(min(len_out, len_ans)):
         if program_output[i] != expected_numbers[i]:
             errors += 1
-            color_print(Colors.RED, f"position {i}: program output: {program_output[i]}\nexpected: {expected_numbers[i]}", end='\n\n')
+            color_print(Colors.WHITE, f"[{i}]")
+            color_print(Colors.RED, f"program output: {program_output[i]}\nexpected value: {expected_numbers[i]}", end='\n\n')
         else:
             good_program_out += 1
-            color_print(Colors.GREEN, f"position {i}: program output: {program_output[i]}\nexpected: {expected_numbers[i]}", end='\n\n')
+            color_print(Colors.WHITE, f"[{i}]")
+            color_print(Colors.GREEN, f"program output: {program_output[i]}\nexpected value: {expected_numbers[i]}", end='\n\n')
 
     if len_out < len_ans:
         for i in range(len_out, len_ans):
             errors += 1
-            color_print(Colors.RED, f"position {i}: program output: NONE\nexpected: {expected_numbers[i]}", end='\n\n')
+            color_print(Colors.WHITE, f"[{i}]")
+            color_print(Colors.RED, f"program output: NONE\nexpected value: {expected_numbers[i]}", end='\n\n')
 
     if len_out > len_ans:
         for i in range(len_ans, len_out):
             errors += 1
-            color_print(Colors.RED, f"position {i}: program output: {program_output[i]}\nexpected: NONE", end='\n\n')
+            color_print(Colors.WHITE, f"[{i}]")
+            color_print(Colors.RED, f"program output: {program_output[i]}\nexpected value: NONE", end='\n\n')
 
-    color_print(Colors.WHITE, "INFO:", end='\n\n')
+    color_print(Colors.WHITE, "\nINFO:", end='\n\n')
 
-    print(f"{Colors.CYAN}Expected answer: {expected_numbers}{Colors.RESET}")
-    print(f"{Colors.CYAN}Program output:  {program_output}{Colors.RESET}")
-
-    print(f"{Colors.CYAN}Program output:{Colors.RESET}")
-    print(program_stdout)
+    color_print(Colors.CYAN, f"Expected answer: {expected_numbers}")
+    color_print(Colors.CYAN, f"Program output:  {program_output}", end = '\n\n')
 
     color_print(Colors.WHITE, f"[ total numbers expected ]: {len_ans}")
-    color_print(Colors.WHITE, f"[ total numbers received ]: {len_out}") 
+    color_print(Colors.WHITE, f"[ total numbers received ]: {len_out}", end = '\n\n') 
+
     color_print(Colors.WHITE, f"[ errors / total ]: {errors}/{len_ans}", end='\n\n')
 
     if len_ans > 0:

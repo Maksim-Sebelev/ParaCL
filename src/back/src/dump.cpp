@@ -1,0 +1,152 @@
+#include <memory>
+#include <stdexcept>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <string>
+#include <unordered_map>
+#include "global.hpp"
+#include "paraCL_crutch_for_parsery.hpp"
+#include <filesystem>
+
+namespace ParaCL {
+
+std::string ptrToStr(const void* ptr);
+void dumpExpr(std::ostream& out, const ParaCL::Expr* expr);
+void dumpStmt(std::ostream& out, const ParaCL::Stmt* stmt);
+
+void dump(const ProgramAST& progAST, const std::string& filename)
+{
+    std::filesystem::create_directories("dot-out");
+    std::ofstream out(filename);
+    if (out.fail())
+        throw std::runtime_error("failed open " + filename);
+
+    out << "digraph AST {\n";
+    out << "  node [shape=box];\n";
+
+    std::string rootId = "Program";
+    out << "  \"" << rootId << "\" [label=\"Program\"];\n";
+
+    for (auto& stmt : progAST.statements)
+    {
+        dumpStmt(out, stmt.get());
+        out << "  \"" << rootId << "\" -> \"" << ptrToStr(stmt.get()) << "\";\n";
+    }
+
+    out << "}\n";
+    out.close();
+
+    std::filesystem::create_directories("../ast-dump");
+    std::string dot_cmd = "dot -Tsvg " + filename + " -o ../ast-dump/ast.svg";
+    system(dot_cmd.c_str());
+}
+
+
+std::string ptrToStr(const void* ptr) {
+    std::ostringstream oss;
+    oss << ptr;
+    return oss.str();
+}
+
+void dumpExpr(std::ostream& out, const Expr* expr) {
+    std::string nodeId = ptrToStr(expr);
+    std::string label;
+
+    if (auto bin = dynamic_cast<const BinExpr*>(expr)) {
+        label = reverseTokenMap.at(bin->op);
+        out << "  \"" << nodeId << "\" [label=\"" << label << "\", style=filled, fillcolor=\"lightyellow\"];\n";
+
+        dumpExpr(out, bin->left.get());
+        dumpExpr(out, bin->right.get());
+
+        out << "  \"" << nodeId << "\" -> \"" << ptrToStr(bin->left.get()) << "\";\n";
+        out << "  \"" << nodeId << "\" -> \"" << ptrToStr(bin->right.get()) << "\";\n";
+    }
+    else if (auto num = dynamic_cast<const NumExpr*>(expr)) {
+        label = "Num: " + std::to_string(num->value);
+        out << "  \"" << nodeId << "\" [label=\"" << label << "\"];\n";
+    }
+    else if (auto var = dynamic_cast<const VarExpr*>(expr)) {
+        label = "Var: " + var->name;
+        out << "  \"" << nodeId << "\" [label=\"" << label << "\"];\n";
+    }
+    else if ([[maybe_unused]] auto in = dynamic_cast<const InputExpr*>(expr)) {
+        label = "Input";
+        out << "  \"" << nodeId << "\" [label=\"" << label << "\"];\n";
+    }
+    else if (auto assign = dynamic_cast<const AssignExpr*>(expr)) {
+        label = "Assign expr: " + assign->name;
+        out << "  \"" << nodeId << "\" [label=\"" << label << "\", style=filled, fillcolor=\"lightblue\"];\n";
+
+        dumpExpr(out, assign->value.get());
+        out << "  \"" << nodeId << "\" -> \"" << ptrToStr(assign->value.get()) << "\";\n";
+    }
+    else {
+        throw std::runtime_error("dump: Unknown expression!");
+    }
+}
+
+void dumpStmt(std::ostream& out, const Stmt* stmt) {
+    std::string nodeId = ptrToStr(stmt);
+    std::string label;
+
+    if (auto assign = dynamic_cast<const AssignStmt*>(stmt)) {
+        label = "Assign: " + assign->name + " ";
+        out << "  \"" << nodeId << "\" [label=\"" << label << "\", style=filled, fillcolor=\"lightblue\"];\n";
+
+        dumpExpr(out, assign->value.get());
+        out << "  \"" << nodeId << "\" -> \"" << ptrToStr(assign->value.get()) << "\";\n";
+    }
+    else if (auto combined_assign = dynamic_cast<const CombinedAssingStmt*>(stmt)) {
+        label = combined_assign->name;
+        switch (combined_assign->op)
+        {
+            case token_t::ADDASGN: label += " += :"; break;
+            case token_t::SUBASGN: label += " -= :"; break;
+            case token_t::MULASGN: label += " *= :"; break;
+            case token_t::DIVASGN: label += " /= :"; break;
+            default: builtin_unreachable_wrapper("no :)");
+        }
+
+        out << "  \"" << nodeId << "\" [label=\"" << label << "\", style=filled, fillcolor=\"lightblue\"];\n";
+
+        dumpExpr(out, combined_assign->value.get());
+        out << "  \"" << nodeId << "\" -> \"" << ptrToStr(combined_assign->value.get()) << "\";\n";
+    }
+    else if (auto print = dynamic_cast<const PrintStmt*>(stmt)) {
+        label = "Print";
+        out << "  \"" << nodeId << "\" [label=\"" << label << "\"];\n";
+
+        dumpExpr(out, print->expr.get());
+        out << "  \"" << nodeId << "\" -> \"" << ptrToStr(print->expr.get()) << "\";\n";
+    }
+    else if (auto whileStmt = dynamic_cast<const WhileStmt*>(stmt)) {
+        label = "While";
+        out << "  \"" << nodeId << "\" [label=\"" << label << "\"];\n";
+
+        dumpExpr(out, whileStmt->condition.get());
+        out << "  \"" << nodeId << "\" -> \"" << ptrToStr(whileStmt->condition.get())
+            << "\" [label=\"cond\", fontcolor=\"gray50\"];\n";
+
+        for (auto& s : whileStmt->body->statements) {
+            dumpStmt(out, s.get());
+            out << "  \"" << nodeId << "\" -> \"" << ptrToStr(s.get())
+                << "\" [label=\"body\", fontcolor=\"gray50\"];\n";
+        }
+    }
+    else if (auto block = dynamic_cast<const BlockStmt*>(stmt)) {
+        label = "Block";
+        out << "  \"" << nodeId << "\" [label=\"" << label << "\"];\n";
+
+        for (auto& s : block->statements) {
+            dumpStmt(out, s.get());
+            out << "  \"" << nodeId << "\" -> \"" << ptrToStr(s.get()) << "\";\n";
+        }
+    }
+    else {
+        throw std::runtime_error("dump: Unknown statement!");
+    }
+}
+
+} /* namespace ParaCL */

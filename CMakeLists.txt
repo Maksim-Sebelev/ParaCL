@@ -24,6 +24,7 @@ endif()
 
 option(BUILD_TESTING "Build tests" OFF)
 option(LOGGER "logger" OFF)
+option(GRAPHVIZ "Enable graphviz visualization (graphviz)" OFF)
 
 # =================================================================================================
 
@@ -92,8 +93,10 @@ target_sources(${PARSER_LIB}
 
 target_include_directories(${PARSER_LIB}
     PRIVATE
+        ${PROJECT_SOURCE_DIR}/src/back/inc/
         ${BISON_PARSER_SRC_DIR}/
         ${FLEX_INC_DIR}/
+        ${INC_DIR}/
 )
 
 add_target_DEBUG__DEBUG_options(${PARSER_LIB})
@@ -125,7 +128,9 @@ target_sources(${LEXER_LIB}
 
 target_include_directories(${LEXER_LIB}
     PRIVATE
-        ${BISON_PARSER_SRC_DIR}
+        ${PROJECT_SOURCE_DIR}/src/back/inc/
+        ${BISON_PARSER_SRC_DIR}/
+        ${INC_DIR}
 )
 
 add_target_DEBUG__DEBUG_options(${LEXER_LIB})
@@ -207,16 +212,21 @@ set(RUN_PARACL_SRC
 
 target_sources(${RUN_PARACL_LIB}
     PUBLIC
-        FILE_SET
-            CXX_MODULES
-        TYPE
-            CXX_MODULES
+        FILE_SET CXX_MODULES
+        TYPE CXX_MODULES
         FILES
             ${RUN_PARACL_SRC}
 )
 
+target_sources(${RUN_PARACL_LIB}
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/src/back/src/compiler.cpp
+        ${PROJECT_SOURCE_DIR}/src/back/src/dump.cpp
+)
+
 target_include_directories(${RUN_PARACL_LIB}
     PRIVATE
+        ${PROJECT_SOURCE_DIR}/src/back/inc/
         ${INC_DIR}
         ${LEXER_SRC_DIR}
         ${BISON_OUT_DIR}
@@ -229,6 +239,10 @@ target_link_libraries(${RUN_PARACL_LIB}
         ${PARSER_LIB}
         ${LEXER_LIB}
 )
+
+if(GRAPHVIZ)
+    target_compile_definitions(${RUN_PARACL_LIB} PRIVATE GRAPHVIZ)
+endif()
 
 add_target_debug_options(${RUN_PARACL_LIB} hard)
 target_add_logger(${RUN_PARACL_LIB})
