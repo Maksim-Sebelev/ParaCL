@@ -15,6 +15,7 @@
 #include "global/custom_console_output.hpp"
 
 
+std::string current_file;
 int current_num_value;
 std::string current_var_value;
 int eof_reached = 0;
@@ -24,15 +25,27 @@ void process_variable(const char* text);
 
 extern FILE* yyin;
 
+// extern int yylineno;
+// extern int yycolumn;
+
 extern YYLTYPE yylloc;
-#define YY_USER_INIT yylloc.first_line=1;
+
+// #define YY_USER_INIT yycolumn=1;
+
+// #define YY_USER_ACTION do {             \
+//     yylloc.first_line = yylineno;        \
+//     yylloc.first_column = yycolumn;       \
+//     yylloc.last_line = yylineno;           \
+//     yylloc.last_column = yycolumn + yyleng; \
+// } while(0);
+
 
 %}
 
 %option noyywrap
 %option nounput
 %option noinput
-
+%option yylineno
 
 DIGIT       [0-9]
 LETTER      [a-zA-Z_]
@@ -46,11 +59,11 @@ WHITESPACE  {SPACE}|{TAB}|{CARRIEGE}
 
 SPACE          
 
-{SPACE}         { yylloc.first_column++; }
-{TAB}           { yylloc.first_column += 4; }
+{SPACE}         { /*yycolumn++; */ }
+{TAB}           { /*yycolumn += 4; */ }
 {CARRIEGE}      { }
 {WHITESPACE}+   { }
-{NEWLINE}       { yylloc.last_line++; yylloc.last_column = 1; }
+{NEWLINE}       { /*yylineno++; yycolumn = 1;*/ }
 
 "#".*          { }
 
@@ -58,35 +71,44 @@ SPACE
     const char* p = yytext; assert(p);
     while (*p)
     {
+        /*
+        if (*p == '\n')
+            { yylineno++; yycolumn = 1; }
+        else
+            yycolumn++;
+        */
         p++;
     }
 }
 
-"and"   { return AND; }
-"or"    { return OR; }
-"+"     { return ADD; }
-"-"     { return SUB; }
-"*"     { return MUL; }
-"/"     { return DIV; }
-">"     { return ISAB; }
-">="    { return ISABE; }
-"<"     { return ISLS; }
-"<="    { return ISLSE; }
-"=="    { return ISEQ; }
-"!="    { return ISNE; }
-"+="    { return ADDASGN; }
-"-="    { return SUBASGN; }
-"*="    { return MULASGN; }
-"/="    { return DIVASGN; }
-"("     { return LCIB; }
-")"     { return RCIB; }
-"{"     { return LCUB; }
-"}"     { return RCUB; }
-"while" { return WH; }
-"?"     { return IN; }
-"="     { return AS; }
-"print" { return PRINT; }
-";"     { return SC; }
+"and"     { return AND; }
+"or"      { return OR; }
+"+"       { return ADD; }
+"-"       { return SUB; }
+"*"       { return MUL; }
+"/"       { return DIV; }
+">"       { return ISAB; }
+">="      { return ISABE; }
+"<"       { return ISLS; }
+"<="      { return ISLSE; }
+"=="      { return ISEQ; }
+"!="      { return ISNE; }
+"+="      { return ADDASGN; }
+"-="      { return SUBASGN; }
+"*="      { return MULASGN; }
+"/="      { return DIVASGN; }
+"("       { return LCIB; }
+")"       { return RCIB; }
+"{"       { return LCUB; }
+"}"       { return RCUB; }
+"while"   { return WH; }
+"?"       { return IN; }
+"="       { return AS; }
+"print"   { return PRINT; }
+"if"      { return IF; }
+"else if" { return ELIF; }
+"else"    { return ELSE; }
+";"       { return SC; }
 
 [+-]?{DIGIT}+    { 
                 process_number(yytext); 
@@ -101,14 +123,14 @@ SPACE
             }
 
 <<EOF>>     { 
-                return 0;
+                return EXIT_SUCCESS;
             }
 
 . { 
     std::cerr << "Error at line " << yylloc.first_line 
               << ", column " << yylloc.first_column 
               << ": unknown character '" << yytext << "'" << std::endl;
-    return 0;
+    return EXIT_FAILURE;
 }
 
 %%
@@ -123,7 +145,9 @@ void process_variable(const char* text) {
 
 std::string get_current_code_place()
 {
-    return "no place";
+    std::ostringstream code_place;
+    code_place << current_file << ":" << yylloc.first_line << ":" << yylloc.first_column;
+    return code_place.str();
 }
 
 std::string get_marked_line_with_error()
@@ -133,4 +157,7 @@ std::string get_marked_line_with_error()
 
 void set_current_paracl_file(const std::string& file)
 {
+    current_file = file;
 }
+
+

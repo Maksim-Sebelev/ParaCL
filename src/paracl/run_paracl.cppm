@@ -62,8 +62,7 @@ namespace ParaCL
 
 int no_sources_action()
 {
-    // std::cout << "Enter your program (Ctrl+D to finish):" << std::endl;
-    // set_current_paracl_file("stdin");
+    set_current_paracl_file("stdin");
     YYLTYPE loc;
     loc.first_line = loc.last_line = 1;
     loc.first_column = loc.last_column = 0;
@@ -84,7 +83,7 @@ int no_sources_action()
 
 int one_source_action(const std::string& source)
 {
-    // set_current_paracl_file(source);
+    set_current_paracl_file(source);
     YYLTYPE loc;
     loc.first_line = loc.last_line = 1;
     loc.first_column = loc.last_column = 0;

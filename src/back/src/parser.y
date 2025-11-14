@@ -13,17 +13,13 @@ extern FILE* yyin;
 extern int yylex();
 extern int yyparse();
 
-extern std::string get_current_code_place();
-extern std::string get_marked_line_with_error();
-
 extern int yylex();
-// int yylex(YYSTYPE* yylval_param, YYLTYPE* yylloc_param);
 
 void yyerror(const char* msg)
 {
-    std::cerr 
-              
-              << ": " << msg << std::endl;
+    std::cerr << get_current_code_place()
+              << ": paracl: error: "
+              << msg << "\n";
 }
 
 #ifdef DEBUG
@@ -39,6 +35,8 @@ void yyerror(const char* msg)
 ParaCL::ProgramAST program;
 
 %}
+
+%locations
 
 %union {
     int num_value;
@@ -57,9 +55,10 @@ ParaCL::ProgramAST program;
 %token LCIB RCIB LCUB RCUB
 %token WH IN AS PRINT
 %token SC
+%token IF ELIF ELSE
 
 %type <stmt_vector> program statements
-%type <stmt> statement assignment combined_assignment print_statement while_statement input_statement
+%type <stmt> statement assignment combined_assignment print_statement while_statement input_statement if_statement elif_statement else_statement
 %type <expr> expression bool_expression and_or_expression math_comparison_expression add_sub_expression mul_div_expression factor assignment_expression
 
 %%
@@ -67,7 +66,8 @@ ParaCL::ProgramAST program;
 program:
     statements {
         for (auto stmt : *$1) {
-            std::cerr << "token {" << @1.first_line << ":" << @1.first_column << "}\n";
+            // std::cerr << "token {" << yylloc.first_line << ":" << yylloc.first_column << "}\n";
+            std::cerr << get_current_code_place() << "\n";
             program.statements.push_back(std::unique_ptr<ParaCL::Stmt>(stmt));
         }
         delete $1;
@@ -100,6 +100,9 @@ statement:
     }
     | input_statement SC { 
         $$ = $1;
+    }
+    | condition_statement {
+        $$ = $1
     }
     ;
 
@@ -177,10 +180,28 @@ input_statement:
     }
     ;
 
+if_statement:
+    IF LCIB expression RCIB LCUB statement RCUB {
+        auto body_stmts = std::vector<std::unique_ptr<ParaCL::stmt>>();
+        for (auto stmt: *$6) {
+            body_stmts.emplace_back(std::unique_ptr<ParaCL::Stmt>(stmt));
+        }
+        auto body 
+        $$ = new ParaCL::IfStmt(
+            std::unique_ptr<ParaCL::Expr>($3),
+            std::unique_ptr<ParaCL::Expr>($3),
+        )
+    }
+    ;
+
+elif_statement:
+    { ELIF LCIB expression RCIB LCUB statement RCUB }  { $$ = }
+    | elif_statement
+    ;
+
 expression:
     bool_expression { $$ = $1; }
     ;
-
 
 bool_expression:
     and_or_expression { $$ = $1; }

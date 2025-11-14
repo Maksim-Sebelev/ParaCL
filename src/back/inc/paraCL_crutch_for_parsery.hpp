@@ -47,18 +47,22 @@ enum class token_t
     LCUB,
     RCUB,
 
-    // while, input, =, print  tokens
+    // while, input, =, print, if, else, else if tokens
     WH,
     IN,
     AS,
     PRINT,
+
+    IF,
+    ELSE,
+    ELIF,
 
     // number, variable, semicolon  tokens 
     NUM,
     VAR,
     SC,
 
-    // end of translation  token
+    // end of translation token
     EOT
 };
 
@@ -94,6 +98,9 @@ const std::unordered_map<std::string, token_t> tokenMap =
     { "?",     token_t::IN    },
     { "=",     token_t::AS    },
     { "print", token_t::PRINT },
+    { "if",    token_t::IF    },
+    { "elif",  token_t::ELIF  },
+    { "else",  token_t::ELSE  },
 
     { ";",     token_t::SC    }
 };
@@ -195,6 +202,46 @@ struct WhileStmt : Stmt {
     std::unique_ptr<BlockStmt> body;
     WhileStmt(std::unique_ptr<Expr> cond, std::unique_ptr<BlockStmt> b)
         : condition(std::move(cond)), body(std::move(b)) {}
+};
+
+struct IfStatement : Stmt {
+    std::unique_ptr<Expr> condition;
+    std::unique_ptr<BlockStmt> body;
+    IfStatement(std::unique_ptr<Expr> cond, std::unique_ptr<BlockStmt> b)
+        : condition(std::move(cond)), body(std::move(b)) {}
+};
+
+struct ElifStatement : Stmt {
+    std::unique_ptr<Expr> condition;
+    std::unique_ptr<BlockStmt> body;
+    ElifStatement(std::unique_ptr<Expr> cond, std::unique_ptr<BlockStmt> b)
+        : condition(std::move(cond)), body(std::move(b)) {}
+};
+
+struct ElseStatement : Stmt {
+    std::unique_ptr<BlockStmt> body;
+    ElseStatement(std::unique_ptr<BlockStmt> b)
+        :  body(std::move(b)) {}
+};
+
+struct ConditionStatement : Stmt {
+    std::unique_ptr<IfStatement> if_stmt;
+    std::vector<std::unique_ptr<ElifStatement>> elif_stmts;
+    std::unique_ptr<ElseStatement> else_stmt;
+
+    ConditionStatement(std::unique_ptr<IfStatement> base_if_stmt, std::vector<std::unique_ptr<ElifStatement>> elif_stmts, std::unique_ptr<ElseStatement> else_stmt)
+        : if_stmt(std::move(base_if_stmt)), elif_stmts(std::move(elif_stmts)), else_stmt(std::move(else_stmt)) {}
+
+    // ConditionStatement(std::unique_ptr<IfStatement> base_if_stmt)
+    //     // : if_stmt(std::make_unique<IfStatement>(std::move(cond), std::move(b))) {} 
+    //     : if_stmt(std::move(base_if_stmt)) {}
+    // void add_elif_condition(std::unique_ptr<ElifStatement> elif_stmt) {
+    //     elif_stmts.emplace_back(std::move(elif_stmt));
+    // }
+
+    // void add_else_condition(std::unique_ptr<ElseStatement> else_stmt_) {
+    //     else_stmt = std::move(else_stmt_);
+    // }
 };
 
 struct ProgramAST {
