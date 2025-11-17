@@ -85,7 +85,7 @@ fi
 
 parse_test_sript="@PYTHON_RUN_TEST_SCRIPT@"
 paracl_exe="@CMAKE_BINARY_DIR@/@PARACL_EXE@"
-dat="@PARACL_E2E_DAT_DIR@/$test_name.pcl"
+dat="@PARACL_E2E_DAT_DIR@/$test_name.cl"
 ans="@PARACL_E2E_ANS_DIR@/$test_name.ans"
 
 if ! [ -f "$parse_test_sript" ]; then

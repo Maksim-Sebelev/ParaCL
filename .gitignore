@@ -19,3 +19,6 @@ Doxyfile
 
 # log out dir
 log/
+
+# dir for graphviz dump of paracl ast tree
+ast-dump/

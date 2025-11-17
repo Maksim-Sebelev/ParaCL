@@ -73,6 +73,7 @@ class options_parser
 
 export namespace OptionsParsing
 {
+
 //---------------------------------------------------------------------------------------------------------------
 
 program_options_t parse_program_options(int argc, char* argv[])
@@ -148,8 +149,8 @@ void options_parser::parse_flag_help() const
     -h --help
     -v --version
 
-        *.pcl
-            to give source file, just write *.pcl file in command.
+        *.cl
+            to give source file, just write *.cl file in command.
 
         -h, --help
             these flags show information about all flags and their functions.
@@ -171,7 +172,8 @@ void options_parser::parse_flag_version() const
 {
 #if not defined(PARACL_VERSION)
 #error "ParaCL version is unknowed."
-#endif
+#endif /* not defined(PARACL_VERSION) */
+
     std::cout << "ParaCL " PARACL_VERSION << std::endl;
 
     exit(EXIT_SUCCESS); // good exit :)
@@ -181,10 +183,14 @@ void options_parser::parse_flag_version() const
 
 void options_parser::parse_not_a_flag(const char* argument)
 {
-    if (not ParaCL::is_paracl_file_name(argument))
-        undefined_option(argument); // exit 1
+    if (ParaCL::is_paracl_file_name(argument))
+    {
+        program_options_.sources.push_back(std::string(argument));
+        return;
+    }
 
-    program_options_.sources.push_back(std::string(argument));   
+    std::cerr << "Bad format of input file: '" << argument << "'\n"
+                  "Expect only '" << ParaCL::paracl_extension << "' extension in sources files\n" ;
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -193,8 +199,8 @@ void options_parser::parse_not_a_flag(const char* argument)
 void options_parser::undefined_option(const char* argument) const
 {
     assert(argument);
-    std::cerr << "Undefined option '" << argument << "'" << std::endl
-              << "I don`t know, what i need to do :("  << std::endl;
+    std::cerr << "Undefined option '" << argument << "'\n"
+                 "I don`t know, what i need to do :(\n";
 
     exit(EXIT_FAILURE);
 }

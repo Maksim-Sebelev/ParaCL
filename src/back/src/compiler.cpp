@@ -45,9 +45,12 @@ public:
     }
 };
 
-static void handleStmt(const Stmt* stmt, SymbolTable& table);
-static int  handleExpr(const Expr* expr, SymbolTable& table);
-static int  executeBinOp(int leftOp, int rightOp, token_t binOp);
+static void handleNode(const ASTNode* node, SymbolTable& table);
+static void handleStmt     (const Stmt              * stmt     , SymbolTable& table);
+static int  handleExpr     (const Expr              * expr     , SymbolTable& table);
+static void handleCondition(const Condition* condition, SymbolTable& table);
+
+static int  executeBinOp         (int leftOp, int rightOp, token_t binOp);
 static void executeCombinedAssign(int& operand, int value, token_t combAsgn);
 // static int  executeUnOp(int operand, token_t unOp);
 
@@ -55,12 +58,22 @@ void compile(const ProgramAST& progAST)
 {
     SymbolTable table;
     table.enter(); // global scope
-    for (auto& stmt : progAST.statements)
-        handleStmt(stmt.get(), table);
+    for (auto& node : progAST.nodes)
+        handleNode(node.get(), table);
 
     table.leave();
 }
  
+static void handleNode(const ASTNode* node, SymbolTable& table)
+{
+    if (auto statement = dynamic_cast<const Stmt*>(node))
+        return handleStmt(statement, table);
+    
+    else if (auto condition = dynamic_cast<const Condition*>(node))
+        return handleCondition(condition, table);
+
+    throw std::runtime_error("Bad type of AST node");
+}
 
 static void handleStmt(const Stmt* stmt, SymbolTable& table)
 {
@@ -72,6 +85,8 @@ static void handleStmt(const Stmt* stmt, SymbolTable& table)
         auto result = handleExpr(e, table);
 
         table.declare(assign->name, result);
+
+        return;
     }
     else if (auto combinedAssingExpr = dynamic_cast<const CombinedAssingStmt*>(stmt))
     {
@@ -89,6 +104,7 @@ static void handleStmt(const Stmt* stmt, SymbolTable& table)
         auto result = handleExpr(e, table);
 
         executeCombinedAssign(varValue->value, result, combinedAssingExpr->op);
+        return;
     }
 
     else if (auto print = dynamic_cast<const PrintStmt*>(stmt))
@@ -97,41 +113,37 @@ static void handleStmt(const Stmt* stmt, SymbolTable& table)
         if (!e) throw std::runtime_error("BinExpr children are not Expr");
 
         auto result = handleExpr(e, table);
-        std::cout << result << '\n'; 
+        std::cout << result << '\n';
+        return;
     }
     else if (auto whileStmt = dynamic_cast<const WhileStmt*>(stmt))
     {
-        const std::vector<std::unique_ptr<Stmt>>&
-        bodyStmts = whileStmt->body->statements;
+        const std::vector<std::unique_ptr<ASTNode>>& bodyStmts = whileStmt->body->nodes;
 
 
         while (handleExpr(whileStmt->condition.get(), table))
-            for (auto& s : bodyStmts) handleStmt(s.get(), table);
+            for (auto& s : bodyStmts) handleNode(s.get(), table);
 
+        return;
     }
     else if (auto block = dynamic_cast<const BlockStmt*>(stmt))
     {
-        const std::vector<std::unique_ptr<Stmt>>& blockStmts = block->statements;
+        const std::vector<std::unique_ptr<ASTNode>>& blockStmts = block->nodes;
 
         bool blockIsEmpty = blockStmts.empty();
 
         if (!blockIsEmpty) table.enter();
 
-        for (auto& s : block->statements)
-        {
-            handleStmt(s.get(), table);
-        }
+        for (auto& s : block->nodes)
+            handleNode(s.get(), table);
+
         if (!blockIsEmpty) table.leave();
-    }
-    else if (auto condition = dynamic_cast<const IfStatement*>(stmt))
-    {
-        const bool flag = handleExpr(condition->condition.get(), table);
-        if (not flag) return;
 
-        handleStmt(condition->body.get(),table);
+        return;
     }
+
+    throw std::runtime_error("Bad Statement node type");
 }
-
 
 static int handleExpr(const Expr* expr, SymbolTable& table)
 {
@@ -197,12 +209,25 @@ static int handleExpr(const Expr* expr, SymbolTable& table)
         executeCombinedAssign(varValue->value, result, combinedAssingExpr->op);
 
         return varValue->value;
+    
     }
 
-    else
-    {
-        throw std::runtime_error("Unknown expression class");
-    }
+    throw std::runtime_error("Bad expression node format");
+}
+
+static void handleCondition(const Condition* condition, SymbolTable& table)
+{
+    auto if_stmt = condition->if_stmt.get(); msg_assert(if_stmt, "in condition we always expect IF");
+    
+    bool flag = handleExpr(if_stmt->condition.get(), table);
+    if (flag) return handleNode(if_stmt->body.get(), table);
+    
+    /* TODO: add parsing of else if */
+        
+    auto else_stmt = condition->else_stmt.get(); 
+    if (not else_stmt) return; /* no ELSE */
+
+    return handleNode(else_stmt->body.get(), table);
 }
 
 static int executeBinOp(int leftOp, int rightOp, token_t binOp)

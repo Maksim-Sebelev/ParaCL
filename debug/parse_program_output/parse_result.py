@@ -30,7 +30,7 @@ def extract_numbers(text):
 
 def main():
     if len(sys.argv) != 4:
-        print(f"Usage: {sys.argv[0]} <paracl_exe> <test>.pcl <answer>.ans")
+        print(f"Usage: {sys.argv[0]} <paracl_exe> <test>.cl <answer>.ans")
         return 1
 
     executable, test_input, test_answer = sys.argv[1:4]

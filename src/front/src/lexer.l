@@ -31,6 +31,13 @@ extern void yyerror(YYLTYPE* loc, const char* msg);
 
 extern FILE* yyin;
 
+/* ну я так хочу да */
+ON_LOGGER(
+namespace PineapLog{
+static size_t tokens_counter = 0;
+} /* почему не static в макросе?: макрос не всегда вызывает в одном и том же scope */
+)
+
 #define YY_USER_ACTION do {                      \
     yylloc->first_line = yylloc->last_line;       \
     yylloc->first_column = yylloc->last_column;    \
@@ -49,6 +56,12 @@ extern FILE* yyin;
         }                                                       \
         yylloc->last_column++;                                   \
     }                                                             \
+    ON_LOGGER( \
+        PineapLog::glog.logc(PineapLog::LogColor::White, "[", PineapLog::tokens_counter, "]"); \
+        PineapLog::tokens_counter++; \
+        PineapLog::LogColor color = (PineapLog::tokens_counter % 3 == 0) ? PineapLog::LogColor::Green : (PineapLog::tokens_counter % 3 == 1) ? PineapLog::LogColor::Yellow : PineapLog::LogColor::Red; \
+        PineapLog::glog.logc(color, "{", "\n\tfirst line: ", yylloc->first_line, "\n\tfirst col : ", yylloc->first_column, "\n\tlast line: ", yylloc->last_line, "\n\tlast col : ", yylloc->last_column, "\n\tword = '", yytext, "'\n}"); \
+    ) \
 } while (0);
 
 
@@ -84,7 +97,9 @@ SPACE
 "/*"([^*]|"*"+[^*/])*"*"+"/" { /* multy-line comment */ }
 
 "and"     { return AND; }
+"&&"      { return AND; }
 "or"      { return OR; }
+"||"      { return OR; }
 "+"       { return ADD; }
 "-"       { return SUB; }
 "*"       { return MUL; }
@@ -108,6 +123,7 @@ SPACE
 "="       { return AS; }
 "print"   { return PRINT; }
 "if"      { return IF; }
+"else"    { return ELSE; }
 ";"       { return SC; }
 
 [+-]?{DIGIT}+    { 

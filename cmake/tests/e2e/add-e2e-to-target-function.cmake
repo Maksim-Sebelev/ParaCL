@@ -3,14 +3,14 @@
 # function for adding tests (not unit) to some executable files
 function(target_e2e_test test_target run_script test_dir ans_dir)
 
-    file(GLOB test_files "${test_dir}/*.pcl") # save all tests -files in variable 'test_files'
+    file(GLOB test_files "${test_dir}/*.cl") # save all tests -files in variable 'test_files'
 
     # get quantity of tests
     list(LENGTH test_files num_tests)
 
     # check that at least 1 test was found
     if(${num_tests} EQUAL 0)
-        message(WARNING "No .pcl files found in ${test_dir}")
+        message(WARNING "No .cl files found in ${test_dir}")
         return()
     endif()
 

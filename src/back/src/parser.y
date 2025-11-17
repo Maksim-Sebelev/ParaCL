@@ -38,11 +38,15 @@ int yylex(YYSTYPE* yylval_param, YYLTYPE* yylloc_param);
 %locations
 
 %union {
-    int num_value;
-    std::string* str_value;
-    ParaCL::Stmt* stmt;
-    ParaCL::Expr* expr;
-    std::vector<ParaCL::Stmt*>* stmt_vector;
+    int                                num_value  ;
+    std   ::string                   * str_value  ;
+    std    ::vector<ParaCL::ASTNode*>* ast_nodes  ;
+    ParaCL::ASTNode                  * ast_node   ;
+    ParaCL::Stmt                     * stmt       ;
+    ParaCL::Expr                     * expr       ;
+    ParaCL::IfCondition              * if_cond    ;
+    ParaCL::ElseCondition            * else_cond  ;
+    ParaCL::Condition                * condition  ;
 }
 
 %token <num_value> NUM
@@ -54,35 +58,40 @@ int yylex(YYSTYPE* yylval_param, YYLTYPE* yylloc_param);
 %token LCIB RCIB LCUB RCUB
 %token WH IN AS PRINT
 %token SC
-%token IF // ELIF ELSE
+%token <if_cond> IF
+%token <else_cond> ELSE
 
-%type <stmt_vector> program statements
-%type <stmt> statement assignment combined_assignment print_statement while_statement input_statement if_statement // condition_statement // lif_statement else_statement
-%type <expr> expression bool_expression and_or_expression math_comparison_expression add_sub_expression mul_div_expression factor assignment_expression
+%type <ast_nodes>   program
+%type <ast_node>    program_node
+%type <stmt>        statement assignment combined_assignment print_statement while_statement input_statement
+%type <expr>        expression bool_expression and_or_expression math_comparison_expression add_sub_expression mul_div_expression factor assignment_expression
+%type <condition>   condition
+%type <if_cond>     if_condition
+%type <else_cond>   else_condition
 
 %%
 
 program:
-    statements {
-        for (auto stmt : *$1) {
-            // std::cerr << "token {" << yylloc.first_line << ":" << yylloc.first_column << "}\n";
-            // std::cerr << format_location(yylloc) << "\n";
-            program.statements.push_back(std::unique_ptr<ParaCL::Stmt>(stmt));
-        }
-        delete $1;
-        DEBUG_COUT_M("AST construction completed!"); 
+    program_node {
+        std::cerr << "add program node\n";
+        program.nodes.push_back(std::unique_ptr<ParaCL::ASTNode>($1));
+    }
+    | program program_node {
+        std::cerr << "add program node in helerr rule\n";
+        program.nodes.push_back(std::unique_ptr<ParaCL::ASTNode>($2));
     }
     ;
 
-statements:
-    {
-        /* FIXME: stament on unique_ptr*/
-        $$ = new std::vector<ParaCL::Stmt*>(); 
-    }
-    | statements statement {
-        $1->push_back($2);
+program_node:
+    statement {
+        std::cerr << "add atatement\n";
         $$ = $1;
+
     }
+    // | condition {
+    //     std::cerr << "add condition\n";
+    //     $$ = $1;
+    // }
     ;
 
 statement:
@@ -99,9 +108,6 @@ statement:
         $$ = $1;
     }
     | input_statement SC { 
-        $$ = $1;
-    }
-    | if_statement {
         $$ = $1;
     }
     ;
@@ -160,10 +166,10 @@ print_statement:
     ;
 
 while_statement:
-    WH LCIB expression RCIB LCUB statements RCUB {
-        auto body_stmts = std::vector<std::unique_ptr<ParaCL::Stmt>>();
+    WH LCIB expression RCIB LCUB program RCUB {
+        auto body_stmts = std::vector<std::unique_ptr<ParaCL::ASTNode>>();
         for (auto stmt : *$6) {
-            body_stmts.push_back(std::unique_ptr<ParaCL::Stmt>(stmt));
+            body_stmts.push_back(std::unique_ptr<ParaCL::ASTNode>(stmt));
         }
         auto body = new ParaCL::BlockStmt(std::move(body_stmts));
         $$ = new ParaCL::WhileStmt(
@@ -173,11 +179,11 @@ while_statement:
         ON_DEBUG(std::cout << "Created while statement" << std::endl;)
         delete $6;
     }
-    | WH LCIB expression RCIB statement {
-        auto body_stmts = std::vector<std::unique_ptr<ParaCL::Stmt>>();
-        body_stmts.push_back(std::unique_ptr<ParaCL::Stmt>($5));
+    | WH LCIB expression RCIB program_node {
+        auto body_stmts = std::vector<std::unique_ptr<ParaCL::ASTNode>>();
+        body_stmts.push_back(std::unique_ptr<ParaCL::ASTNode>($5));
         auto body = new ParaCL::BlockStmt(std::move(body_stmts));
-    
+
         $$ = new ParaCL::WhileStmt(
             std::unique_ptr<ParaCL::Expr>($3), 
             std::unique_ptr<ParaCL::BlockStmt>(body)
@@ -191,34 +197,39 @@ input_statement:
     }
     ;
 
-/* condition_statement:
-    if_statement { 
-        $$ = new ParaCL::ConditionStatement(
-            std::unique_ptr<ParaCL::IfStatement>($1)
+condition:
+    if_condition { 
+        $$ = new ParaCL::Condition(
+            std::unique_ptr<ParaCL::IfCondition>($1)
         );
     }
-    ; */
+    | else_condition {
+        ($$)->add_else_condition(
+            std::unique_ptr<ParaCL::ElseCondition>($1)
+        );
+    }
+    ;
 
-if_statement:
-    IF LCIB expression RCIB LCUB statements RCUB {
-        auto body_stmts = std::vector<std::unique_ptr<ParaCL::Stmt>>();
+if_condition:
+    IF LCIB expression RCIB LCUB program RCUB {
+        auto body_stmts = std::vector<std::unique_ptr<ParaCL::ASTNode>>();
         for (auto stmt : *$6) {
-            body_stmts.push_back(std::unique_ptr<ParaCL::Stmt>(stmt));
+            body_stmts.push_back(std::unique_ptr<ParaCL::ASTNode>(stmt));
         }
         auto body = new ParaCL::BlockStmt(std::move(body_stmts));
-        $$ = new ParaCL::IfStatement(
+        $$ = new ParaCL::IfCondition(
             std::unique_ptr<ParaCL::Expr>($3),
             std::unique_ptr<ParaCL::BlockStmt>(body)
         );
-        ON_DEBUG(std::cout << "Created if statement with {}" << std::endl;)
         delete $6;
+        ON_DEBUG(std::cout << "Created if statement with {}" << std::endl;)
     }
-    | IF LCIB expression RCIB statement {
-        auto body_stmts = std::vector<std::unique_ptr<ParaCL::Stmt>>();
-        body_stmts.push_back(std::unique_ptr<ParaCL::Stmt>($5));
+    | IF LCIB expression RCIB program_node {
+        auto body_stmts = std::vector<std::unique_ptr<ParaCL::ASTNode>>();
+        body_stmts.push_back(std::unique_ptr<ParaCL::ASTNode>($5));
         auto body = new ParaCL::BlockStmt(std::move(body_stmts));
 
-        $$ = new ParaCL::IfStatement(
+        $$ = new ParaCL::IfCondition(
             std::unique_ptr<ParaCL::Expr>($3),
             std::unique_ptr<ParaCL::BlockStmt>(body)
         );
@@ -226,10 +237,30 @@ if_statement:
     }
     ;
 
-/* elif_statement:
-    { ELIF LCIB expression RCIB LCUB statement RCUB }  { $$ = }
-    | elif_statement
-    ; */
+else_condition:
+    ELSE LCUB program RCUB {
+        auto body_stmts = std::vector<std::unique_ptr<ParaCL::ASTNode>>();
+        for (auto node : *$3) {
+            body_stmts.push_back(std::unique_ptr<ParaCL::ASTNode>(node));
+        }
+        auto body = new ParaCL::BlockStmt(std::move(body_stmts));
+        $$ = new ParaCL::ElseCondition(
+            std::unique_ptr<ParaCL::BlockStmt>(body)
+        );
+        delete $3;
+        ON_DEBUG(std::cout << "Created else statement with {}" << std::endl;)
+    }
+    | ELSE program_node {
+        auto body_stmts = std::vector<std::unique_ptr<ParaCL::ASTNode>>();
+        body_stmts.push_back(std::unique_ptr<ParaCL::ASTNode>($2));
+        auto body = new ParaCL::BlockStmt(std::move(body_stmts));
+
+        $$ = new ParaCL::ElseCondition(
+            std::unique_ptr<ParaCL::BlockStmt>(body)
+        );
+        ON_DEBUG(std::cout << "Created else statement withOUT {}" << std::endl;)
+    }
+    ;
 
 expression:
     bool_expression { $$ = $1; }

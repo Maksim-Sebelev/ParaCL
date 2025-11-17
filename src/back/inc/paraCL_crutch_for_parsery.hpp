@@ -1,6 +1,7 @@
 #ifndef PARACL_CRUTCH_FOR_PARSERY
 #define PARACL_CRUTCH_FOR_PARSERY
 
+#include <cstddef>
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -190,11 +191,11 @@ struct PrintStmt : Stmt {
     PrintStmt(std::unique_ptr<Expr> e) : expr(std::move(e)) {}
 };
 
-struct BlockStmt : Stmt {
-    std::vector<std::unique_ptr<Stmt>> statements;
+struct BlockStmt : ASTNode {
+    std::vector<std::unique_ptr<ASTNode>> nodes;
     BlockStmt() = default;
-    BlockStmt(std::vector<std::unique_ptr<Stmt>> stmts)
-        : statements(std::move(stmts)) {}
+    BlockStmt(std::vector<std::unique_ptr<ASTNode>> body)
+        : nodes(std::move(body)) {}
 };
 
 struct WhileStmt : Stmt {
@@ -204,48 +205,42 @@ struct WhileStmt : Stmt {
         : condition(std::move(cond)), body(std::move(b)) {}
 };
 
-struct IfStatement : Stmt {
+struct IfCondition : ASTNode {
     std::unique_ptr<Expr> condition;
     std::unique_ptr<BlockStmt> body;
-    IfStatement(std::unique_ptr<Expr> cond, std::unique_ptr<BlockStmt> b)
+    IfCondition(std::unique_ptr<Expr> cond, std::unique_ptr<BlockStmt> b)
         : condition(std::move(cond)), body(std::move(b)) {}
 };
 
-struct ElifStatement : Stmt {
+struct ElifCondition : ASTNode {
     std::unique_ptr<Expr> condition;
     std::unique_ptr<BlockStmt> body;
-    ElifStatement(std::unique_ptr<Expr> cond, std::unique_ptr<BlockStmt> b)
+    ElifCondition(std::unique_ptr<Expr> cond, std::unique_ptr<BlockStmt> b)
         : condition(std::move(cond)), body(std::move(b)) {}
 };
 
-struct ElseStatement : Stmt {
+struct ElseCondition : ASTNode {
     std::unique_ptr<BlockStmt> body;
-    ElseStatement(std::unique_ptr<BlockStmt> b)
+    ElseCondition(std::unique_ptr<BlockStmt> b)
         :  body(std::move(b)) {}
 };
 
-struct ConditionStatement : Stmt {
-    std::unique_ptr<IfStatement> if_stmt;
-    // std::vector<std::unique_ptr<ElifStatement>> elif_stmts;
-    // std::unique_ptr<ElseStatement> else_stmt;
+struct Condition : ASTNode {
+    std::unique_ptr<IfCondition>   if_stmt;
+    std::unique_ptr<ElseCondition> else_stmt;
+    // std::vector<std::unique_ptr<ElifCondition>> elif_stmts;
 
-    ConditionStatement(std::unique_ptr<IfStatement> base_if_stmt /*, std::vector<std::unique_ptr<ElifStatement>> elif_stmts, std::unique_ptr<ElseStatement> else_stmt*/)
-        : if_stmt(std::move(base_if_stmt))/*, elif_stmts(std::move(elif_stmts)), else_stmt(std::move(else_stmt))*/ {}
+    Condition(std::unique_ptr<IfCondition> base_if_stmt)
+        : if_stmt(std::move(base_if_stmt)), else_stmt(nullptr) {}
 
-    // ConditionStatement(std::unique_ptr<IfStatement> base_if_stmt)
-    //     // : if_stmt(std::make_unique<IfStatement>(std::move(cond), std::move(b))) {} 
-    //     : if_stmt(std::move(base_if_stmt)) {}
-    // void add_elif_condition(std::unique_ptr<ElifStatement> elif_stmt) {
-    //     elif_stmts.emplace_back(std::move(elif_stmt));
-    // }
+    void add_else_condition(std::unique_ptr<ElseCondition> else_cond) {
+        else_stmt = std::move(else_cond);
+    }
 
-    // void add_else_condition(std::unique_ptr<ElseStatement> else_stmt_) {
-    //     else_stmt = std::move(else_stmt_);
-    // }
 };
 
 struct ProgramAST {
-    std::vector<std::unique_ptr<Stmt>> statements;
+    std::vector<std::unique_ptr<ASTNode>> nodes;
 };
 
 void
