@@ -16,7 +16,4 @@ if (a != b)
     if (a + b == 27) print 14;
 }
 
-if (a == b)
-{
-    print 1000;
-}
+if (a == b) print 1000;
