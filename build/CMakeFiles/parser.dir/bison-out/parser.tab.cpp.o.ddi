@@ -1,0 +1,9 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "CMakeFiles/parser.dir/bison-out/parser.tab.cpp.o"
+    }
+  ],
+  "version": 1
+}

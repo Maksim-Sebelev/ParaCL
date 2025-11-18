@@ -1,0 +1,35 @@
+{
+	"modules" : 
+	{
+		"options_parser" : 
+		{
+			"bmi" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/options_parse.dir/options_parser.pcm",
+			"is-private" : false
+		},
+		"paracl_extension" : 
+		{
+			"bmi" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/options_parse.dir/paracl_extension.pcm",
+			"is-private" : false
+		}
+	},
+	"references" : 
+	{
+		"options_parser" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "CMakeFiles/options_parse.dir/options_parser.pcm"
+		},
+		"paracl_extension" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "CMakeFiles/options_parse.dir/paracl_extension.pcm"
+		}
+	},
+	"usages" : 
+	{
+		"options_parser" : 
+		[
+			"paracl_extension"
+		]
+	}
+}

@@ -1,0 +1,3 @@
+-x c++-module
+-fmodule-output=CMakeFiles/options_parse.dir/options_parser.pcm
+-fmodule-file=paracl_extension=CMakeFiles/options_parse.dir/paracl_extension.pcm

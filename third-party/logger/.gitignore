@@ -1,0 +1,14 @@
+# vscode settings
+.vscode/
+
+# clangd automatic dir
+.cache/
+
+# generated with cmake files
+build/
+
+# dir with html files, generated with programm
+log/
+
+# backgrounds for logger
+backgrounds/

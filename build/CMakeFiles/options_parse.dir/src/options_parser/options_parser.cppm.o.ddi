@@ -1,0 +1,21 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "CMakeFiles/options_parse.dir/src/options_parser/options_parser.cppm.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "options_parser",
+          "source-path": "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/options_parser/options_parser.cppm"
+        }
+      ],
+      "requires": [
+        {
+          "logical-name": "paracl_extension"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

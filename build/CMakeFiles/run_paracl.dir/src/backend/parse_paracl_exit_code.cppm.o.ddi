@@ -1,0 +1,16 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "CMakeFiles/run_paracl.dir/src/backend/parse_paracl_exit_code.cppm.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "parse_paracl_exit_code",
+          "source-path": "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/backend/parse_paracl_exit_code.cppm"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

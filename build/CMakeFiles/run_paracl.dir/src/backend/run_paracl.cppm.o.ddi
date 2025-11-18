@@ -1,0 +1,33 @@
+{
+  "revision": 0,
+  "rules": [
+    {
+      "primary-output": "CMakeFiles/run_paracl.dir/src/backend/run_paracl.cppm.o",
+      "provides": [
+        {
+          "is-interface": true,
+          "logical-name": "run_paracl",
+          "source-path": "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/backend/run_paracl.cppm"
+        }
+      ],
+      "requires": [
+        {
+          "logical-name": "paracl_extension"
+        },
+        {
+          "logical-name": "options_parser"
+        },
+        {
+          "logical-name": "paracl_interpreter"
+        },
+        {
+          "logical-name": "parse_paracl_exit_code"
+        },
+        {
+          "logical-name": "ast_graph_dump"
+        }
+      ]
+    }
+  ],
+  "version": 1
+}

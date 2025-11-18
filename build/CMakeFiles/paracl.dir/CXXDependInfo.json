@@ -1,0 +1,25 @@
+{
+	"bmi-installation" : null,
+	"compiler-frontend-variant" : "GNU",
+	"compiler-id" : "Clang",
+	"compiler-simulate-id" : "",
+	"config" : "Debug",
+	"cxx-modules" : {},
+	"dir-cur-bld" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build",
+	"dir-cur-src" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version",
+	"dir-top-bld" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build",
+	"dir-top-src" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version",
+	"exports" : [],
+	"forward-modules-from-target-dirs" : [],
+	"include-dirs" : 
+	[
+		"/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/third-party/logger/Src/header-only"
+	],
+	"language" : "CXX",
+	"linked-target-dirs" : 
+	[
+		"/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/options_parse.dir",
+		"/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/run_paracl.dir"
+	],
+	"module-dir" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/paracl.dir"
+}

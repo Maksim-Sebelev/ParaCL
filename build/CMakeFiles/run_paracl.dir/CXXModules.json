@@ -1,0 +1,73 @@
+{
+	"modules" : 
+	{
+		"ast_graph_dump" : 
+		{
+			"bmi" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/run_paracl.dir/ast_graph_dump.pcm",
+			"is-private" : false
+		},
+		"paracl_interpreter" : 
+		{
+			"bmi" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/run_paracl.dir/paracl_interpreter.pcm",
+			"is-private" : false
+		},
+		"parse_paracl_exit_code" : 
+		{
+			"bmi" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/run_paracl.dir/parse_paracl_exit_code.pcm",
+			"is-private" : false
+		},
+		"run_paracl" : 
+		{
+			"bmi" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/run_paracl.dir/run_paracl.pcm",
+			"is-private" : false
+		}
+	},
+	"references" : 
+	{
+		"ast_graph_dump" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "CMakeFiles/run_paracl.dir/ast_graph_dump.pcm"
+		},
+		"options_parser" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "CMakeFiles/options_parse.dir/options_parser.pcm"
+		},
+		"paracl_extension" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "CMakeFiles/options_parse.dir/paracl_extension.pcm"
+		},
+		"paracl_interpreter" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "CMakeFiles/run_paracl.dir/paracl_interpreter.pcm"
+		},
+		"parse_paracl_exit_code" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "CMakeFiles/run_paracl.dir/parse_paracl_exit_code.pcm"
+		},
+		"run_paracl" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "CMakeFiles/run_paracl.dir/run_paracl.pcm"
+		}
+	},
+	"usages" : 
+	{
+		"options_parser" : 
+		[
+			"paracl_extension"
+		],
+		"run_paracl" : 
+		[
+			"ast_graph_dump",
+			"options_parser",
+			"paracl_extension",
+			"paracl_interpreter",
+			"parse_paracl_exit_code"
+		]
+	}
+}

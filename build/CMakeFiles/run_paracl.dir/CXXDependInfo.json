@@ -1,0 +1,70 @@
+{
+	"bmi-installation" : null,
+	"compiler-frontend-variant" : "GNU",
+	"compiler-id" : "Clang",
+	"compiler-simulate-id" : "",
+	"config" : "Debug",
+	"cxx-modules" : 
+	{
+		"CMakeFiles/run_paracl.dir/debug/ast/ast-graph-dump.cppm.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "debug/ast",
+			"source" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/debug/ast/ast-graph-dump.cppm",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		},
+		"CMakeFiles/run_paracl.dir/src/backend/interpreter.cppm.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src/backend",
+			"source" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/backend/interpreter.cppm",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		},
+		"CMakeFiles/run_paracl.dir/src/backend/parse_paracl_exit_code.cppm.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src/backend",
+			"source" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/backend/parse_paracl_exit_code.cppm",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		},
+		"CMakeFiles/run_paracl.dir/src/backend/run_paracl.cppm.o" : 
+		{
+			"bmi-only" : false,
+			"destination" : null,
+			"name" : "CXX_MODULES",
+			"relative-directory" : "src/backend",
+			"source" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/backend/run_paracl.cppm",
+			"type" : "CXX_MODULES",
+			"visibility" : "PUBLIC"
+		}
+	},
+	"dir-cur-bld" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build",
+	"dir-cur-src" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version",
+	"dir-top-bld" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build",
+	"dir-top-src" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version",
+	"exports" : [],
+	"forward-modules-from-target-dirs" : [],
+	"include-dirs" : 
+	[
+		"/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/include",
+		"flex-out",
+		"bison-out",
+		"/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/include/frontend",
+		"/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/third-party/logger/Src/header-only"
+	],
+	"language" : "CXX",
+	"linked-target-dirs" : 
+	[
+		"/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/options_parse.dir"
+	],
+	"module-dir" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/run_paracl.dir"
+}
