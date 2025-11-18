@@ -27,7 +27,12 @@ int yylex(YYSTYPE* yylval_param, YYLTYPE* yylloc_param);
 %define api.pure full
 %locations
 
-
+%left OR
+%left AND
+%nonassoc ISEQ ISNE
+%nonassoc ISAB ISABE ISLS ISLSE
+%left ADD SUB
+%left MUL DIV REM
 
 %union {
     int                                      num_value     ;
@@ -45,10 +50,7 @@ int yylex(YYSTYPE* yylval_param, YYLTYPE* yylloc_param);
 
 %token <num_value> NUM
 %token <str_value> VAR
-%token AND OR
 %token ADDASGN SUBASGN MULASGN DIVASGN
-%token ADD SUB MUL DIV REM
-%token ISAB ISABE ISLS ISLSE ISEQ ISNE
 %token LCIB RCIB LCUB RCUB
 %token WH IN AS PRINT IF ELIF ELSE
 %token SC
@@ -56,7 +58,7 @@ int yylex(YYSTYPE* yylval_param, YYLTYPE* yylloc_param);
 %type <stmt_vector> program statements
 %type <block> block one_stmt_block
 %type <stmt> statement assignment combined_assignment print_statement while_statement
-%type <expr> expression and_or_expression math_comparison_expression add_sub_expression mul_div_expression remains_expression factor assignment_expression
+%type <expr> expression logical_or_expression logical_and_expression equality_expression relational_expression additive_expression multiplicative_expression unary_expression factor assignment_expression
 
 %type <condition_stmt> condition_statement
 %type <if_stmt>               if_statement
@@ -241,31 +243,14 @@ else_statement:
         );
     }
     ;
+
 expression:
-    remains_expression { $$ = $1; }
+    logical_or_expression { $$ = $1; }
     ;
 
-remains_expression:
-    and_or_expression { $$ = $1; }
-    | remains_expression REM remains_expression {
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::REM,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    ;
-
-and_or_expression:
-    math_comparison_expression { $$ = $1; }
-    | and_or_expression AND and_or_expression {
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::AND,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    | and_or_expression OR and_or_expression {
+logical_or_expression:
+    logical_and_expression { $$ = $1; }
+    | logical_or_expression OR logical_and_expression {
         $$ = new ParaCL::BinExpr(
             ParaCL::token_t::OR,
             std::unique_ptr<ParaCL::Expr>($1),
@@ -274,44 +259,27 @@ and_or_expression:
     }
     ;
 
-math_comparison_expression:
-    add_sub_expression { $$ = $1; }
-    | math_comparison_expression ISAB math_comparison_expression {
+logical_and_expression:
+    equality_expression { $$ = $1; }
+    | logical_and_expression AND equality_expression {
         $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::ISAB,
+            ParaCL::token_t::AND,
             std::unique_ptr<ParaCL::Expr>($1),
             std::unique_ptr<ParaCL::Expr>($3)
         );
     }
-    | math_comparison_expression ISABE math_comparison_expression {
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::ISABE,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    | math_comparison_expression ISLS math_comparison_expression {
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::ISLS,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    | math_comparison_expression ISLSE math_comparison_expression {
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::ISLSE,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    | math_comparison_expression ISEQ math_comparison_expression {
+    ;
+
+equality_expression:
+    relational_expression { $$ = $1; }
+    | equality_expression ISEQ relational_expression {
         $$ = new ParaCL::BinExpr(
             ParaCL::token_t::ISEQ,
             std::unique_ptr<ParaCL::Expr>($1),
             std::unique_ptr<ParaCL::Expr>($3)
         );
     }
-    | math_comparison_expression ISNE math_comparison_expression {
+    | equality_expression ISNE relational_expression {
         $$ = new ParaCL::BinExpr(
             ParaCL::token_t::ISNE,
             std::unique_ptr<ParaCL::Expr>($1),
@@ -320,16 +288,48 @@ math_comparison_expression:
     }
     ;
 
-add_sub_expression:
-    mul_div_expression { $$ = $1; }
-    | add_sub_expression ADD add_sub_expression { 
+relational_expression:
+    additive_expression { $$ = $1; }
+    | relational_expression ISAB additive_expression {
+        $$ = new ParaCL::BinExpr(
+            ParaCL::token_t::ISAB,
+            std::unique_ptr<ParaCL::Expr>($1),
+            std::unique_ptr<ParaCL::Expr>($3)
+        );
+    }
+    | relational_expression ISABE additive_expression {
+        $$ = new ParaCL::BinExpr(
+            ParaCL::token_t::ISABE,
+            std::unique_ptr<ParaCL::Expr>($1),
+            std::unique_ptr<ParaCL::Expr>($3)
+        );
+    }
+    | relational_expression ISLS additive_expression {
+        $$ = new ParaCL::BinExpr(
+            ParaCL::token_t::ISLS,
+            std::unique_ptr<ParaCL::Expr>($1),
+            std::unique_ptr<ParaCL::Expr>($3)
+        );
+    }
+    | relational_expression ISLSE additive_expression {
+        $$ = new ParaCL::BinExpr(
+            ParaCL::token_t::ISLSE,
+            std::unique_ptr<ParaCL::Expr>($1),
+            std::unique_ptr<ParaCL::Expr>($3)
+        );
+    }
+    ;
+
+additive_expression:
+    multiplicative_expression { $$ = $1; }
+    | additive_expression ADD multiplicative_expression { 
         $$ = new ParaCL::BinExpr(
             ParaCL::token_t::ADD,
             std::unique_ptr<ParaCL::Expr>($1),
             std::unique_ptr<ParaCL::Expr>($3)
         );
     }
-    | add_sub_expression SUB add_sub_expression { 
+    | additive_expression SUB multiplicative_expression { 
         $$ = new ParaCL::BinExpr(
             ParaCL::token_t::SUB,
             std::unique_ptr<ParaCL::Expr>($1),
@@ -338,118 +338,34 @@ add_sub_expression:
     }
     ;
 
-mul_div_expression:
+multiplicative_expression:
+    unary_expression { $$ = $1; }
+    | multiplicative_expression MUL unary_expression { 
+        $$ = new ParaCL::BinExpr(
+            ParaCL::token_t::MUL, 
+            std::unique_ptr<ParaCL::Expr>($1),
+            std::unique_ptr<ParaCL::Expr>($3)
+        );
+    }
+    | multiplicative_expression DIV unary_expression {
+        $$ = new ParaCL::BinExpr(
+            ParaCL::token_t::DIV, 
+            std::unique_ptr<ParaCL::Expr>($1),
+            std::unique_ptr<ParaCL::Expr>($3)
+        );
+    }
+    | multiplicative_expression REM unary_expression {
+        $$ = new ParaCL::BinExpr(
+            ParaCL::token_t::REM,
+            std::unique_ptr<ParaCL::Expr>($1),
+            std::unique_ptr<ParaCL::Expr>($3)
+        );
+    }
+    ;
+
+unary_expression:
     factor { $$ = $1; }
-    | mul_div_expression MUL mul_div_expression { 
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::MUL, 
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    | mul_div_expression DIV factor { /* factor because problem with /: (10 / 2 / 5) is a (10 / 2) / 5, not a 10 / (2 / 5) */
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::DIV, 
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
     ;
-
-/* 
-expression:
-    expression REM expression {
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::REM,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    | expression AND expression {
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::AND,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    | expression OR expression {
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::OR,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    | expression ISAB expression {
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::ISAB,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    | expression ISABE expression {
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::ISABE,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    | expression ISLS expression {
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::ISLS,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    | expression ISLSE expression {
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::ISLSE,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    | expression ISEQ expression {
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::ISEQ,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    | expression ISNE expression {
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::ISNE,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    | expression ADD expression { 
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::ADD,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    | expression SUB expression { 
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::SUB,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    | expression MUL expression { 
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::MUL, 
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    | expression DIV expression {
-        $$ = new ParaCL::BinExpr(
-            ParaCL::token_t::DIV, 
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
-        );
-    }
-    ; */
 
 factor:
     NUM { 
