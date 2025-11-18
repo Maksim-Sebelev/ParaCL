@@ -53,7 +53,7 @@ int  executeBinOp(int leftOp, int rightOp, token_t binOp);
 void executeCombinedAssign(int& operand, int value, token_t combAsgn);
 int  executeUnOp(int operand, token_t unOp);
 
-export void interpet(const ProgramAST& progAST)
+export void interpret(const ProgramAST& progAST)
 {
     SymbolTable table;
     table.enter(); // global scope

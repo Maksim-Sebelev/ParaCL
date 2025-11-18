@@ -466,17 +466,15 @@ void yyerror(YYLTYPE* loc, const char* msg)
     
     // Извлекаем токен вокруг позиции ошибки
     std::string problematic_token = extract_token_at_position(loc);
+    std::string possible_token = find_possible_token(problematic_token.c_str());
     
-    if (!problematic_token.empty()) {
-        std::string possible_token = find_possible_token(problematic_token.c_str());
-        
-        std::cerr << "Problematic place: '" << problematic_token << "'\n";
-        if (!possible_token.empty()) {
-            std::cerr << "Did you mean: '" << possible_token << "'?\n";
-        }
-    }
+    if (!problematic_token.empty())
+        std::cerr << "Problematic place: '" << problematic_token << "'\n\n";   
     
     show_error_context(loc);
+
+    if (!possible_token.empty())
+        std::cerr << "\nDid you mean: '" << possible_token << "'?\n";
 }
 
 void show_error_context(YYLTYPE* loc) {
@@ -501,14 +499,19 @@ void show_error_context(YYLTYPE* loc) {
         std::cerr << loc->first_line << " | " << buffer << std::endl;
         
         std::cerr << "  | ";
-        for (int i = 1; i < loc->first_column; i++)
+        int i = 1;
+        for (; i < loc->first_column; i++)
         {
             if (i < (int)strlen(buffer) && buffer[i-1] == '\t')
-                std::cerr << "    ";
+                std::cerr << "~~~~";
             else
-                std::cerr << " ";
+                std::cerr << "~";
         }
-        std::cerr << "^--- Unexpected token" << std::endl;
+        std::cerr << "^";
+
+        for (; i < (int)strlen(buffer); i++) std::cerr << "~";
+
+        std::cerr << "\n";
     }
     
     // Restoring the position in the file
@@ -542,6 +545,7 @@ size_t levenshtein_distance(const std::string& s1, const std::string& s2)
 }
 
 std::string find_possible_token(const char* unexpected) {
+    if (strlen(unexpected) == 0) return "";
     static const std::vector<std::string> known_tokens = {
         "if", "else", "while", "print", 
         "and", "or", "not",

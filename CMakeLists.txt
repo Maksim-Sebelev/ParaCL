@@ -196,7 +196,6 @@ set(RUN_PARACL_SRC_DIR ${BACKEND_SRC_DIR})
 set(RUN_PARACL_SRC
     ${RUN_PARACL_SRC_DIR}/interpreter.cppm
     ${RUN_PARACL_SRC_DIR}/run_paracl.cppm
-    ${RUN_PARACL_SRC_DIR}/parse_paracl_exit_code.cppm
 )
 
 if (GRAPHVIZ)

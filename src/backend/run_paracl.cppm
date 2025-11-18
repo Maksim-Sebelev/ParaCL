@@ -25,7 +25,6 @@ export module run_paracl;
 import paracl_extension;
 import options_parser;
 import paracl_interpreter;
-import parse_paracl_exit_code;
 
 #if defined(GRAPHVIZ)
 import ast_graph_dump;
@@ -33,10 +32,10 @@ import ast_graph_dump;
 
 namespace ParaCL
 {
-int  no_sources_action      ();
-int  one_source_action      (const std::string& source);
+void no_sources_action ();
+void one_source_action (const std::string& source);
 
-export int run_paracl(const OptionsParsing::program_options_t& program_options)
+export void run_paracl(const OptionsParsing::program_options_t& program_options)
 {
     const std::vector<std::string> sources          = program_options.sources  ;
     const size_t                   sources_quantity = sources        .size   ();
@@ -46,16 +45,14 @@ export int run_paracl(const OptionsParsing::program_options_t& program_options)
     int paracil_exit_code = EXIT_SUCCESS;
 
     if (sources_quantity == 0)
-        paracil_exit_code = no_sources_action();
+        no_sources_action();
     else if (sources_quantity == 1)
-        paracil_exit_code =  one_source_action(sources[0]);
+        one_source_action(sources[0]);
     else
         builtin_unreachable_wrapper("now we dont parse any situations");
-
-    return parse_paracl_exit_code(program_options.program_name, paracil_exit_code);
 }
 
-int no_sources_action()
+void no_sources_action()
 {
     set_current_paracl_file("stdin");
     
@@ -63,25 +60,24 @@ int no_sources_action()
     int result =  yyparse();
 
     if (result != EXIT_SUCCESS)
-        return result;
-
+        throw std::runtime_error("Parsing failed");
 
 #if defined(GRAPHVIZ)
     try {
         ast_dump(program);
     } catch(const std::runtime_error& e) {
         std::cerr << ERROR_MSG("Dump failed:\n") << e.what() << "\n";
+        throw;
     } catch(...) {
         std::cerr << "Dump failed!\n";
+        throw;
     }
 #endif /* defined(GRAPHVIZ) */
 
-    interpet(program);
-
-    return result;
+    interpret(program);
 }
 
-int one_source_action(const std::string& source)
+void one_source_action(const std::string& source)
 {
     set_current_paracl_file(source);
 
@@ -97,21 +93,21 @@ int one_source_action(const std::string& source)
     fclose(input_file);
 
     if (result != EXIT_SUCCESS)
-        return result;
+        throw std::runtime_error("Parsing failed");
 
 #if defined(GRAPHVIZ)
     try {
         ast_dump(program);
     } catch(const std::runtime_error& e) {
         std::cerr << ERROR_MSG("Dump failed:\n") << e.what() << "\n";
+        throw;
     } catch(...) {
         std::cerr << ERROR_MSG("Dump failed!\n");
+        throw;
     }
 #endif /* defined(GRAPHVIZ) */
 
-    interpet(program);
-
-    return result;
+    interpret(program);
 }
 
 } /* namespace ParaCL */
