@@ -16,7 +16,6 @@ int main(int argc, char* argv[]) try {
     ParaCL::run_paracl(program_options);
 
     return EXIT_SUCCESS;
-
 } catch (const std::invalid_argument& e) {
     ParaCL::invalid_argument(e);
     return EXIT_FAILURE;
@@ -24,3 +23,4 @@ int main(int argc, char* argv[]) try {
     ParaCL::runtime_error(e);
     return EXIT_FAILURE;
 }
+

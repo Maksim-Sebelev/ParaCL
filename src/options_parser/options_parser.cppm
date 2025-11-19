@@ -15,6 +15,7 @@ module;
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <filesystem>
 
 #include "global/global.hpp"
 #include "global/custom_console_output.hpp"
@@ -26,6 +27,7 @@ export module options_parser;
 //---------------------------------------------------------------------------------------------------------------
 
 import paracl_extension;
+import paracl_info;
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -41,7 +43,6 @@ export namespace OptionsParsing
 struct program_options_t
 {
     std::string              program_name = "";
-    bool                     help : 1 = false;
     std::vector<std::string> sources;
 };
 
@@ -181,11 +182,15 @@ void options_parser::parse_flag_help() const
 [[noreturn]]
 void options_parser::parse_flag_version() const
 {
-#if not defined(PARACL_VERSION)
-#error "ParaCL version is unknowed."
-#endif /* not defined(PARACL_VERSION) */
-    std::cout << "ParaCL " PARACL_VERSION << std::endl;
-
+    std::cout <<
+        "ParaCL\n" 
+        "Version     : " << ParaCL::paracl_info.version    << "\n"
+        "Build at    : " << ParaCL::paracl_info.build_date << "\n"
+        "Build type  : " << ParaCL::paracl_info.build_type << "\n"
+        "Build with  : " << ParaCL::paracl_info.compiler   << "\n"
+        "Commit hash : " << ParaCL::paracl_info.git_commit << "\n"
+        "Architecture: " << ParaCL::paracl_info.architecture 
+    << std::endl;
 
     exit(EXIT_SUCCESS); // good exit :)
 }
