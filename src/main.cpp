@@ -15,6 +15,8 @@ int main(int argc, char* argv[]) try {
                                             OptionsParsing::parse_program_options(argc, argv);
     ParaCL::run_paracl(program_options);
 
+    return EXIT_SUCCESS;
+
 } catch (const std::invalid_argument& e) {
     ParaCL::invalid_argument(e);
     return EXIT_FAILURE;
