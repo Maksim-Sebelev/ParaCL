@@ -8,3 +8,4 @@ imgs/
 log/
 .cache
 ast-dump/
+tmp/

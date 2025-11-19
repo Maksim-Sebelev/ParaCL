@@ -132,11 +132,8 @@ struct ConditionStatement : Stmt {
     ConditionStatement(std::unique_ptr<IfStatement> base_if_stmt)
         : if_stmt(std::move(base_if_stmt)) {}
 
-    void add_elif_conditions(const std::vector<ElifStatement*>* elif_stmts_) {
-        msg_assert(elif_stmts_, "nullptr is no expect here");
-
-        for (size_t it = 0, ie = elif_stmts_->size(); it < ie; ++it)
-            elif_stmts.push_back(std::unique_ptr<ElifStatement>(std::unique_ptr<ElifStatement>((*elif_stmts_)[it])));
+    void add_elif_condition(std::unique_ptr<ElifStatement> elif_stmt) {
+        elif_stmts.push_back(std::move(elif_stmt));
     }
 
     void add_else_condition(std::unique_ptr<ElseStatement> else_stmt_) {

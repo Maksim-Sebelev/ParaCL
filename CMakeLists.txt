@@ -96,6 +96,7 @@ add_library(${PARSER_LIB} STATIC)
 target_sources(${PARSER_LIB}
     PRIVATE
         ${BISON_PARSER_SRC_DIR}/${BISON_PARSER_CPP}
+        ${BISON_SRC_DIR}/parse_error.cpp
 )
 
 target_include_directories(${PARSER_LIB}
@@ -196,6 +197,7 @@ set(RUN_PARACL_SRC_DIR ${BACKEND_SRC_DIR})
 set(RUN_PARACL_SRC
     ${RUN_PARACL_SRC_DIR}/interpreter.cppm
     ${RUN_PARACL_SRC_DIR}/run_paracl.cppm
+    ${RUN_PARACL_SRC_DIR}/parse_paracl_exceptions.cppm
 )
 
 if (GRAPHVIZ)

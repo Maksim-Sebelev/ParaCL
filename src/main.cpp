@@ -7,6 +7,7 @@
 
 import options_parser;
 import run_paracl;
+import parse_paracl_exceptions;
 
 int main(int argc, char* argv[]) try {
 
@@ -15,8 +16,9 @@ int main(int argc, char* argv[]) try {
     ParaCL::run_paracl(program_options);
 
 } catch (const std::invalid_argument& e) {
-    std::cerr << e.what() << "\n";
+    ParaCL::invalid_argument(e);
     return EXIT_FAILURE;
 } catch (const std::runtime_error& e) {
+    ParaCL::runtime_error(e);
     return EXIT_FAILURE;
 }

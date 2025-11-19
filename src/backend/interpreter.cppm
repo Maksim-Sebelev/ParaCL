@@ -99,7 +99,7 @@ void handleStmt(const Stmt* stmt, SymbolTable& table)
         if (!e) throw std::runtime_error("BinExpr children are not Expr");
 
         auto result = handleExpr(e, table);
-        std::cout << result << '\n'; 
+        std::cout << result << '\n';
 
         return;
     }
@@ -151,7 +151,6 @@ void handleStmt(const Stmt* stmt, SymbolTable& table)
 
     builtin_unreachable_wrapper("we must return in some else-if");
 }
-
 
 int handleExpr(const Expr* expr, SymbolTable& table)
 {
@@ -251,8 +250,8 @@ int executeUnOp(int operand, token_t unOp)
 {
     switch (unOp)
     {
-    case token_t::SUB : return +operand;
-    case token_t::ADD : return -operand;
+    case token_t::ADD : return +operand;
+    case token_t::SUB : return -operand;
     case token_t::NOT : return !operand;
     default: builtin_unreachable_wrapper("here we parse onlu unary operation");
     }

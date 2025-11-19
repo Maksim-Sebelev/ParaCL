@@ -1,0 +1,2 @@
+gone = print;
+print ;
