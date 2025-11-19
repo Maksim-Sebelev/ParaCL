@@ -1,6 +1,5 @@
 module;
 
-#include <iostream>
 #include <cstdlib>
 #include <vector>
 #include <string>
@@ -14,6 +13,11 @@ module;
 #include "global/global.hpp"
 #include "global/custom_console_output.hpp"
 
+#if defined (GRAPHVIZ)
+#include <iostream>
+import ast_graph_dump;
+#endif /* defined(GRAPHIVZ)*/
+
 extern int yyparse();
 extern void set_current_paracl_file(const std::string&);
 
@@ -26,9 +30,6 @@ import paracl_extension;
 import options_parser;
 import paracl_interpreter;
 
-#if defined(GRAPHVIZ)
-import ast_graph_dump;
-#endif /* defined(GRAPHVIZ) */
 
 namespace ParaCL
 {
@@ -42,14 +43,13 @@ export void run_paracl(const OptionsParsing::program_options_t& program_options)
 
     msg_bad_exit(sources_quantity <= 1, "now we work only with 1 input file :(");
 
-    int paracil_exit_code = EXIT_SUCCESS;
-
     if (sources_quantity == 0)
-        no_sources_action();
+        return no_sources_action();
+
     else if (sources_quantity == 1)
-        one_source_action(sources[0]);
-    else
-        builtin_unreachable_wrapper("now we dont parse any situations");
+        return one_source_action(sources[0]);
+
+    builtin_unreachable_wrapper("now we dont parse any situations");
 }
 
 void no_sources_action()
@@ -67,10 +67,8 @@ void no_sources_action()
         ast_dump(program);
     } catch(const std::runtime_error& e) {
         std::cerr << ERROR_MSG("Dump failed:\n") << e.what() << "\n";
-        throw;
     } catch(...) {
         std::cerr << "Dump failed!\n";
-        throw;
     }
 #endif /* defined(GRAPHVIZ) */
 
@@ -100,10 +98,8 @@ void one_source_action(const std::string& source)
         ast_dump(program);
     } catch(const std::runtime_error& e) {
         std::cerr << ERROR_MSG("Dump failed:\n") << e.what() << "\n";
-        throw;
     } catch(...) {
         std::cerr << ERROR_MSG("Dump failed!\n");
-        throw;
     }
 #endif /* defined(GRAPHVIZ) */
 

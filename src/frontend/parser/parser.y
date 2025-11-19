@@ -117,6 +117,9 @@ statement:
     | condition_statement {
         $$ = $1;
     }
+    | SC {
+        $$ = new ParaCL::BlockStmt();  
+    }
     ;
 
 assignment:
@@ -419,6 +422,12 @@ unary_expression:
             std::unique_ptr<ParaCL::Expr>($2)
         );
     }
+    | ADD unary_expression %prec NEG {
+        $$ = new ParaCL::UnExpr(
+            ParaCL::token_t::SUB,
+            std::unique_ptr<ParaCL::Expr>($2)
+        );
+    }
     ;
 
 factor:
@@ -461,7 +470,7 @@ void yyerror(YYLTYPE* loc, const char* msg)
 {
     std::cerr << current_file << ":"
               << loc->first_line << ":"
-              << loc->first_column << ":"
+              << loc->first_column << ": paracl: error:"
               " ---> " << msg << "\n";
     
     // Извлекаем токен вокруг позиции ошибки
@@ -470,7 +479,7 @@ void yyerror(YYLTYPE* loc, const char* msg)
     
     if (!problematic_token.empty())
         std::cerr << "Problematic place: '" << problematic_token << "'\n\n";   
-    
+
     show_error_context(loc);
 
     if (!possible_token.empty())
@@ -479,12 +488,12 @@ void yyerror(YYLTYPE* loc, const char* msg)
 
 void show_error_context(YYLTYPE* loc) {
     if (!yyin) return;
-    
+
     long current_file_pos = ftell(yyin);
-    
+
     // Go to start of the file
     rewind(yyin);
-    
+
     char buffer[1024];
     int current_line = 1;
 
@@ -497,7 +506,7 @@ void show_error_context(YYLTYPE* loc) {
         if (len > 0 && buffer[len-1] == '\n') buffer[len-1] = '\0';
         
         std::cerr << loc->first_line << " | " << buffer << std::endl;
-        
+
         std::cerr << "  | ";
         int i = 1;
         for (; i < loc->first_column; i++)
@@ -513,7 +522,7 @@ void show_error_context(YYLTYPE* loc) {
 
         std::cerr << "\n";
     }
-    
+
     // Restoring the position in the file
     fseek(yyin, current_file_pos, SEEK_SET);
 }
@@ -523,7 +532,7 @@ size_t levenshtein_distance(const std::string& s1, const std::string& s2)
 {
     const size_t len1 = s1.size(), len2 = s2.size();
     std::vector<std::vector<size_t>> dp(len1 + 1, std::vector<size_t>(len2 + 1));
-    
+
     for (size_t i = 1; i <= len1; ++i) dp[i][0] = i;
     for (size_t j = 1; j <= len2; ++j) dp[0][j] = j;
     
@@ -540,24 +549,27 @@ size_t levenshtein_distance(const std::string& s1, const std::string& s2)
             });
         }
     }
-    
+
     return dp[len1][len2];
 }
 
 std::string find_possible_token(const char* unexpected) {
-    if (strlen(unexpected) == 0) return "";
+    if (strlen(unexpected) == 0) 
+        return "";
+
     static const std::vector<std::string> known_tokens = {
-        "if", "else", "while", "print", 
+        "if", "else if", "else", "while", "print",
+        "&&", "||", "!",
         "and", "or", "not",
         "+", "-", "*", "/", "%",
         "==", "!=", ">", ">=", "<", "<=",
-        "=", "+=", "-=", "*=", "/=",
-        "(", ")", "{", "}", ";", "?"
+        "=", "+=", "-=", "*=", "/=", "%=",
+        "(", ")", "{", "}", ";", "?",
     };
-    
+
     std::string best_match;
     size_t min_distance = std::numeric_limits<size_t>::max();
-    
+
     for (const auto& token : known_tokens)
     {
         size_t distance = levenshtein_distance(unexpected, token);
@@ -567,53 +579,54 @@ std::string find_possible_token(const char* unexpected) {
             best_match = token;
         }
     }
-    
+
     return best_match;
 }
 
 std::string extract_token_at_position(YYLTYPE* loc) {
-    if (!yyin) return "";
-    
+    if (!yyin)
+        return "";
+
     long current_file_pos = ftell(yyin);
-    
+
     rewind(yyin);
-    
+
     char buffer[1024];
     int current_line = 1;
     std::string target_line;
 
     while (current_line < loc->first_line && fgets(buffer, sizeof(buffer), yyin)) {
-        current_line++;
+        ++current_line;
     }
 
     if (current_line == loc->first_line && fgets(buffer, sizeof(buffer), yyin)) {
         target_line = buffer;
     }
-    
+
     fseek(yyin, current_file_pos, SEEK_SET);
-    
+
     if (target_line.empty()) return "";
-    
+
     // try to form token around the given position
     size_t pos = loc->first_column - 1;
-    
+
     if (pos >= target_line.length()) return "";
-    
+
     // go left from problem pos
     size_t start = pos;
     while (start > 0 && !isspace(target_line[start - 1])) {
-        start--;
+        --start;
     }
-    
+
     // find end of token (go right until space or end of line)
     size_t end = pos;
     while (end < target_line.length() && !isspace(target_line[end]) && 
            target_line[end] != '\0' && 
            target_line[end] != '\n' && 
            target_line[end] != '\r') {
-        end++;
+        ++end;
     }
-    
+
     std::string token = target_line.substr(start, end - start);
     
     while (!token.empty() && 
@@ -621,16 +634,16 @@ std::string extract_token_at_position(YYLTYPE* loc) {
             token.front() == '{' || token.front() == '}' ||
             token.front() == ';' || token.front() == ',')) {
         token.erase(0, 1);
-        start++;
+        ++start;
     }
-    
+
     while (!token.empty() && 
            (token.back() == '(' || token.back() == ')' || 
             token.back() == '{' || token.back() == '}' ||
             token.back() == ';' || token.back() == ',')) {
         token.pop_back();
-        end--;
+        --end;
     }
-    
+
     return token;
 }

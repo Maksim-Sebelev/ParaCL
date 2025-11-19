@@ -91,7 +91,7 @@ SPACE
 {WHITESPACE}+   { }
 {NEWLINE}       { }
 
-"#".*           { /* one-line comment */ }
+"//".*           { /* one-line comment */ }
 
 "/*"([^*]|"*"+[^*/])*"*"+"/" { /* multy-line comment */ }
 
@@ -100,7 +100,7 @@ SPACE
 "or"      { return OR; }
 "||"      { return OR; }
 "!"       { return NOT; }
-"not "    { return NOT; }
+"not"     { return NOT; }
 "+"       { return ADD; }
 "-"       { return SUB; }
 "*"       { return MUL; }
@@ -129,7 +129,7 @@ SPACE
 "else"    { return ELSE; }
 ";"       { return SC; }
 
-[+-]?{DIGIT}+    { 
+{DIGIT}+    { 
                 process_number(yytext); 
                 yylval->num_value = current_num_value;
                 return NUM; 
