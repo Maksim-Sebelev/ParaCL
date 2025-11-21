@@ -1,3 +1,4 @@
+#include "parser/ast.hpp"
 module;
 
 #include <cstdlib>
@@ -41,7 +42,7 @@ int   execute_binary_operation         (int  lhs, int rhs  , token_t binary_oper
 void  execute_combined_assign          (int& rhs, int value, token_t combined_assign);
 int   execute_unary_operation          (int  rhs           , token_t unary_operator );
 
-export void interpret(const ProgramAST &progAST)
+export void interpret(const ProgramAST& progAST)
 {
     NameTable table;
 

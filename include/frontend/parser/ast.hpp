@@ -191,7 +191,6 @@ struct ConditionStatement : Statement
 struct ProgramAST
 {
     std::vector<std::unique_ptr<Statement>> statements;
-    void interpret();
 };
 
 }; /* namespace ParaCL */
