@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <sstream>
 #include "parser/parse_error.hpp"
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
@@ -114,8 +115,35 @@ STRING      \"[^"]*\"
 ","       { return yy::parser::token::COMMA; }
 
 {STRING}    { 
-                std::string content(yytext + 1, yyleng - 2);
-                yylval->build<std::string>(std::move(content));
+                std::ostringstream result;
+
+                for (size_t it = 1, ite = yyleng - 2; it < ite; ++it)
+                {
+                    const char c = *(yytext + it);
+                    const char next_c = *(yytext + it + 1);
+
+                    if (c != '\\' && next_c != '\0')
+                    {
+                        result << c;
+                        continue;
+                    }
+                    switch (next_c)
+                    {
+                        case 'n':  result << '\n'; continue;
+                        case 't':  result << '\t'; continue;
+                        case 'r':  result << '\r'; continue;
+                        case '\\': result << '\\'; continue;
+                        case '"':  result << '"';  continue;
+                        case '0':  result << '\0'; continue;
+                        case 'a':  result << '\a'; continue;
+                        case 'b':  result << '\b'; continue;
+                        case 'v':  result << '\v'; continue;
+                        case 'f':  result << '\f'; continue;
+                        default:   result << c   ; continue;
+                    }
+                    ++it;
+                }
+                yylval->build<std::string>(std::move(result.str()));
                 return yy::parser::token::STRING;
             }
 

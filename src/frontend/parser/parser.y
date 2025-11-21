@@ -166,11 +166,8 @@ combined_assignment:
     ;
 
 print_statement:
-    PRINT expression SC {
-        std::vector<std::unique_ptr<ParaCL::Expr>> v;
-        v.push_back(std::move($2));
-        $$ = std::make_unique<ParaCL::PrintStmt>(std::move(v));
-
+    PRINT print_args {
+        $$ = std::make_unique<ParaCL::PrintStmt>(std::move($2));
     }
     | PRINT error {
         ErrorHandler::throwError(@2, "expected expressions and string constants after print");
@@ -179,21 +176,25 @@ print_statement:
     ;
 
 print_args:
-    expression {
+    %empty {
         $$ = std::vector<std::unique_ptr<ParaCL::Expr>>();
-        $$.push_back(std::move($1));
     }
-    /* %empty {
-        $$ = std::vector<std::unique_ptr<ParaCL::Expr>>();
+    | print_args expression {
+        $1.push_back(std::move($2));
+        $$ = std::move($1);
+    }
+    | print_args string_constant {
+        $1.push_back(std::move($2));
+        $$ = std::move($1);
     }
     | print_args COMMA expression {
         $1.push_back(std::move($3));
         $$ = std::move($1);
-    } */
-    /* | print_args COMMA string_constant {
+    }
+    | print_args COMMA string_constant {
         $1.push_back(std::move($3));
         $$ = std::move($1);
-    } */
+    }
     ;
 
 while_statement:

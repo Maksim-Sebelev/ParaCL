@@ -190,6 +190,11 @@ void dumpExpr(std::ostream &out, const Expr *expr)
         link_nodes(out, expr, combined_assign->value.get());
         return;
     }
+    else if (auto string = dynamic_cast<const StringConstant*>(expr))
+    {
+        create_node(out, expr, "STRING: " + string->value);
+        return;
+    }
 
     builtin_unreachable_wrapper("we must return in some else-if");
 }
@@ -242,19 +247,9 @@ void dumpStmt(std::ostream &out, const Stmt *stmt)
 
         for (auto &arg : print->args)
         {
-            if (auto expr = dynamic_cast<const Expr *>(arg.get()))
-            {
-                dumpExpr(out, expr);
-                link_nodes(out, print, expr);
-                continue;
-            }
-            else if (auto string = dynamic_cast<const StringConstant *>(arg.get()))
-            {
-                create_node(out, string, "STRING: " + string->value);
-                link_nodes(out, print, string);
-                continue;
-            }
-            throw std::runtime_error("undefined 'print' arg");
+            dumpExpr(out, arg.get());
+            link_nodes(out, print, arg.get());
+            continue;
         }
         return;
     }

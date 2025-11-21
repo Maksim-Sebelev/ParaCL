@@ -1,6 +1,5 @@
 module;
 
-#include "parser/parser.hpp"
 #include <cstdlib>
 #include <iostream>
 #include <memory>
@@ -8,6 +7,7 @@ module;
 #include <unordered_map>
 #include <vector>
 
+#include "parser/parser.hpp"
 #include "global//global.hpp"
 
 export module paracl_interpreter;
@@ -105,17 +105,17 @@ void handleStmt(const Stmt *stmt, SymbolTable &table)
 
         for (auto &arg : print->args)
         {
-            if (auto expr = dynamic_cast<const Expr *>(arg.get()))
+            if (auto string = dynamic_cast<const StringConstant *>(arg.get()))
             {
-                auto result = handleExpr(expr, table);
-                std::cout << result;
-                if (is_1_expression)
-                    std::cout << "\n";
+                std::cout << string->value << std::flush;
                 continue;
             }
-            else if (auto string = dynamic_cast<const StringConstant *>(arg.get()))
+            else if (auto expr = dynamic_cast<const Expr *>(arg.get()))
             {
-                std::cout << string->value;
+                auto result = handleExpr(expr, table);
+                std::cout << result << std::flush;
+                if (is_1_expression)
+                    std::cout << std::endl;
                 continue;
             }
 
