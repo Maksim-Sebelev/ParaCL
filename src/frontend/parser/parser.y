@@ -56,11 +56,11 @@ int  yylex            (yy::parser::semantic_type* yylval, yy::parser::location_t
 %token SC COMMA
 %token <std::string> STRING
 
-%type <std::vector<std::unique_ptr<ParaCL::Stmt>>> program statements
+%type <std::vector<std::unique_ptr<ParaCL::Statement>>> program statements
 %type <std::unique_ptr<ParaCL::BlockStmt>> block one_stmt_block
-%type <std::unique_ptr<ParaCL::Stmt>> statement assignment combined_assignment print_statement while_statement
-%type <std::unique_ptr<ParaCL::Expr>> expression assignment_expression logical_or_expression logical_and_expression equality_expression relational_expression additive_expression multiplicative_expression unary_expression factor string_constant
-%type <std::vector<std::unique_ptr<ParaCL::Expr>>> print_args
+%type <std::unique_ptr<ParaCL::Statement>> statement assignment combined_assignment print_statement while_statement
+%type <std::unique_ptr<ParaCL::Expression>> expression assignment_expression logical_or_expression logical_and_expression equality_expression relational_expression additive_expression multiplicative_expression unary_expression factor string_constant
+%type <std::vector<std::unique_ptr<ParaCL::Expression>>> print_args
 
 %type <std::unique_ptr<ParaCL::ConditionStatement>> condition_statement
 %type <std::unique_ptr<ParaCL::IfStatement>> if_statement
@@ -79,7 +79,7 @@ program:
 
 statements:
     %empty {
-        $$ = std::vector<std::unique_ptr<ParaCL::Stmt>>();
+        $$ = std::vector<std::unique_ptr<ParaCL::Statement>>();
     }
     | statements statement {
         $1.push_back(std::move($2));
@@ -177,7 +177,7 @@ print_statement:
 
 print_args:
     %empty {
-        $$ = std::vector<std::unique_ptr<ParaCL::Expr>>();
+        $$ = std::vector<std::unique_ptr<ParaCL::Expression>>();
     }
     | print_args expression {
         $1.push_back(std::move($2));
@@ -616,7 +616,7 @@ block:
 
 one_stmt_block:
     statement {
-        std::vector<std::unique_ptr<ParaCL::Stmt>> body_stmts;
+        std::vector<std::unique_ptr<ParaCL::Statement>> body_stmts;
         body_stmts.push_back(std::move($1));
         $$ = std::make_unique<ParaCL::BlockStmt>(std::move(body_stmts));
     }

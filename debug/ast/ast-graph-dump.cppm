@@ -21,8 +21,8 @@ void body_link_type(std::ostream &out, const void *lhs, const void *rhs);
 void create_node(std::ostream &out, const void *node, const std::string &label, const std::string &more_settings = "");
 void dump_body(std::ostream &out, const void *node, const BlockStmt *body);
 
-void dumpExpr(std::ostream &out, const ParaCL::Expr *expr);
-void dumpStmt(std::ostream &out, const ParaCL::Stmt *stmt);
+void dumpExpr(std::ostream &out, const ParaCL::Expression *expr);
+void dumpStmt(std::ostream &out, const ParaCL::Statement *stmt);
 
 export void ast_dump(const ProgramAST &progAST, const std::string &filename = "dot-out/ast.dot")
 {
@@ -53,7 +53,7 @@ export void ast_dump(const ProgramAST &progAST, const std::string &filename = "d
     std::system(dot_cmd.c_str());
 }
 
-void dumpExpr(std::ostream &out, const Expr *expr)
+void dumpExpr(std::ostream &out, const Expression *expr)
 {
     if (auto bin = dynamic_cast<const BinExpr *>(expr))
     {
@@ -199,7 +199,7 @@ void dumpExpr(std::ostream &out, const Expr *expr)
     builtin_unreachable_wrapper("we must return in some else-if");
 }
 
-void dumpStmt(std::ostream &out, const Stmt *stmt)
+void dumpStmt(std::ostream &out, const Statement *stmt)
 {
     if (auto assign = dynamic_cast<const AssignStmt *>(stmt))
     {

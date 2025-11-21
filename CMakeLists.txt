@@ -239,6 +239,7 @@ set(RUN_PARACL_SRC
     ${RUN_PARACL_SRC_DIR}/interpreter.cppm
     ${RUN_PARACL_SRC_DIR}/run_paracl.cppm
     ${RUN_PARACL_SRC_DIR}/parse_paracl_exceptions.cppm
+    ${RUN_PARACL_SRC_DIR}/name_table.cppm
 )
 
 if (GRAPHVIZ)
