@@ -1,541 +1,2713 @@
-/* A Bison parser, made by GNU Bison 3.8.2.  */
+// A Bison parser, made by GNU Bison 3.8.2.
 
-/* Bison implementation for Yacc-like parsers in C
+// Skeleton implementation for Bison LALR(1) parsers in C++
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
-   Inc.
+// Copyright (C) 2002-2015, 2018-2021 Free Software Foundation, Inc.
 
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-/* As a special exception, you may create a larger work that contains
-   part or all of the Bison parser skeleton and distribute that work
-   under terms of your choice, so long as that work isn't itself a
-   parser generator using the skeleton or a modified version thereof
-   as a parser skeleton.  Alternatively, if you modify or redistribute
-   the parser skeleton itself, you may (at your option) remove this
-   special exception, which will cause the skeleton and the resulting
-   Bison output files to be licensed under the GNU General Public
-   License without this special exception.
+// As a special exception, you may create a larger work that contains
+// part or all of the Bison parser skeleton and distribute that work
+// under terms of your choice, so long as that work isn't itself a
+// parser generator using the skeleton or a modified version thereof
+// as a parser skeleton.  Alternatively, if you modify or redistribute
+// the parser skeleton itself, you may (at your option) remove this
+// special exception, which will cause the skeleton and the resulting
+// Bison output files to be licensed under the GNU General Public
+// License without this special exception.
 
-   This special exception was added by the Free Software Foundation in
-   version 2.2 of Bison.  */
+// This special exception was added by the Free Software Foundation in
+// version 2.2 of Bison.
 
-/* C LALR(1) parser skeleton written by Richard Stallman, by
-   simplifying the original so-called "semantic" parser.  */
-
-/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
-   especially those whose name start with YY_ or yy_.  They are
-   private implementation details that can be changed or removed.  */
-
-/* All symbols defined below should begin with yy or YY, to avoid
-   infringing on user name space.  This should be done even for local
-   variables, as they might otherwise be expanded by user macros.
-   There are some unavoidable exceptions within include files to
-   define necessary library symbols; they are noted "INFRINGES ON
-   USER NAME SPACE" below.  */
-
-/* Identify Bison output, and Bison version.  */
-#define YYBISON 30802
-
-/* Bison version string.  */
-#define YYBISON_VERSION "3.8.2"
-
-/* Skeleton name.  */
-#define YYSKELETON_NAME "yacc.c"
-
-/* Pure parsers.  */
-#define YYPURE 2
-
-/* Push parsers.  */
-#define YYPUSH 0
-
-/* Pull parsers.  */
-#define YYPULL 1
+// DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+// especially those whose name start with YY_ or yy_.  They are
+// private implementation details that can be changed or removed.
 
 
 
 
-/* First part of user prologue.  */
-#line 1 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
 
-#include <iostream>
-#include <cstdio>
-#include <unordered_map>
-#include <memory>
-#include <vector>
+#include "parser.tab.hpp"
+
+
+// Unqualified %code blocks.
+#line 29 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+
+
+#include "parser/parse_error.hpp"
 #include "lexer/lexer.hpp"
-#include "parser/parser.hpp"
-#include "global/global.hpp"
 
-extern FILE* yyin;
-extern int yyparse();
+ParaCL    ::ProgramAST        program;
 
-inline ParaCL::ProgramAST program;
+int  yylex            (yy::parser::semantic_type* yylval, yy::parser::location_type* yylloc);
 
-extern std::string current_file;
+#line 56 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
 
-typedef struct YYLTYPE YYLTYPE;
-typedef union YYSTYPE YYSTYPE;
-
-void yyerror(YYLTYPE* loc, const char* msg);
-int yylex(YYSTYPE* yylval_param, YYLTYPE* yylloc_param);
-
-
-#line 96 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-
-# ifndef YY_CAST
-#  ifdef __cplusplus
-#   define YY_CAST(Type, Val) static_cast<Type> (Val)
-#   define YY_REINTERPRET_CAST(Type, Val) reinterpret_cast<Type> (Val)
-#  else
-#   define YY_CAST(Type, Val) ((Type) (Val))
-#   define YY_REINTERPRET_CAST(Type, Val) ((Type) (Val))
-#  endif
-# endif
-# ifndef YY_NULLPTR
-#  if defined __cplusplus
-#   if 201103L <= __cplusplus
-#    define YY_NULLPTR nullptr
-#   else
-#    define YY_NULLPTR 0
-#   endif
-#  else
-#   define YY_NULLPTR ((void*)0)
-#  endif
-# endif
-
-#include "parser.tab.hpp"
-/* Symbol kind.  */
-enum yysymbol_kind_t
-{
-  YYSYMBOL_YYEMPTY = -2,
-  YYSYMBOL_YYEOF = 0,                      /* "end of file"  */
-  YYSYMBOL_YYerror = 1,                    /* error  */
-  YYSYMBOL_YYUNDEF = 2,                    /* "invalid token"  */
-  YYSYMBOL_OR = 3,                         /* OR  */
-  YYSYMBOL_AND = 4,                        /* AND  */
-  YYSYMBOL_ISEQ = 5,                       /* ISEQ  */
-  YYSYMBOL_ISNE = 6,                       /* ISNE  */
-  YYSYMBOL_ISAB = 7,                       /* ISAB  */
-  YYSYMBOL_ISABE = 8,                      /* ISABE  */
-  YYSYMBOL_ISLS = 9,                       /* ISLS  */
-  YYSYMBOL_ISLSE = 10,                     /* ISLSE  */
-  YYSYMBOL_ADD = 11,                       /* ADD  */
-  YYSYMBOL_SUB = 12,                       /* SUB  */
-  YYSYMBOL_MUL = 13,                       /* MUL  */
-  YYSYMBOL_DIV = 14,                       /* DIV  */
-  YYSYMBOL_REM = 15,                       /* REM  */
-  YYSYMBOL_NEG = 16,                       /* NEG  */
-  YYSYMBOL_NOT = 17,                       /* NOT  */
-  YYSYMBOL_AS = 18,                        /* AS  */
-  YYSYMBOL_ADDASGN = 19,                   /* ADDASGN  */
-  YYSYMBOL_SUBASGN = 20,                   /* SUBASGN  */
-  YYSYMBOL_MULASGN = 21,                   /* MULASGN  */
-  YYSYMBOL_DIVASGN = 22,                   /* DIVASGN  */
-  YYSYMBOL_NUM = 23,                       /* NUM  */
-  YYSYMBOL_VAR = 24,                       /* VAR  */
-  YYSYMBOL_LCIB = 25,                      /* LCIB  */
-  YYSYMBOL_RCIB = 26,                      /* RCIB  */
-  YYSYMBOL_LCUB = 27,                      /* LCUB  */
-  YYSYMBOL_RCUB = 28,                      /* RCUB  */
-  YYSYMBOL_WH = 29,                        /* WH  */
-  YYSYMBOL_IN = 30,                        /* IN  */
-  YYSYMBOL_PRINT = 31,                     /* PRINT  */
-  YYSYMBOL_IF = 32,                        /* IF  */
-  YYSYMBOL_ELIF = 33,                      /* ELIF  */
-  YYSYMBOL_ELSE = 34,                      /* ELSE  */
-  YYSYMBOL_SC = 35,                        /* SC  */
-  YYSYMBOL_YYACCEPT = 36,                  /* $accept  */
-  YYSYMBOL_program = 37,                   /* program  */
-  YYSYMBOL_statements = 38,                /* statements  */
-  YYSYMBOL_statement = 39,                 /* statement  */
-  YYSYMBOL_assignment = 40,                /* assignment  */
-  YYSYMBOL_combined_assignment = 41,       /* combined_assignment  */
-  YYSYMBOL_print_statement = 42,           /* print_statement  */
-  YYSYMBOL_while_statement = 43,           /* while_statement  */
-  YYSYMBOL_condition_statement = 44,       /* condition_statement  */
-  YYSYMBOL_if_statement = 45,              /* if_statement  */
-  YYSYMBOL_elif_statements = 46,           /* elif_statements  */
-  YYSYMBOL_else_statement = 47,            /* else_statement  */
-  YYSYMBOL_expression = 48,                /* expression  */
-  YYSYMBOL_assignment_expression = 49,     /* assignment_expression  */
-  YYSYMBOL_logical_or_expression = 50,     /* logical_or_expression  */
-  YYSYMBOL_logical_and_expression = 51,    /* logical_and_expression  */
-  YYSYMBOL_equality_expression = 52,       /* equality_expression  */
-  YYSYMBOL_relational_expression = 53,     /* relational_expression  */
-  YYSYMBOL_additive_expression = 54,       /* additive_expression  */
-  YYSYMBOL_multiplicative_expression = 55, /* multiplicative_expression  */
-  YYSYMBOL_unary_expression = 56,          /* unary_expression  */
-  YYSYMBOL_factor = 57,                    /* factor  */
-  YYSYMBOL_block = 58,                     /* block  */
-  YYSYMBOL_one_stmt_block = 59             /* one_stmt_block  */
-};
-typedef enum yysymbol_kind_t yysymbol_kind_t;
-
-
-
-
-#ifdef short
-# undef short
-#endif
-
-/* On compilers that do not define __PTRDIFF_MAX__ etc., make sure
-   <limits.h> and (if available) <stdint.h> are included
-   so that the code can choose integer types of a good width.  */
-
-#ifndef __PTRDIFF_MAX__
-# include <limits.h> /* INFRINGES ON USER NAME SPACE */
-# if defined __STDC_VERSION__ && 199901 <= __STDC_VERSION__
-#  include <stdint.h> /* INFRINGES ON USER NAME SPACE */
-#  define YY_STDINT_H
-# endif
-#endif
-
-/* Narrow types that promote to a signed type and that can represent a
-   signed or unsigned integer of at least N bits.  In tables they can
-   save space and decrease cache pressure.  Promoting to a signed type
-   helps avoid bugs in integer arithmetic.  */
-
-#ifdef __INT_LEAST8_MAX__
-typedef __INT_LEAST8_TYPE__ yytype_int8;
-#elif defined YY_STDINT_H
-typedef int_least8_t yytype_int8;
-#else
-typedef signed char yytype_int8;
-#endif
-
-#ifdef __INT_LEAST16_MAX__
-typedef __INT_LEAST16_TYPE__ yytype_int16;
-#elif defined YY_STDINT_H
-typedef int_least16_t yytype_int16;
-#else
-typedef short yytype_int16;
-#endif
-
-/* Work around bug in HP-UX 11.23, which defines these macros
-   incorrectly for preprocessor constants.  This workaround can likely
-   be removed in 2023, as HPE has promised support for HP-UX 11.23
-   (aka HP-UX 11i v2) only through the end of 2022; see Table 2 of
-   <https://h20195.www2.hpe.com/V2/getpdf.aspx/4AA4-7673ENW.pdf>.  */
-#ifdef __hpux
-# undef UINT_LEAST8_MAX
-# undef UINT_LEAST16_MAX
-# define UINT_LEAST8_MAX 255
-# define UINT_LEAST16_MAX 65535
-#endif
-
-#if defined __UINT_LEAST8_MAX__ && __UINT_LEAST8_MAX__ <= __INT_MAX__
-typedef __UINT_LEAST8_TYPE__ yytype_uint8;
-#elif (!defined __UINT_LEAST8_MAX__ && defined YY_STDINT_H \
-       && UINT_LEAST8_MAX <= INT_MAX)
-typedef uint_least8_t yytype_uint8;
-#elif !defined __UINT_LEAST8_MAX__ && UCHAR_MAX <= INT_MAX
-typedef unsigned char yytype_uint8;
-#else
-typedef short yytype_uint8;
-#endif
-
-#if defined __UINT_LEAST16_MAX__ && __UINT_LEAST16_MAX__ <= __INT_MAX__
-typedef __UINT_LEAST16_TYPE__ yytype_uint16;
-#elif (!defined __UINT_LEAST16_MAX__ && defined YY_STDINT_H \
-       && UINT_LEAST16_MAX <= INT_MAX)
-typedef uint_least16_t yytype_uint16;
-#elif !defined __UINT_LEAST16_MAX__ && USHRT_MAX <= INT_MAX
-typedef unsigned short yytype_uint16;
-#else
-typedef int yytype_uint16;
-#endif
-
-#ifndef YYPTRDIFF_T
-# if defined __PTRDIFF_TYPE__ && defined __PTRDIFF_MAX__
-#  define YYPTRDIFF_T __PTRDIFF_TYPE__
-#  define YYPTRDIFF_MAXIMUM __PTRDIFF_MAX__
-# elif defined PTRDIFF_MAX
-#  ifndef ptrdiff_t
-#   include <stddef.h> /* INFRINGES ON USER NAME SPACE */
-#  endif
-#  define YYPTRDIFF_T ptrdiff_t
-#  define YYPTRDIFF_MAXIMUM PTRDIFF_MAX
-# else
-#  define YYPTRDIFF_T long
-#  define YYPTRDIFF_MAXIMUM LONG_MAX
-# endif
-#endif
-
-#ifndef YYSIZE_T
-# ifdef __SIZE_TYPE__
-#  define YYSIZE_T __SIZE_TYPE__
-# elif defined size_t
-#  define YYSIZE_T size_t
-# elif defined __STDC_VERSION__ && 199901 <= __STDC_VERSION__
-#  include <stddef.h> /* INFRINGES ON USER NAME SPACE */
-#  define YYSIZE_T size_t
-# else
-#  define YYSIZE_T unsigned
-# endif
-#endif
-
-#define YYSIZE_MAXIMUM                                  \
-  YY_CAST (YYPTRDIFF_T,                                 \
-           (YYPTRDIFF_MAXIMUM < YY_CAST (YYSIZE_T, -1)  \
-            ? YYPTRDIFF_MAXIMUM                         \
-            : YY_CAST (YYSIZE_T, -1)))
-
-#define YYSIZEOF(X) YY_CAST (YYPTRDIFF_T, sizeof (X))
-
-
-/* Stored state numbers (used for stacks). */
-typedef yytype_int8 yy_state_t;
-
-/* State numbers in computations.  */
-typedef int yy_state_fast_t;
 
 #ifndef YY_
 # if defined YYENABLE_NLS && YYENABLE_NLS
 #  if ENABLE_NLS
-#   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
-#   define YY_(Msgid) dgettext ("bison-runtime", Msgid)
+#   include <libintl.h> // FIXME: INFRINGES ON USER NAME SPACE.
+#   define YY_(msgid) dgettext ("bison-runtime", msgid)
 #  endif
 # endif
 # ifndef YY_
-#  define YY_(Msgid) Msgid
+#  define YY_(msgid) msgid
 # endif
 #endif
 
 
-#ifndef YY_ATTRIBUTE_PURE
-# if defined __GNUC__ && 2 < __GNUC__ + (96 <= __GNUC_MINOR__)
-#  define YY_ATTRIBUTE_PURE __attribute__ ((__pure__))
+// Whether we are compiled with exception support.
+#ifndef YY_EXCEPTIONS
+# if defined __GNUC__ && !defined __EXCEPTIONS
+#  define YY_EXCEPTIONS 0
 # else
-#  define YY_ATTRIBUTE_PURE
+#  define YY_EXCEPTIONS 1
 # endif
 #endif
 
-#ifndef YY_ATTRIBUTE_UNUSED
-# if defined __GNUC__ && 2 < __GNUC__ + (7 <= __GNUC_MINOR__)
-#  define YY_ATTRIBUTE_UNUSED __attribute__ ((__unused__))
-# else
-#  define YY_ATTRIBUTE_UNUSED
-# endif
-#endif
+#define YYRHSLOC(Rhs, K) ((Rhs)[K].location)
+/* YYLLOC_DEFAULT -- Set CURRENT to span from RHS[1] to RHS[N].
+   If N is 0, then set CURRENT to the empty location which ends
+   the previous symbol: RHS[0] (always defined).  */
 
-/* Suppress unused-variable warnings by "using" E.  */
-#if ! defined lint || defined __GNUC__
-# define YY_USE(E) ((void) (E))
-#else
-# define YY_USE(E) /* empty */
-#endif
-
-/* Suppress an incorrect diagnostic about yylval being uninitialized.  */
-#if defined __GNUC__ && ! defined __ICC && 406 <= __GNUC__ * 100 + __GNUC_MINOR__
-# if __GNUC__ * 100 + __GNUC_MINOR__ < 407
-#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
-    _Pragma ("GCC diagnostic push")                                     \
-    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")
-# else
-#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
-    _Pragma ("GCC diagnostic push")                                     \
-    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")              \
-    _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
-# endif
-# define YY_IGNORE_MAYBE_UNINITIALIZED_END      \
-    _Pragma ("GCC diagnostic pop")
-#else
-# define YY_INITIAL_VALUE(Value) Value
-#endif
-#ifndef YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-# define YY_IGNORE_MAYBE_UNINITIALIZED_END
-#endif
-#ifndef YY_INITIAL_VALUE
-# define YY_INITIAL_VALUE(Value) /* Nothing. */
-#endif
-
-#if defined __cplusplus && defined __GNUC__ && ! defined __ICC && 6 <= __GNUC__
-# define YY_IGNORE_USELESS_CAST_BEGIN                          \
-    _Pragma ("GCC diagnostic push")                            \
-    _Pragma ("GCC diagnostic ignored \"-Wuseless-cast\"")
-# define YY_IGNORE_USELESS_CAST_END            \
-    _Pragma ("GCC diagnostic pop")
-#endif
-#ifndef YY_IGNORE_USELESS_CAST_BEGIN
-# define YY_IGNORE_USELESS_CAST_BEGIN
-# define YY_IGNORE_USELESS_CAST_END
-#endif
-
-
-#define YY_ASSERT(E) ((void) (0 && (E)))
-
-#if !defined yyoverflow
-
-/* The parser invokes alloca or malloc; define the necessary symbols.  */
-
-# ifdef YYSTACK_USE_ALLOCA
-#  if YYSTACK_USE_ALLOCA
-#   ifdef __GNUC__
-#    define YYSTACK_ALLOC __builtin_alloca
-#   elif defined __BUILTIN_VA_ARG_INCR
-#    include <alloca.h> /* INFRINGES ON USER NAME SPACE */
-#   elif defined _AIX
-#    define YYSTACK_ALLOC __alloca
-#   elif defined _MSC_VER
-#    include <malloc.h> /* INFRINGES ON USER NAME SPACE */
-#    define alloca _alloca
-#   else
-#    define YYSTACK_ALLOC alloca
-#    if ! defined _ALLOCA_H && ! defined EXIT_SUCCESS
-#     include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
-      /* Use EXIT_SUCCESS as a witness for stdlib.h.  */
-#     ifndef EXIT_SUCCESS
-#      define EXIT_SUCCESS 0
-#     endif
-#    endif
-#   endif
-#  endif
-# endif
-
-# ifdef YYSTACK_ALLOC
-   /* Pacify GCC's 'empty if-body' warning.  */
-#  define YYSTACK_FREE(Ptr) do { /* empty */; } while (0)
-#  ifndef YYSTACK_ALLOC_MAXIMUM
-    /* The OS might guarantee only one guard page at the bottom of the stack,
-       and a page size can be as small as 4096 bytes.  So we cannot safely
-       invoke alloca (N) if N exceeds 4096.  Use a slightly smaller number
-       to allow for a few compiler-allocated temporary stack slots.  */
-#   define YYSTACK_ALLOC_MAXIMUM 4032 /* reasonable circa 2006 */
-#  endif
-# else
-#  define YYSTACK_ALLOC YYMALLOC
-#  define YYSTACK_FREE YYFREE
-#  ifndef YYSTACK_ALLOC_MAXIMUM
-#   define YYSTACK_ALLOC_MAXIMUM YYSIZE_MAXIMUM
-#  endif
-#  if (defined __cplusplus && ! defined EXIT_SUCCESS \
-       && ! ((defined YYMALLOC || defined malloc) \
-             && (defined YYFREE || defined free)))
-#   include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
-#   ifndef EXIT_SUCCESS
-#    define EXIT_SUCCESS 0
-#   endif
-#  endif
-#  ifndef YYMALLOC
-#   define YYMALLOC malloc
-#   if ! defined malloc && ! defined EXIT_SUCCESS
-void *malloc (YYSIZE_T); /* INFRINGES ON USER NAME SPACE */
-#   endif
-#  endif
-#  ifndef YYFREE
-#   define YYFREE free
-#   if ! defined free && ! defined EXIT_SUCCESS
-void free (void *); /* INFRINGES ON USER NAME SPACE */
-#   endif
-#  endif
-# endif
-#endif /* !defined yyoverflow */
-
-#if (! defined yyoverflow \
-     && (! defined __cplusplus \
-         || (defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL \
-             && defined YYSTYPE_IS_TRIVIAL && YYSTYPE_IS_TRIVIAL)))
-
-/* A type that is properly aligned for any stack member.  */
-union yyalloc
-{
-  yy_state_t yyss_alloc;
-  YYSTYPE yyvs_alloc;
-  YYLTYPE yyls_alloc;
-};
-
-/* The size of the maximum gap between one aligned stack and the next.  */
-# define YYSTACK_GAP_MAXIMUM (YYSIZEOF (union yyalloc) - 1)
-
-/* The size of an array large to enough to hold all stacks, each with
-   N elements.  */
-# define YYSTACK_BYTES(N) \
-     ((N) * (YYSIZEOF (yy_state_t) + YYSIZEOF (YYSTYPE) \
-             + YYSIZEOF (YYLTYPE)) \
-      + 2 * YYSTACK_GAP_MAXIMUM)
-
-# define YYCOPY_NEEDED 1
-
-/* Relocate STACK from its old location to the new one.  The
-   local variables YYSIZE and YYSTACKSIZE give the old and new number of
-   elements in the stack, and YYPTR gives the new location of the
-   stack.  Advance YYPTR to a properly aligned location for the next
-   stack.  */
-# define YYSTACK_RELOCATE(Stack_alloc, Stack)                           \
+# ifndef YYLLOC_DEFAULT
+#  define YYLLOC_DEFAULT(Current, Rhs, N)                               \
     do                                                                  \
-      {                                                                 \
-        YYPTRDIFF_T yynewbytes;                                         \
-        YYCOPY (&yyptr->Stack_alloc, Stack, yysize);                    \
-        Stack = &yyptr->Stack_alloc;                                    \
-        yynewbytes = yystacksize * YYSIZEOF (*Stack) + YYSTACK_GAP_MAXIMUM; \
-        yyptr += yynewbytes / YYSIZEOF (*yyptr);                        \
-      }                                                                 \
-    while (0)
+      if (N)                                                            \
+        {                                                               \
+          (Current).begin  = YYRHSLOC (Rhs, 1).begin;                   \
+          (Current).end    = YYRHSLOC (Rhs, N).end;                     \
+        }                                                               \
+      else                                                              \
+        {                                                               \
+          (Current).begin = (Current).end = YYRHSLOC (Rhs, 0).end;      \
+        }                                                               \
+    while (false)
+# endif
+
+
+// Enable debugging if requested.
+#if YYDEBUG
+
+// A pseudo ostream that takes yydebug_ into account.
+# define YYCDEBUG if (yydebug_) (*yycdebug_)
+
+# define YY_SYMBOL_PRINT(Title, Symbol)         \
+  do {                                          \
+    if (yydebug_)                               \
+    {                                           \
+      *yycdebug_ << Title << ' ';               \
+      yy_print_ (*yycdebug_, Symbol);           \
+      *yycdebug_ << '\n';                       \
+    }                                           \
+  } while (false)
+
+# define YY_REDUCE_PRINT(Rule)          \
+  do {                                  \
+    if (yydebug_)                       \
+      yy_reduce_print_ (Rule);          \
+  } while (false)
+
+# define YY_STACK_PRINT()               \
+  do {                                  \
+    if (yydebug_)                       \
+      yy_stack_print_ ();                \
+  } while (false)
+
+#else // !YYDEBUG
+
+# define YYCDEBUG if (false) std::cerr
+# define YY_SYMBOL_PRINT(Title, Symbol)  YY_USE (Symbol)
+# define YY_REDUCE_PRINT(Rule)           static_cast<void> (0)
+# define YY_STACK_PRINT()                static_cast<void> (0)
+
+#endif // !YYDEBUG
+
+#define yyerrok         (yyerrstatus_ = 0)
+#define yyclearin       (yyla.clear ())
+
+#define YYACCEPT        goto yyacceptlab
+#define YYABORT         goto yyabortlab
+#define YYERROR         goto yyerrorlab
+#define YYRECOVERING()  (!!yyerrstatus_)
+
+#line 7 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+namespace yy {
+#line 149 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+
+  /// Build a parser object.
+  parser::parser ()
+#if YYDEBUG
+    : yydebug_ (false),
+      yycdebug_ (&std::cerr)
+#else
 
 #endif
+  {}
 
-#if defined YYCOPY_NEEDED && YYCOPY_NEEDED
-/* Copy COUNT objects from SRC to DST.  The source and destination do
-   not overlap.  */
-# ifndef YYCOPY
-#  if defined __GNUC__ && 1 < __GNUC__
-#   define YYCOPY(Dst, Src, Count) \
-      __builtin_memcpy (Dst, Src, YY_CAST (YYSIZE_T, (Count)) * sizeof (*(Src)))
-#  else
-#   define YYCOPY(Dst, Src, Count)              \
-      do                                        \
-        {                                       \
-          YYPTRDIFF_T yyi;                      \
-          for (yyi = 0; yyi < (Count); yyi++)   \
-            (Dst)[yyi] = (Src)[yyi];            \
-        }                                       \
-      while (0)
-#  endif
-# endif
-#endif /* !YYCOPY_NEEDED */
+  parser::~parser ()
+  {}
 
-/* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  3
-/* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   114
+  parser::syntax_error::~syntax_error () YY_NOEXCEPT YY_NOTHROW
+  {}
 
-/* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  36
-/* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  24
-/* YYNRULES -- Number of rules.  */
-#define YYNRULES  61
-/* YYNSTATES -- Number of states.  */
-#define YYNSTATES  116
+  /*---------.
+  | symbol.  |
+  `---------*/
 
-/* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   290
+  // basic_symbol.
+  template <typename Base>
+  parser::basic_symbol<Base>::basic_symbol (const basic_symbol& that)
+    : Base (that)
+    , value ()
+    , location (that.location)
+  {
+    switch (this->kind ())
+    {
+      case symbol_kind::S_NUM: // NUM
+        value.copy< int > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_VAR: // VAR
+      case symbol_kind::S_STRING: // STRING
+        value.copy< std::string > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_block: // block
+      case symbol_kind::S_one_stmt_block: // one_stmt_block
+        value.copy< std::unique_ptr<ParaCL::BlockStmt> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_condition_statement: // condition_statement
+        value.copy< std::unique_ptr<ParaCL::ConditionStatement> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_else_statement: // else_statement
+        value.copy< std::unique_ptr<ParaCL::ElseStatement> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_expression: // expression
+      case symbol_kind::S_assignment_expression: // assignment_expression
+      case symbol_kind::S_logical_or_expression: // logical_or_expression
+      case symbol_kind::S_logical_and_expression: // logical_and_expression
+      case symbol_kind::S_equality_expression: // equality_expression
+      case symbol_kind::S_relational_expression: // relational_expression
+      case symbol_kind::S_additive_expression: // additive_expression
+      case symbol_kind::S_multiplicative_expression: // multiplicative_expression
+      case symbol_kind::S_unary_expression: // unary_expression
+      case symbol_kind::S_factor: // factor
+      case symbol_kind::S_string_constant: // string_constant
+        value.copy< std::unique_ptr<ParaCL::Expression> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_if_statement: // if_statement
+        value.copy< std::unique_ptr<ParaCL::IfStatement> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_statement: // statement
+      case symbol_kind::S_assignment: // assignment
+      case symbol_kind::S_combined_assignment: // combined_assignment
+      case symbol_kind::S_print_statement: // print_statement
+      case symbol_kind::S_while_statement: // while_statement
+        value.copy< std::unique_ptr<ParaCL::Statement> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_elif_statements: // elif_statements
+        value.copy< std::vector<std::unique_ptr<ParaCL::ElifStatement>> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_print_args: // print_args
+        value.copy< std::vector<std::unique_ptr<ParaCL::Expression>> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_program: // program
+      case symbol_kind::S_statements: // statements
+        value.copy< std::vector<std::unique_ptr<ParaCL::Statement>> > (YY_MOVE (that.value));
+        break;
+
+      default:
+        break;
+    }
+
+  }
 
 
-/* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
-   as returned by yylex, with out-of-bounds checking.  */
-#define YYTRANSLATE(YYX)                                \
-  (0 <= (YYX) && (YYX) <= YYMAXUTOK                     \
-   ? YY_CAST (yysymbol_kind_t, yytranslate[YYX])        \
-   : YYSYMBOL_YYUNDEF)
 
-/* YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
-   as returned by yylex.  */
-static const yytype_int8 yytranslate[] =
-{
+
+  template <typename Base>
+  parser::symbol_kind_type
+  parser::basic_symbol<Base>::type_get () const YY_NOEXCEPT
+  {
+    return this->kind ();
+  }
+
+
+  template <typename Base>
+  bool
+  parser::basic_symbol<Base>::empty () const YY_NOEXCEPT
+  {
+    return this->kind () == symbol_kind::S_YYEMPTY;
+  }
+
+  template <typename Base>
+  void
+  parser::basic_symbol<Base>::move (basic_symbol& s)
+  {
+    super_type::move (s);
+    switch (this->kind ())
+    {
+      case symbol_kind::S_NUM: // NUM
+        value.move< int > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_VAR: // VAR
+      case symbol_kind::S_STRING: // STRING
+        value.move< std::string > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_block: // block
+      case symbol_kind::S_one_stmt_block: // one_stmt_block
+        value.move< std::unique_ptr<ParaCL::BlockStmt> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_condition_statement: // condition_statement
+        value.move< std::unique_ptr<ParaCL::ConditionStatement> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_else_statement: // else_statement
+        value.move< std::unique_ptr<ParaCL::ElseStatement> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_expression: // expression
+      case symbol_kind::S_assignment_expression: // assignment_expression
+      case symbol_kind::S_logical_or_expression: // logical_or_expression
+      case symbol_kind::S_logical_and_expression: // logical_and_expression
+      case symbol_kind::S_equality_expression: // equality_expression
+      case symbol_kind::S_relational_expression: // relational_expression
+      case symbol_kind::S_additive_expression: // additive_expression
+      case symbol_kind::S_multiplicative_expression: // multiplicative_expression
+      case symbol_kind::S_unary_expression: // unary_expression
+      case symbol_kind::S_factor: // factor
+      case symbol_kind::S_string_constant: // string_constant
+        value.move< std::unique_ptr<ParaCL::Expression> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_if_statement: // if_statement
+        value.move< std::unique_ptr<ParaCL::IfStatement> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_statement: // statement
+      case symbol_kind::S_assignment: // assignment
+      case symbol_kind::S_combined_assignment: // combined_assignment
+      case symbol_kind::S_print_statement: // print_statement
+      case symbol_kind::S_while_statement: // while_statement
+        value.move< std::unique_ptr<ParaCL::Statement> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_elif_statements: // elif_statements
+        value.move< std::vector<std::unique_ptr<ParaCL::ElifStatement>> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_print_args: // print_args
+        value.move< std::vector<std::unique_ptr<ParaCL::Expression>> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_program: // program
+      case symbol_kind::S_statements: // statements
+        value.move< std::vector<std::unique_ptr<ParaCL::Statement>> > (YY_MOVE (s.value));
+        break;
+
+      default:
+        break;
+    }
+
+    location = YY_MOVE (s.location);
+  }
+
+  // by_kind.
+  parser::by_kind::by_kind () YY_NOEXCEPT
+    : kind_ (symbol_kind::S_YYEMPTY)
+  {}
+
+#if 201103L <= YY_CPLUSPLUS
+  parser::by_kind::by_kind (by_kind&& that) YY_NOEXCEPT
+    : kind_ (that.kind_)
+  {
+    that.clear ();
+  }
+#endif
+
+  parser::by_kind::by_kind (const by_kind& that) YY_NOEXCEPT
+    : kind_ (that.kind_)
+  {}
+
+  parser::by_kind::by_kind (token_kind_type t) YY_NOEXCEPT
+    : kind_ (yytranslate_ (t))
+  {}
+
+
+
+  void
+  parser::by_kind::clear () YY_NOEXCEPT
+  {
+    kind_ = symbol_kind::S_YYEMPTY;
+  }
+
+  void
+  parser::by_kind::move (by_kind& that)
+  {
+    kind_ = that.kind_;
+    that.clear ();
+  }
+
+  parser::symbol_kind_type
+  parser::by_kind::kind () const YY_NOEXCEPT
+  {
+    return kind_;
+  }
+
+
+  parser::symbol_kind_type
+  parser::by_kind::type_get () const YY_NOEXCEPT
+  {
+    return this->kind ();
+  }
+
+
+
+  // by_state.
+  parser::by_state::by_state () YY_NOEXCEPT
+    : state (empty_state)
+  {}
+
+  parser::by_state::by_state (const by_state& that) YY_NOEXCEPT
+    : state (that.state)
+  {}
+
+  void
+  parser::by_state::clear () YY_NOEXCEPT
+  {
+    state = empty_state;
+  }
+
+  void
+  parser::by_state::move (by_state& that)
+  {
+    state = that.state;
+    that.clear ();
+  }
+
+  parser::by_state::by_state (state_type s) YY_NOEXCEPT
+    : state (s)
+  {}
+
+  parser::symbol_kind_type
+  parser::by_state::kind () const YY_NOEXCEPT
+  {
+    if (state == empty_state)
+      return symbol_kind::S_YYEMPTY;
+    else
+      return YY_CAST (symbol_kind_type, yystos_[+state]);
+  }
+
+  parser::stack_symbol_type::stack_symbol_type ()
+  {}
+
+  parser::stack_symbol_type::stack_symbol_type (YY_RVREF (stack_symbol_type) that)
+    : super_type (YY_MOVE (that.state), YY_MOVE (that.location))
+  {
+    switch (that.kind ())
+    {
+      case symbol_kind::S_NUM: // NUM
+        value.YY_MOVE_OR_COPY< int > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_VAR: // VAR
+      case symbol_kind::S_STRING: // STRING
+        value.YY_MOVE_OR_COPY< std::string > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_block: // block
+      case symbol_kind::S_one_stmt_block: // one_stmt_block
+        value.YY_MOVE_OR_COPY< std::unique_ptr<ParaCL::BlockStmt> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_condition_statement: // condition_statement
+        value.YY_MOVE_OR_COPY< std::unique_ptr<ParaCL::ConditionStatement> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_else_statement: // else_statement
+        value.YY_MOVE_OR_COPY< std::unique_ptr<ParaCL::ElseStatement> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_expression: // expression
+      case symbol_kind::S_assignment_expression: // assignment_expression
+      case symbol_kind::S_logical_or_expression: // logical_or_expression
+      case symbol_kind::S_logical_and_expression: // logical_and_expression
+      case symbol_kind::S_equality_expression: // equality_expression
+      case symbol_kind::S_relational_expression: // relational_expression
+      case symbol_kind::S_additive_expression: // additive_expression
+      case symbol_kind::S_multiplicative_expression: // multiplicative_expression
+      case symbol_kind::S_unary_expression: // unary_expression
+      case symbol_kind::S_factor: // factor
+      case symbol_kind::S_string_constant: // string_constant
+        value.YY_MOVE_OR_COPY< std::unique_ptr<ParaCL::Expression> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_if_statement: // if_statement
+        value.YY_MOVE_OR_COPY< std::unique_ptr<ParaCL::IfStatement> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_statement: // statement
+      case symbol_kind::S_assignment: // assignment
+      case symbol_kind::S_combined_assignment: // combined_assignment
+      case symbol_kind::S_print_statement: // print_statement
+      case symbol_kind::S_while_statement: // while_statement
+        value.YY_MOVE_OR_COPY< std::unique_ptr<ParaCL::Statement> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_elif_statements: // elif_statements
+        value.YY_MOVE_OR_COPY< std::vector<std::unique_ptr<ParaCL::ElifStatement>> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_print_args: // print_args
+        value.YY_MOVE_OR_COPY< std::vector<std::unique_ptr<ParaCL::Expression>> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_program: // program
+      case symbol_kind::S_statements: // statements
+        value.YY_MOVE_OR_COPY< std::vector<std::unique_ptr<ParaCL::Statement>> > (YY_MOVE (that.value));
+        break;
+
+      default:
+        break;
+    }
+
+#if 201103L <= YY_CPLUSPLUS
+    // that is emptied.
+    that.state = empty_state;
+#endif
+  }
+
+  parser::stack_symbol_type::stack_symbol_type (state_type s, YY_MOVE_REF (symbol_type) that)
+    : super_type (s, YY_MOVE (that.location))
+  {
+    switch (that.kind ())
+    {
+      case symbol_kind::S_NUM: // NUM
+        value.move< int > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_VAR: // VAR
+      case symbol_kind::S_STRING: // STRING
+        value.move< std::string > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_block: // block
+      case symbol_kind::S_one_stmt_block: // one_stmt_block
+        value.move< std::unique_ptr<ParaCL::BlockStmt> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_condition_statement: // condition_statement
+        value.move< std::unique_ptr<ParaCL::ConditionStatement> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_else_statement: // else_statement
+        value.move< std::unique_ptr<ParaCL::ElseStatement> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_expression: // expression
+      case symbol_kind::S_assignment_expression: // assignment_expression
+      case symbol_kind::S_logical_or_expression: // logical_or_expression
+      case symbol_kind::S_logical_and_expression: // logical_and_expression
+      case symbol_kind::S_equality_expression: // equality_expression
+      case symbol_kind::S_relational_expression: // relational_expression
+      case symbol_kind::S_additive_expression: // additive_expression
+      case symbol_kind::S_multiplicative_expression: // multiplicative_expression
+      case symbol_kind::S_unary_expression: // unary_expression
+      case symbol_kind::S_factor: // factor
+      case symbol_kind::S_string_constant: // string_constant
+        value.move< std::unique_ptr<ParaCL::Expression> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_if_statement: // if_statement
+        value.move< std::unique_ptr<ParaCL::IfStatement> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_statement: // statement
+      case symbol_kind::S_assignment: // assignment
+      case symbol_kind::S_combined_assignment: // combined_assignment
+      case symbol_kind::S_print_statement: // print_statement
+      case symbol_kind::S_while_statement: // while_statement
+        value.move< std::unique_ptr<ParaCL::Statement> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_elif_statements: // elif_statements
+        value.move< std::vector<std::unique_ptr<ParaCL::ElifStatement>> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_print_args: // print_args
+        value.move< std::vector<std::unique_ptr<ParaCL::Expression>> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_program: // program
+      case symbol_kind::S_statements: // statements
+        value.move< std::vector<std::unique_ptr<ParaCL::Statement>> > (YY_MOVE (that.value));
+        break;
+
+      default:
+        break;
+    }
+
+    // that is emptied.
+    that.kind_ = symbol_kind::S_YYEMPTY;
+  }
+
+#if YY_CPLUSPLUS < 201103L
+  parser::stack_symbol_type&
+  parser::stack_symbol_type::operator= (const stack_symbol_type& that)
+  {
+    state = that.state;
+    switch (that.kind ())
+    {
+      case symbol_kind::S_NUM: // NUM
+        value.copy< int > (that.value);
+        break;
+
+      case symbol_kind::S_VAR: // VAR
+      case symbol_kind::S_STRING: // STRING
+        value.copy< std::string > (that.value);
+        break;
+
+      case symbol_kind::S_block: // block
+      case symbol_kind::S_one_stmt_block: // one_stmt_block
+        value.copy< std::unique_ptr<ParaCL::BlockStmt> > (that.value);
+        break;
+
+      case symbol_kind::S_condition_statement: // condition_statement
+        value.copy< std::unique_ptr<ParaCL::ConditionStatement> > (that.value);
+        break;
+
+      case symbol_kind::S_else_statement: // else_statement
+        value.copy< std::unique_ptr<ParaCL::ElseStatement> > (that.value);
+        break;
+
+      case symbol_kind::S_expression: // expression
+      case symbol_kind::S_assignment_expression: // assignment_expression
+      case symbol_kind::S_logical_or_expression: // logical_or_expression
+      case symbol_kind::S_logical_and_expression: // logical_and_expression
+      case symbol_kind::S_equality_expression: // equality_expression
+      case symbol_kind::S_relational_expression: // relational_expression
+      case symbol_kind::S_additive_expression: // additive_expression
+      case symbol_kind::S_multiplicative_expression: // multiplicative_expression
+      case symbol_kind::S_unary_expression: // unary_expression
+      case symbol_kind::S_factor: // factor
+      case symbol_kind::S_string_constant: // string_constant
+        value.copy< std::unique_ptr<ParaCL::Expression> > (that.value);
+        break;
+
+      case symbol_kind::S_if_statement: // if_statement
+        value.copy< std::unique_ptr<ParaCL::IfStatement> > (that.value);
+        break;
+
+      case symbol_kind::S_statement: // statement
+      case symbol_kind::S_assignment: // assignment
+      case symbol_kind::S_combined_assignment: // combined_assignment
+      case symbol_kind::S_print_statement: // print_statement
+      case symbol_kind::S_while_statement: // while_statement
+        value.copy< std::unique_ptr<ParaCL::Statement> > (that.value);
+        break;
+
+      case symbol_kind::S_elif_statements: // elif_statements
+        value.copy< std::vector<std::unique_ptr<ParaCL::ElifStatement>> > (that.value);
+        break;
+
+      case symbol_kind::S_print_args: // print_args
+        value.copy< std::vector<std::unique_ptr<ParaCL::Expression>> > (that.value);
+        break;
+
+      case symbol_kind::S_program: // program
+      case symbol_kind::S_statements: // statements
+        value.copy< std::vector<std::unique_ptr<ParaCL::Statement>> > (that.value);
+        break;
+
+      default:
+        break;
+    }
+
+    location = that.location;
+    return *this;
+  }
+
+  parser::stack_symbol_type&
+  parser::stack_symbol_type::operator= (stack_symbol_type& that)
+  {
+    state = that.state;
+    switch (that.kind ())
+    {
+      case symbol_kind::S_NUM: // NUM
+        value.move< int > (that.value);
+        break;
+
+      case symbol_kind::S_VAR: // VAR
+      case symbol_kind::S_STRING: // STRING
+        value.move< std::string > (that.value);
+        break;
+
+      case symbol_kind::S_block: // block
+      case symbol_kind::S_one_stmt_block: // one_stmt_block
+        value.move< std::unique_ptr<ParaCL::BlockStmt> > (that.value);
+        break;
+
+      case symbol_kind::S_condition_statement: // condition_statement
+        value.move< std::unique_ptr<ParaCL::ConditionStatement> > (that.value);
+        break;
+
+      case symbol_kind::S_else_statement: // else_statement
+        value.move< std::unique_ptr<ParaCL::ElseStatement> > (that.value);
+        break;
+
+      case symbol_kind::S_expression: // expression
+      case symbol_kind::S_assignment_expression: // assignment_expression
+      case symbol_kind::S_logical_or_expression: // logical_or_expression
+      case symbol_kind::S_logical_and_expression: // logical_and_expression
+      case symbol_kind::S_equality_expression: // equality_expression
+      case symbol_kind::S_relational_expression: // relational_expression
+      case symbol_kind::S_additive_expression: // additive_expression
+      case symbol_kind::S_multiplicative_expression: // multiplicative_expression
+      case symbol_kind::S_unary_expression: // unary_expression
+      case symbol_kind::S_factor: // factor
+      case symbol_kind::S_string_constant: // string_constant
+        value.move< std::unique_ptr<ParaCL::Expression> > (that.value);
+        break;
+
+      case symbol_kind::S_if_statement: // if_statement
+        value.move< std::unique_ptr<ParaCL::IfStatement> > (that.value);
+        break;
+
+      case symbol_kind::S_statement: // statement
+      case symbol_kind::S_assignment: // assignment
+      case symbol_kind::S_combined_assignment: // combined_assignment
+      case symbol_kind::S_print_statement: // print_statement
+      case symbol_kind::S_while_statement: // while_statement
+        value.move< std::unique_ptr<ParaCL::Statement> > (that.value);
+        break;
+
+      case symbol_kind::S_elif_statements: // elif_statements
+        value.move< std::vector<std::unique_ptr<ParaCL::ElifStatement>> > (that.value);
+        break;
+
+      case symbol_kind::S_print_args: // print_args
+        value.move< std::vector<std::unique_ptr<ParaCL::Expression>> > (that.value);
+        break;
+
+      case symbol_kind::S_program: // program
+      case symbol_kind::S_statements: // statements
+        value.move< std::vector<std::unique_ptr<ParaCL::Statement>> > (that.value);
+        break;
+
+      default:
+        break;
+    }
+
+    location = that.location;
+    // that is emptied.
+    that.state = empty_state;
+    return *this;
+  }
+#endif
+
+  template <typename Base>
+  void
+  parser::yy_destroy_ (const char* yymsg, basic_symbol<Base>& yysym) const
+  {
+    if (yymsg)
+      YY_SYMBOL_PRINT (yymsg, yysym);
+  }
+
+#if YYDEBUG
+  template <typename Base>
+  void
+  parser::yy_print_ (std::ostream& yyo, const basic_symbol<Base>& yysym) const
+  {
+    std::ostream& yyoutput = yyo;
+    YY_USE (yyoutput);
+    if (yysym.empty ())
+      yyo << "empty symbol";
+    else
+      {
+        symbol_kind_type yykind = yysym.kind ();
+        yyo << (yykind < YYNTOKENS ? "token" : "nterm")
+            << ' ' << yysym.name () << " ("
+            << yysym.location << ": ";
+        YY_USE (yykind);
+        yyo << ')';
+      }
+  }
+#endif
+
+  void
+  parser::yypush_ (const char* m, YY_MOVE_REF (stack_symbol_type) sym)
+  {
+    if (m)
+      YY_SYMBOL_PRINT (m, sym);
+    yystack_.push (YY_MOVE (sym));
+  }
+
+  void
+  parser::yypush_ (const char* m, state_type s, YY_MOVE_REF (symbol_type) sym)
+  {
+#if 201103L <= YY_CPLUSPLUS
+    yypush_ (m, stack_symbol_type (s, std::move (sym)));
+#else
+    stack_symbol_type ss (s, sym);
+    yypush_ (m, ss);
+#endif
+  }
+
+  void
+  parser::yypop_ (int n) YY_NOEXCEPT
+  {
+    yystack_.pop (n);
+  }
+
+#if YYDEBUG
+  std::ostream&
+  parser::debug_stream () const
+  {
+    return *yycdebug_;
+  }
+
+  void
+  parser::set_debug_stream (std::ostream& o)
+  {
+    yycdebug_ = &o;
+  }
+
+
+  parser::debug_level_type
+  parser::debug_level () const
+  {
+    return yydebug_;
+  }
+
+  void
+  parser::set_debug_level (debug_level_type l)
+  {
+    yydebug_ = l;
+  }
+#endif // YYDEBUG
+
+  parser::state_type
+  parser::yy_lr_goto_state_ (state_type yystate, int yysym)
+  {
+    int yyr = yypgoto_[yysym - YYNTOKENS] + yystate;
+    if (0 <= yyr && yyr <= yylast_ && yycheck_[yyr] == yystate)
+      return yytable_[yyr];
+    else
+      return yydefgoto_[yysym - YYNTOKENS];
+  }
+
+  bool
+  parser::yy_pact_value_is_default_ (int yyvalue) YY_NOEXCEPT
+  {
+    return yyvalue == yypact_ninf_;
+  }
+
+  bool
+  parser::yy_table_value_is_error_ (int yyvalue) YY_NOEXCEPT
+  {
+    return yyvalue == yytable_ninf_;
+  }
+
+  int
+  parser::operator() ()
+  {
+    return parse ();
+  }
+
+  int
+  parser::parse ()
+  {
+    int yyn;
+    /// Length of the RHS of the rule being reduced.
+    int yylen = 0;
+
+    // Error handling.
+    int yynerrs_ = 0;
+    int yyerrstatus_ = 0;
+
+    /// The lookahead symbol.
+    symbol_type yyla;
+
+    /// The locations where the error started and ended.
+    stack_symbol_type yyerror_range[3];
+
+    /// The return value of parse ().
+    int yyresult;
+
+#if YY_EXCEPTIONS
+    try
+#endif // YY_EXCEPTIONS
+      {
+    YYCDEBUG << "Starting parse\n";
+
+
+    /* Initialize the stack.  The initial state will be set in
+       yynewstate, since the latter expects the semantical and the
+       location values to have been already stored, initialize these
+       stacks with a primary value.  */
+    yystack_.clear ();
+    yypush_ (YY_NULLPTR, 0, YY_MOVE (yyla));
+
+  /*-----------------------------------------------.
+  | yynewstate -- push a new symbol on the stack.  |
+  `-----------------------------------------------*/
+  yynewstate:
+    YYCDEBUG << "Entering state " << int (yystack_[0].state) << '\n';
+    YY_STACK_PRINT ();
+
+    // Accept?
+    if (yystack_[0].state == yyfinal_)
+      YYACCEPT;
+
+    goto yybackup;
+
+
+  /*-----------.
+  | yybackup.  |
+  `-----------*/
+  yybackup:
+    // Try to take a decision without lookahead.
+    yyn = yypact_[+yystack_[0].state];
+    if (yy_pact_value_is_default_ (yyn))
+      goto yydefault;
+
+    // Read a lookahead token.
+    if (yyla.empty ())
+      {
+        YYCDEBUG << "Reading a token\n";
+#if YY_EXCEPTIONS
+        try
+#endif // YY_EXCEPTIONS
+          {
+            yyla.kind_ = yytranslate_ (yylex (&yyla.value, &yyla.location));
+          }
+#if YY_EXCEPTIONS
+        catch (const syntax_error& yyexc)
+          {
+            YYCDEBUG << "Caught exception: " << yyexc.what() << '\n';
+            error (yyexc);
+            goto yyerrlab1;
+          }
+#endif // YY_EXCEPTIONS
+      }
+    YY_SYMBOL_PRINT ("Next token is", yyla);
+
+    if (yyla.kind () == symbol_kind::S_YYerror)
+    {
+      // The scanner already issued an error message, process directly
+      // to error recovery.  But do not keep the error token as
+      // lookahead, it is too special and may lead us to an endless
+      // loop in error recovery. */
+      yyla.kind_ = symbol_kind::S_YYUNDEF;
+      goto yyerrlab1;
+    }
+
+    /* If the proper action on seeing token YYLA.TYPE is to reduce or
+       to detect an error, take that action.  */
+    yyn += yyla.kind ();
+    if (yyn < 0 || yylast_ < yyn || yycheck_[yyn] != yyla.kind ())
+      {
+        goto yydefault;
+      }
+
+    // Reduce or error.
+    yyn = yytable_[yyn];
+    if (yyn <= 0)
+      {
+        if (yy_table_value_is_error_ (yyn))
+          goto yyerrlab;
+        yyn = -yyn;
+        goto yyreduce;
+      }
+
+    // Count tokens shifted since error; after three, turn off error status.
+    if (yyerrstatus_)
+      --yyerrstatus_;
+
+    // Shift the lookahead token.
+    yypush_ ("Shifting", state_type (yyn), YY_MOVE (yyla));
+    goto yynewstate;
+
+
+  /*-----------------------------------------------------------.
+  | yydefault -- do the default action for the current state.  |
+  `-----------------------------------------------------------*/
+  yydefault:
+    yyn = yydefact_[+yystack_[0].state];
+    if (yyn == 0)
+      goto yyerrlab;
+    goto yyreduce;
+
+
+  /*-----------------------------.
+  | yyreduce -- do a reduction.  |
+  `-----------------------------*/
+  yyreduce:
+    yylen = yyr2_[yyn];
+    {
+      stack_symbol_type yylhs;
+      yylhs.state = yy_lr_goto_state_ (yystack_[yylen].state, yyr1_[yyn]);
+      /* Variants are always initialized to an empty instance of the
+         correct type. The default '$$ = $1' action is NOT applied
+         when using variants.  */
+      switch (yyr1_[yyn])
+    {
+      case symbol_kind::S_NUM: // NUM
+        yylhs.value.emplace< int > ();
+        break;
+
+      case symbol_kind::S_VAR: // VAR
+      case symbol_kind::S_STRING: // STRING
+        yylhs.value.emplace< std::string > ();
+        break;
+
+      case symbol_kind::S_block: // block
+      case symbol_kind::S_one_stmt_block: // one_stmt_block
+        yylhs.value.emplace< std::unique_ptr<ParaCL::BlockStmt> > ();
+        break;
+
+      case symbol_kind::S_condition_statement: // condition_statement
+        yylhs.value.emplace< std::unique_ptr<ParaCL::ConditionStatement> > ();
+        break;
+
+      case symbol_kind::S_else_statement: // else_statement
+        yylhs.value.emplace< std::unique_ptr<ParaCL::ElseStatement> > ();
+        break;
+
+      case symbol_kind::S_expression: // expression
+      case symbol_kind::S_assignment_expression: // assignment_expression
+      case symbol_kind::S_logical_or_expression: // logical_or_expression
+      case symbol_kind::S_logical_and_expression: // logical_and_expression
+      case symbol_kind::S_equality_expression: // equality_expression
+      case symbol_kind::S_relational_expression: // relational_expression
+      case symbol_kind::S_additive_expression: // additive_expression
+      case symbol_kind::S_multiplicative_expression: // multiplicative_expression
+      case symbol_kind::S_unary_expression: // unary_expression
+      case symbol_kind::S_factor: // factor
+      case symbol_kind::S_string_constant: // string_constant
+        yylhs.value.emplace< std::unique_ptr<ParaCL::Expression> > ();
+        break;
+
+      case symbol_kind::S_if_statement: // if_statement
+        yylhs.value.emplace< std::unique_ptr<ParaCL::IfStatement> > ();
+        break;
+
+      case symbol_kind::S_statement: // statement
+      case symbol_kind::S_assignment: // assignment
+      case symbol_kind::S_combined_assignment: // combined_assignment
+      case symbol_kind::S_print_statement: // print_statement
+      case symbol_kind::S_while_statement: // while_statement
+        yylhs.value.emplace< std::unique_ptr<ParaCL::Statement> > ();
+        break;
+
+      case symbol_kind::S_elif_statements: // elif_statements
+        yylhs.value.emplace< std::vector<std::unique_ptr<ParaCL::ElifStatement>> > ();
+        break;
+
+      case symbol_kind::S_print_args: // print_args
+        yylhs.value.emplace< std::vector<std::unique_ptr<ParaCL::Expression>> > ();
+        break;
+
+      case symbol_kind::S_program: // program
+      case symbol_kind::S_statements: // statements
+        yylhs.value.emplace< std::vector<std::unique_ptr<ParaCL::Statement>> > ();
+        break;
+
+      default:
+        break;
+    }
+
+
+      // Default location.
+      {
+        stack_type::slice range (yystack_, yylen);
+        YYLLOC_DEFAULT (yylhs.location, range, yylen);
+        yyerror_range[1].location = yylhs.location;
+      }
+
+      // Perform the reduction.
+      YY_REDUCE_PRINT (yyn);
+#if YY_EXCEPTIONS
+      try
+#endif // YY_EXCEPTIONS
+        {
+          switch (yyn)
+            {
+  case 2: // program: statements
+#line 75 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+               {
+        program.statements = std::move(yystack_[0].value.as < std::vector<std::unique_ptr<ParaCL::Statement>> > ());
+    }
+#line 1066 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 3: // statements: %empty
+#line 81 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+           {
+        yylhs.value.as < std::vector<std::unique_ptr<ParaCL::Statement>> > () = std::vector<std::unique_ptr<ParaCL::Statement>>();
+    }
+#line 1074 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 4: // statements: statements statement
+#line 84 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                           {
+        yystack_[1].value.as < std::vector<std::unique_ptr<ParaCL::Statement>> > ().push_back(std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Statement> > ()));
+        yylhs.value.as < std::vector<std::unique_ptr<ParaCL::Statement>> > () = std::move(yystack_[1].value.as < std::vector<std::unique_ptr<ParaCL::Statement>> > ());
+    }
+#line 1083 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 5: // statement: assignment SC
+#line 91 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                  { 
+        yylhs.value.as < std::unique_ptr<ParaCL::Statement> > () = std::move(yystack_[1].value.as < std::unique_ptr<ParaCL::Statement> > ());
+    }
+#line 1091 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 6: // statement: combined_assignment SC
+#line 94 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                             {
+        yylhs.value.as < std::unique_ptr<ParaCL::Statement> > () = std::move(yystack_[1].value.as < std::unique_ptr<ParaCL::Statement> > ());
+    }
+#line 1099 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 7: // statement: print_statement SC
+#line 97 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                         {
+        yylhs.value.as < std::unique_ptr<ParaCL::Statement> > () = std::move(yystack_[1].value.as < std::unique_ptr<ParaCL::Statement> > ());
+    }
+#line 1107 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 8: // statement: while_statement
+#line 100 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                      {
+        yylhs.value.as < std::unique_ptr<ParaCL::Statement> > () = std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Statement> > ());
+    }
+#line 1115 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 9: // statement: condition_statement
+#line 103 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                          {
+        yylhs.value.as < std::unique_ptr<ParaCL::Statement> > () = std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::ConditionStatement> > ());
+    }
+#line 1123 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 10: // statement: SC
+#line 106 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+         {
+        yylhs.value.as < std::unique_ptr<ParaCL::Statement> > () = std::make_unique<ParaCL::BlockStmt>();
+    }
+#line 1131 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 11: // assignment: VAR AS expression
+#line 112 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                      {
+        yylhs.value.as < std::unique_ptr<ParaCL::Statement> > () = std::make_unique<ParaCL::AssignStmt>(yystack_[2].value.as < std::string > (), std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ()));
+    }
+#line 1139 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 12: // assignment: VAR AS error
+#line 115 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                   {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after assignment");
+        YYABORT;
+    }
+#line 1148 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 13: // combined_assignment: VAR ADDASGN expression
+#line 122 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                           {
+        yylhs.value.as < std::unique_ptr<ParaCL::Statement> > () = std::make_unique<ParaCL::CombinedAssingStmt>(
+            ParaCL::token_t::ADDASGN,
+            yystack_[2].value.as < std::string > (),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1160 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 14: // combined_assignment: VAR SUBASGN expression
+#line 129 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                             {
+        yylhs.value.as < std::unique_ptr<ParaCL::Statement> > () = std::make_unique<ParaCL::CombinedAssingStmt>(
+            ParaCL::token_t::SUBASGN,
+            yystack_[2].value.as < std::string > (),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1172 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 15: // combined_assignment: VAR MULASGN expression
+#line 136 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                             {
+        yylhs.value.as < std::unique_ptr<ParaCL::Statement> > () = std::make_unique<ParaCL::CombinedAssingStmt>(
+            ParaCL::token_t::MULASGN,
+            yystack_[2].value.as < std::string > (),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1184 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 16: // combined_assignment: VAR DIVASGN expression
+#line 143 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                             {
+        yylhs.value.as < std::unique_ptr<ParaCL::Statement> > () = std::make_unique<ParaCL::CombinedAssingStmt>(
+            ParaCL::token_t::DIVASGN,
+            yystack_[2].value.as < std::string > (),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1196 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 17: // combined_assignment: VAR ADDASGN error
+#line 150 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                        {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '+=' assignment");
+        YYABORT;
+    }
+#line 1205 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 18: // combined_assignment: VAR SUBASGN error
+#line 154 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                        {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '-=' assignment");
+        YYABORT;
+    }
+#line 1214 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 19: // combined_assignment: VAR MULASGN error
+#line 158 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                        {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '*=' assignment");
+        YYABORT;
+    }
+#line 1223 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 20: // combined_assignment: VAR DIVASGN error
+#line 162 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                        {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '/=' assignment");
+        YYABORT;
+    }
+#line 1232 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 21: // print_statement: PRINT print_args
+#line 169 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                     {
+        yylhs.value.as < std::unique_ptr<ParaCL::Statement> > () = std::make_unique<ParaCL::PrintStmt>(std::move(yystack_[0].value.as < std::vector<std::unique_ptr<ParaCL::Expression>> > ()));
+    }
+#line 1240 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 22: // print_statement: PRINT error
+#line 172 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                  {
+        ErrorHandler::throwError(yystack_[0].location, "expected expressions and string constants after print");
+        YYABORT;
+    }
+#line 1249 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 23: // print_args: %empty
+#line 179 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+           {
+        yylhs.value.as < std::vector<std::unique_ptr<ParaCL::Expression>> > () = std::vector<std::unique_ptr<ParaCL::Expression>>();
+    }
+#line 1257 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 24: // print_args: print_args expression
+#line 182 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                            {
+        yystack_[1].value.as < std::vector<std::unique_ptr<ParaCL::Expression>> > ().push_back(std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ()));
+        yylhs.value.as < std::vector<std::unique_ptr<ParaCL::Expression>> > () = std::move(yystack_[1].value.as < std::vector<std::unique_ptr<ParaCL::Expression>> > ());
+    }
+#line 1266 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 25: // print_args: print_args string_constant
+#line 186 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                 {
+        yystack_[1].value.as < std::vector<std::unique_ptr<ParaCL::Expression>> > ().push_back(std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ()));
+        yylhs.value.as < std::vector<std::unique_ptr<ParaCL::Expression>> > () = std::move(yystack_[1].value.as < std::vector<std::unique_ptr<ParaCL::Expression>> > ());
+    }
+#line 1275 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 26: // print_args: print_args COMMA expression
+#line 190 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                  {
+        yystack_[2].value.as < std::vector<std::unique_ptr<ParaCL::Expression>> > ().push_back(std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ()));
+        yylhs.value.as < std::vector<std::unique_ptr<ParaCL::Expression>> > () = std::move(yystack_[2].value.as < std::vector<std::unique_ptr<ParaCL::Expression>> > ());
+    }
+#line 1284 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 27: // print_args: print_args COMMA string_constant
+#line 194 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                       {
+        yystack_[2].value.as < std::vector<std::unique_ptr<ParaCL::Expression>> > ().push_back(std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ()));
+        yylhs.value.as < std::vector<std::unique_ptr<ParaCL::Expression>> > () = std::move(yystack_[2].value.as < std::vector<std::unique_ptr<ParaCL::Expression>> > ());
+    }
+#line 1293 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 28: // while_statement: WH LCIB expression RCIB LCUB block RCUB
+#line 201 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                            {
+        yylhs.value.as < std::unique_ptr<ParaCL::Statement> > () = std::make_unique<ParaCL::WhileStmt>(
+            std::move(yystack_[4].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[1].value.as < std::unique_ptr<ParaCL::BlockStmt> > ())
+        );
+    }
+#line 1304 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 29: // while_statement: WH LCIB expression RCIB one_stmt_block
+#line 207 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                             {
+        yylhs.value.as < std::unique_ptr<ParaCL::Statement> > () = std::make_unique<ParaCL::WhileStmt>(
+            std::move(yystack_[2].value.as < std::unique_ptr<ParaCL::Expression> > ()), 
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::BlockStmt> > ())
+        );
+    }
+#line 1315 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 30: // while_statement: WH LCIB error RCIB LCUB block RCUB
+#line 213 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                         {
+        ErrorHandler::throwError(yystack_[4].location, "expected condition expression in while statement");
+        YYABORT;
+    }
+#line 1324 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 31: // while_statement: WH LCIB expression error LCUB block RCUB
+#line 217 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                               {
+        ErrorHandler::throwError(yystack_[3].location, "expected ')' after while condition");
+        YYABORT;
+    }
+#line 1333 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 32: // while_statement: WH LCIB expression RCIB error
+#line 221 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                    {
+        ErrorHandler::throwError(yystack_[0].location, "expected block or statement after while condition");
+        YYABORT;
+    }
+#line 1342 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 33: // while_statement: WH error
+#line 225 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+               {
+        ErrorHandler::throwError(yystack_[0].location, "expected '(' after while");
+        YYABORT;
+    }
+#line 1351 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 34: // condition_statement: if_statement elif_statements else_statement
+#line 232 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                {
+        auto cond_stmt = std::make_unique<ParaCL::ConditionStatement>(
+            std::move(yystack_[2].value.as < std::unique_ptr<ParaCL::IfStatement> > ())
+        );
+
+        for (auto&& elif_stmt: yystack_[1].value.as < std::vector<std::unique_ptr<ParaCL::ElifStatement>> > ())
+            cond_stmt->add_elif_condition(std::move(elif_stmt));
+
+        if (yystack_[0].value.as < std::unique_ptr<ParaCL::ElseStatement> > ()) cond_stmt->add_else_condition(std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::ElseStatement> > ()));
+        
+        yylhs.value.as < std::unique_ptr<ParaCL::ConditionStatement> > () = std::move(cond_stmt);
+    }
+#line 1368 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 35: // if_statement: IF LCIB expression RCIB LCUB block RCUB
+#line 247 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                            {
+        yylhs.value.as < std::unique_ptr<ParaCL::IfStatement> > () = std::make_unique<ParaCL::IfStatement>(
+            std::move(yystack_[4].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[1].value.as < std::unique_ptr<ParaCL::BlockStmt> > ())
+        );
+    }
+#line 1379 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 36: // if_statement: IF LCIB expression RCIB one_stmt_block
+#line 253 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                             {
+        yylhs.value.as < std::unique_ptr<ParaCL::IfStatement> > () = std::make_unique<ParaCL::IfStatement>(
+            std::move(yystack_[2].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::BlockStmt> > ())
+        );
+    }
+#line 1390 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 37: // if_statement: IF LCIB error RCIB LCUB block RCUB
+#line 259 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                         {
+        ErrorHandler::throwError(yystack_[4].location, "expected condition expression in if statement");
+        YYABORT;
+    }
+#line 1399 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 38: // if_statement: IF LCIB expression error LCUB block RCUB
+#line 263 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                               {
+        ErrorHandler::throwError(yystack_[3].location, "expected ')' after if condition");
+        YYABORT;
+    }
+#line 1408 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 39: // if_statement: IF LCIB expression RCIB error
+#line 267 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                    {
+        ErrorHandler::throwError(yystack_[0].location, "expected block or statement after if condition");
+        YYABORT;
+    }
+#line 1417 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 40: // if_statement: IF error
+#line 271 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+               {
+        ErrorHandler::throwError(yystack_[0].location, "expected '(' after if");
+        YYABORT;
+    }
+#line 1426 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 41: // elif_statements: %empty
+#line 278 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+           {
+        yylhs.value.as < std::vector<std::unique_ptr<ParaCL::ElifStatement>> > () = std::vector<std::unique_ptr<ParaCL::ElifStatement>>();
+    }
+#line 1434 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 42: // elif_statements: elif_statements ELIF LCIB expression RCIB LCUB block RCUB
+#line 281 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                                {
+        yystack_[7].value.as < std::vector<std::unique_ptr<ParaCL::ElifStatement>> > ().push_back(std::make_unique<ParaCL::ElifStatement>(
+            std::move(yystack_[4].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[1].value.as < std::unique_ptr<ParaCL::BlockStmt> > ())
+        ));
+        yylhs.value.as < std::vector<std::unique_ptr<ParaCL::ElifStatement>> > () = std::move(yystack_[7].value.as < std::vector<std::unique_ptr<ParaCL::ElifStatement>> > ());
+    }
+#line 1446 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 43: // elif_statements: elif_statements ELIF LCIB expression RCIB one_stmt_block
+#line 288 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                               {
+        yystack_[5].value.as < std::vector<std::unique_ptr<ParaCL::ElifStatement>> > ().push_back(std::make_unique<ParaCL::ElifStatement>(
+            std::move(yystack_[2].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::BlockStmt> > ())
+        ));
+        yylhs.value.as < std::vector<std::unique_ptr<ParaCL::ElifStatement>> > () = std::move(yystack_[5].value.as < std::vector<std::unique_ptr<ParaCL::ElifStatement>> > ());
+    }
+#line 1458 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 44: // elif_statements: elif_statements ELIF LCIB error RCIB LCUB block RCUB
+#line 295 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                           {
+        ErrorHandler::throwError(yystack_[4].location, "expected condition expression in elif statement");
+        YYABORT;
+    }
+#line 1467 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 45: // elif_statements: elif_statements ELIF LCIB expression error LCUB block RCUB
+#line 299 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                                 {
+        ErrorHandler::throwError(yystack_[3].location, "expected ')' after elif condition");
+        YYABORT;
+    }
+#line 1476 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 46: // elif_statements: elif_statements ELIF LCIB expression RCIB error
+#line 303 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                      {
+        ErrorHandler::throwError(yystack_[0].location, "expected block or statement after elif condition");
+        YYABORT;
+    }
+#line 1485 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 47: // elif_statements: elif_statements ELIF error
+#line 307 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                 {
+        ErrorHandler::throwError(yystack_[0].location, "expected '(' after elif");
+        YYABORT;
+    }
+#line 1494 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 48: // else_statement: %empty
+#line 314 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+           { yylhs.value.as < std::unique_ptr<ParaCL::ElseStatement> > () = nullptr; }
+#line 1500 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 49: // else_statement: ELSE LCUB block RCUB
+#line 315 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                           {
+        yylhs.value.as < std::unique_ptr<ParaCL::ElseStatement> > () = std::make_unique<ParaCL::ElseStatement>(
+            std::move(yystack_[1].value.as < std::unique_ptr<ParaCL::BlockStmt> > ())
+        );
+    }
+#line 1510 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 50: // else_statement: ELSE one_stmt_block
+#line 320 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                          {
+        yylhs.value.as < std::unique_ptr<ParaCL::ElseStatement> > () = std::make_unique<ParaCL::ElseStatement>(
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::BlockStmt> > ())
+        );
+    }
+#line 1520 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 51: // else_statement: ELSE error
+#line 325 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                 {
+        ErrorHandler::throwError(yystack_[0].location, "expected block or statement after else");
+        YYABORT;
+    }
+#line 1529 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 52: // expression: assignment_expression
+#line 332 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                          { yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ()); }
+#line 1535 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 53: // assignment_expression: logical_or_expression
+#line 336 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                          { yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ()); }
+#line 1541 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 54: // assignment_expression: VAR AS assignment_expression
+#line 337 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                            {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::AssignExpr>(yystack_[2].value.as < std::string > (), std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ()));
+    }
+#line 1549 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 55: // assignment_expression: VAR ADDASGN assignment_expression
+#line 340 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                      {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::CombinedAssingExpr>(
+            ParaCL::token_t::ADDASGN,
+            yystack_[2].value.as < std::string > (),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1561 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 56: // assignment_expression: VAR SUBASGN assignment_expression
+#line 347 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                      {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::CombinedAssingExpr>(
+            ParaCL::token_t::SUBASGN,
+            yystack_[2].value.as < std::string > (),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1573 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 57: // assignment_expression: VAR MULASGN assignment_expression
+#line 354 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                      {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::CombinedAssingExpr>(
+            ParaCL::token_t::MULASGN,
+            yystack_[2].value.as < std::string > (),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1585 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 58: // assignment_expression: VAR DIVASGN assignment_expression
+#line 361 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                      {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::CombinedAssingExpr>(
+            ParaCL::token_t::DIVASGN,
+            yystack_[2].value.as < std::string > (),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1597 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 59: // assignment_expression: VAR AS error
+#line 368 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                   {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after assignment");
+        YYABORT;
+    }
+#line 1606 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 60: // assignment_expression: VAR ADDASGN error
+#line 372 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                        {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '+=' assignment");
+        YYABORT;
+    }
+#line 1615 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 61: // assignment_expression: VAR SUBASGN error
+#line 376 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                        {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '-=' assignment");
+        YYABORT;
+    }
+#line 1624 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 62: // assignment_expression: VAR MULASGN error
+#line 380 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                        {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '*=' assignment");
+        YYABORT;
+    }
+#line 1633 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 63: // assignment_expression: VAR DIVASGN error
+#line 384 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                        {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '/=' assignment");
+        YYABORT;
+    }
+#line 1642 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 64: // logical_or_expression: logical_and_expression
+#line 391 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                           { yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ()); }
+#line 1648 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 65: // logical_or_expression: logical_or_expression OR logical_and_expression
+#line 392 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                               {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::BinExpr>(
+            ParaCL::token_t::OR,
+            std::move(yystack_[2].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1660 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 66: // logical_or_expression: logical_or_expression OR error
+#line 399 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                     {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after 'or' operator");
+        YYABORT;
+    }
+#line 1669 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 67: // logical_and_expression: equality_expression
+#line 406 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                        { yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ()); }
+#line 1675 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 68: // logical_and_expression: logical_and_expression AND equality_expression
+#line 407 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                               {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::BinExpr>(
+            ParaCL::token_t::AND,
+            std::move(yystack_[2].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1687 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 69: // logical_and_expression: logical_and_expression AND error
+#line 414 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                       {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after 'and' operator");
+        YYABORT;
+    }
+#line 1696 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 70: // equality_expression: relational_expression
+#line 421 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                          { yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ()); }
+#line 1702 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 71: // equality_expression: equality_expression ISEQ relational_expression
+#line 422 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                                {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::BinExpr>(
+            ParaCL::token_t::ISEQ,
+            std::move(yystack_[2].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1714 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 72: // equality_expression: equality_expression ISNE relational_expression
+#line 429 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                                {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::BinExpr>(
+            ParaCL::token_t::ISNE,
+            std::move(yystack_[2].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1726 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 73: // equality_expression: equality_expression ISEQ error
+#line 436 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                     {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '==' operator");
+        YYABORT;
+    }
+#line 1735 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 74: // equality_expression: equality_expression ISNE error
+#line 440 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                     {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '!=' operator");
+        YYABORT;
+    }
+#line 1744 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 75: // relational_expression: additive_expression
+#line 447 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                        { yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ()); }
+#line 1750 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 76: // relational_expression: relational_expression ISAB additive_expression
+#line 448 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                                {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::BinExpr>(
+            ParaCL::token_t::ISAB,
+            std::move(yystack_[2].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1762 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 77: // relational_expression: relational_expression ISABE additive_expression
+#line 455 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                                  {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::BinExpr>(
+            ParaCL::token_t::ISABE,
+            std::move(yystack_[2].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1774 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 78: // relational_expression: relational_expression ISLS additive_expression
+#line 462 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                                {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::BinExpr>(
+            ParaCL::token_t::ISLS,
+            std::move(yystack_[2].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1786 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 79: // relational_expression: relational_expression ISLSE additive_expression
+#line 469 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                                  {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::BinExpr>(
+            ParaCL::token_t::ISLSE,
+            std::move(yystack_[2].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1798 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 80: // relational_expression: relational_expression ISAB error
+#line 476 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                       {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '>' operator");
+        YYABORT;
+    }
+#line 1807 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 81: // relational_expression: relational_expression ISABE error
+#line 480 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                        {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '>=' operator");
+        YYABORT;
+    }
+#line 1816 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 82: // relational_expression: relational_expression ISLS error
+#line 484 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                       {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '<' operator");
+        YYABORT;
+    }
+#line 1825 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 83: // relational_expression: relational_expression ISLSE error
+#line 488 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                        {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '<=' operator");
+        YYABORT;
+    }
+#line 1834 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 84: // additive_expression: multiplicative_expression
+#line 495 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                              { yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ()); }
+#line 1840 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 85: // additive_expression: additive_expression ADD multiplicative_expression
+#line 496 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                                  { 
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::BinExpr>(
+            ParaCL::token_t::ADD,
+            std::move(yystack_[2].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1852 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 86: // additive_expression: additive_expression SUB multiplicative_expression
+#line 503 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                                  { 
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::BinExpr>(
+            ParaCL::token_t::SUB,
+            std::move(yystack_[2].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1864 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 87: // additive_expression: additive_expression ADD error
+#line 510 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                    {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '+' operator");
+        YYABORT;
+    }
+#line 1873 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 88: // additive_expression: additive_expression SUB error
+#line 514 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                    {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '-' operator");
+        YYABORT;
+    }
+#line 1882 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 89: // multiplicative_expression: unary_expression
+#line 521 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                     { yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ()); }
+#line 1888 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 90: // multiplicative_expression: multiplicative_expression MUL unary_expression
+#line 522 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                               { 
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::BinExpr>(
+            ParaCL::token_t::MUL, 
+            std::move(yystack_[2].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1900 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 91: // multiplicative_expression: multiplicative_expression DIV unary_expression
+#line 529 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                               {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::BinExpr>(
+            ParaCL::token_t::DIV, 
+            std::move(yystack_[2].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1912 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 92: // multiplicative_expression: multiplicative_expression REM unary_expression
+#line 536 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                                               {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::BinExpr>(
+            ParaCL::token_t::REM,
+            std::move(yystack_[2].value.as < std::unique_ptr<ParaCL::Expression> > ()),
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1924 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 93: // multiplicative_expression: multiplicative_expression MUL error
+#line 543 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                          {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '*' operator");
+        YYABORT;
+    }
+#line 1933 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 94: // multiplicative_expression: multiplicative_expression DIV error
+#line 547 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                          {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '/' operator");
+        YYABORT;
+    }
+#line 1942 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 95: // multiplicative_expression: multiplicative_expression REM error
+#line 551 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                          {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after '%' operator");
+        YYABORT;
+    }
+#line 1951 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 96: // unary_expression: factor
+#line 558 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+           { yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ()); }
+#line 1957 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 97: // unary_expression: SUB unary_expression
+#line 559 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                     {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::UnExpr>(
+            ParaCL::token_t::SUB,
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1968 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 98: // unary_expression: NOT unary_expression
+#line 565 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                     {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::UnExpr>(
+            ParaCL::token_t::NOT,
+            std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ())
+        );
+    }
+#line 1979 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 99: // unary_expression: ADD unary_expression
+#line 571 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                                     {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Expression> > ());
+    }
+#line 1987 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 100: // unary_expression: SUB error
+#line 574 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after unary '-'");
+        YYABORT;
+    }
+#line 1996 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 101: // unary_expression: NOT error
+#line 578 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after 'not' operator");
+        YYABORT;
+    }
+#line 2005 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 102: // unary_expression: ADD error
+#line 582 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                {
+        ErrorHandler::throwError(yystack_[0].location, "expected expression after unary '+'");
+        YYABORT;
+    }
+#line 2014 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 103: // factor: NUM
+#line 589 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+        { 
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::NumExpr>(yystack_[0].value.as < int > ());
+    }
+#line 2022 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 104: // factor: VAR
+#line 592 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+          { 
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::VarExpr>(std::move(yystack_[0].value.as < std::string > ()));
+    }
+#line 2030 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 105: // factor: LCIB expression RCIB
+#line 595 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                           { 
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::move(yystack_[1].value.as < std::unique_ptr<ParaCL::Expression> > ());
+    }
+#line 2038 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 106: // factor: IN
+#line 598 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+         {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::InputExpr>();
+    }
+#line 2046 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 107: // factor: LCIB error RCIB
+#line 601 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                      {
+        ErrorHandler::throwError(yystack_[1].location, "expected expression inside parentheses");
+        YYABORT;
+    }
+#line 2055 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 108: // factor: LCIB expression error
+#line 605 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+                            {
+        ErrorHandler::throwError(yystack_[0].location, "expected ')' after expression");
+        YYABORT;
+    }
+#line 2064 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 109: // block: statements
+#line 612 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+               {
+        yylhs.value.as < std::unique_ptr<ParaCL::BlockStmt> > () = std::make_unique<ParaCL::BlockStmt>(std::move(yystack_[0].value.as < std::vector<std::unique_ptr<ParaCL::Statement>> > ()));
+    }
+#line 2072 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 110: // one_stmt_block: statement
+#line 618 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+              {
+        std::vector<std::unique_ptr<ParaCL::Statement>> body_stmts;
+        body_stmts.push_back(std::move(yystack_[0].value.as < std::unique_ptr<ParaCL::Statement> > ()));
+        yylhs.value.as < std::unique_ptr<ParaCL::BlockStmt> > () = std::make_unique<ParaCL::BlockStmt>(std::move(body_stmts));
+    }
+#line 2082 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+  case 111: // string_constant: STRING
+#line 626 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+           {
+        yylhs.value.as < std::unique_ptr<ParaCL::Expression> > () = std::make_unique<ParaCL::StringConstant>(std::move(yystack_[0].value.as < std::string > ()));
+    }
+#line 2090 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+    break;
+
+
+#line 2094 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
+
+            default:
+              break;
+            }
+        }
+#if YY_EXCEPTIONS
+      catch (const syntax_error& yyexc)
+        {
+          YYCDEBUG << "Caught exception: " << yyexc.what() << '\n';
+          error (yyexc);
+          YYERROR;
+        }
+#endif // YY_EXCEPTIONS
+      YY_SYMBOL_PRINT ("-> $$ =", yylhs);
+      yypop_ (yylen);
+      yylen = 0;
+
+      // Shift the result of the reduction.
+      yypush_ (YY_NULLPTR, YY_MOVE (yylhs));
+    }
+    goto yynewstate;
+
+
+  /*--------------------------------------.
+  | yyerrlab -- here on detecting error.  |
+  `--------------------------------------*/
+  yyerrlab:
+    // If not already recovering from an error, report this error.
+    if (!yyerrstatus_)
+      {
+        ++yynerrs_;
+        context yyctx (*this, yyla);
+        std::string msg = yysyntax_error_ (yyctx);
+        error (yyla.location, YY_MOVE (msg));
+      }
+
+
+    yyerror_range[1].location = yyla.location;
+    if (yyerrstatus_ == 3)
+      {
+        /* If just tried and failed to reuse lookahead token after an
+           error, discard it.  */
+
+        // Return failure if at end of input.
+        if (yyla.kind () == symbol_kind::S_YYEOF)
+          YYABORT;
+        else if (!yyla.empty ())
+          {
+            yy_destroy_ ("Error: discarding", yyla);
+            yyla.clear ();
+          }
+      }
+
+    // Else will try to reuse lookahead token after shifting the error token.
+    goto yyerrlab1;
+
+
+  /*---------------------------------------------------.
+  | yyerrorlab -- error raised explicitly by YYERROR.  |
+  `---------------------------------------------------*/
+  yyerrorlab:
+    /* Pacify compilers when the user code never invokes YYERROR and
+       the label yyerrorlab therefore never appears in user code.  */
+    if (false)
+      YYERROR;
+
+    /* Do not reclaim the symbols of the rule whose action triggered
+       this YYERROR.  */
+    yypop_ (yylen);
+    yylen = 0;
+    YY_STACK_PRINT ();
+    goto yyerrlab1;
+
+
+  /*-------------------------------------------------------------.
+  | yyerrlab1 -- common code for both syntax error and YYERROR.  |
+  `-------------------------------------------------------------*/
+  yyerrlab1:
+    yyerrstatus_ = 3;   // Each real token shifted decrements this.
+    // Pop stack until we find a state that shifts the error token.
+    for (;;)
+      {
+        yyn = yypact_[+yystack_[0].state];
+        if (!yy_pact_value_is_default_ (yyn))
+          {
+            yyn += symbol_kind::S_YYerror;
+            if (0 <= yyn && yyn <= yylast_
+                && yycheck_[yyn] == symbol_kind::S_YYerror)
+              {
+                yyn = yytable_[yyn];
+                if (0 < yyn)
+                  break;
+              }
+          }
+
+        // Pop the current state because it cannot handle the error token.
+        if (yystack_.size () == 1)
+          YYABORT;
+
+        yyerror_range[1].location = yystack_[0].location;
+        yy_destroy_ ("Error: popping", yystack_[0]);
+        yypop_ ();
+        YY_STACK_PRINT ();
+      }
+    {
+      stack_symbol_type error_token;
+
+      yyerror_range[2].location = yyla.location;
+      YYLLOC_DEFAULT (error_token.location, yyerror_range, 2);
+
+      // Shift the error token.
+      error_token.state = state_type (yyn);
+      yypush_ ("Shifting", YY_MOVE (error_token));
+    }
+    goto yynewstate;
+
+
+  /*-------------------------------------.
+  | yyacceptlab -- YYACCEPT comes here.  |
+  `-------------------------------------*/
+  yyacceptlab:
+    yyresult = 0;
+    goto yyreturn;
+
+
+  /*-----------------------------------.
+  | yyabortlab -- YYABORT comes here.  |
+  `-----------------------------------*/
+  yyabortlab:
+    yyresult = 1;
+    goto yyreturn;
+
+
+  /*-----------------------------------------------------.
+  | yyreturn -- parsing is finished, return the result.  |
+  `-----------------------------------------------------*/
+  yyreturn:
+    if (!yyla.empty ())
+      yy_destroy_ ("Cleanup: discarding lookahead", yyla);
+
+    /* Do not reclaim the symbols of the rule whose action triggered
+       this YYABORT or YYACCEPT.  */
+    yypop_ (yylen);
+    YY_STACK_PRINT ();
+    while (1 < yystack_.size ())
+      {
+        yy_destroy_ ("Cleanup: popping", yystack_[0]);
+        yypop_ ();
+      }
+
+    return yyresult;
+  }
+#if YY_EXCEPTIONS
+    catch (...)
+      {
+        YYCDEBUG << "Exception caught: cleaning lookahead and stack\n";
+        // Do not try to display the values of the reclaimed symbols,
+        // as their printers might throw an exception.
+        if (!yyla.empty ())
+          yy_destroy_ (YY_NULLPTR, yyla);
+
+        while (1 < yystack_.size ())
+          {
+            yy_destroy_ (YY_NULLPTR, yystack_[0]);
+            yypop_ ();
+          }
+        throw;
+      }
+#endif // YY_EXCEPTIONS
+  }
+
+  void
+  parser::error (const syntax_error& yyexc)
+  {
+    error (yyexc.location, yyexc.what ());
+  }
+
+  const char *
+  parser::symbol_name (symbol_kind_type yysymbol)
+  {
+    static const char *const yy_sname[] =
+    {
+    "end of file", "error", "invalid token", "OR", "AND", "ISEQ", "ISNE",
+  "ISAB", "ISABE", "ISLS", "ISLSE", "ADD", "SUB", "MUL", "DIV", "REM",
+  "NEG", "NOT", "AS", "ADDASGN", "SUBASGN", "MULASGN", "DIVASGN", "NUM",
+  "VAR", "LCIB", "RCIB", "LCUB", "RCUB", "WH", "IN", "PRINT", "IF", "ELIF",
+  "ELSE", "SC", "COMMA", "STRING", "$accept", "program", "statements",
+  "statement", "assignment", "combined_assignment", "print_statement",
+  "print_args", "while_statement", "condition_statement", "if_statement",
+  "elif_statements", "else_statement", "expression",
+  "assignment_expression", "logical_or_expression",
+  "logical_and_expression", "equality_expression", "relational_expression",
+  "additive_expression", "multiplicative_expression", "unary_expression",
+  "factor", "block", "one_stmt_block", "string_constant", YY_NULLPTR
+    };
+    return yy_sname[yysymbol];
+  }
+
+
+
+  // parser::context.
+  parser::context::context (const parser& yyparser, const symbol_type& yyla)
+    : yyparser_ (yyparser)
+    , yyla_ (yyla)
+  {}
+
+  int
+  parser::context::expected_tokens (symbol_kind_type yyarg[], int yyargn) const
+  {
+    // Actual number of expected tokens
+    int yycount = 0;
+
+    const int yyn = yypact_[+yyparser_.yystack_[0].state];
+    if (!yy_pact_value_is_default_ (yyn))
+      {
+        /* Start YYX at -YYN if negative to avoid negative indexes in
+           YYCHECK.  In other words, skip the first -YYN actions for
+           this state because they are default actions.  */
+        const int yyxbegin = yyn < 0 ? -yyn : 0;
+        // Stay within bounds of both yycheck and yytname.
+        const int yychecklim = yylast_ - yyn + 1;
+        const int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
+        for (int yyx = yyxbegin; yyx < yyxend; ++yyx)
+          if (yycheck_[yyx + yyn] == yyx && yyx != symbol_kind::S_YYerror
+              && !yy_table_value_is_error_ (yytable_[yyx + yyn]))
+            {
+              if (!yyarg)
+                ++yycount;
+              else if (yycount == yyargn)
+                return 0;
+              else
+                yyarg[yycount++] = YY_CAST (symbol_kind_type, yyx);
+            }
+      }
+
+    if (yyarg && yycount == 0 && 0 < yyargn)
+      yyarg[0] = symbol_kind::S_YYEMPTY;
+    return yycount;
+  }
+
+
+
+
+
+
+  int
+  parser::yy_syntax_error_arguments_ (const context& yyctx,
+                                                 symbol_kind_type yyarg[], int yyargn) const
+  {
+    /* There are many possibilities here to consider:
+       - If this state is a consistent state with a default action, then
+         the only way this function was invoked is if the default action
+         is an error action.  In that case, don't check for expected
+         tokens because there are none.
+       - The only way there can be no lookahead present (in yyla) is
+         if this state is a consistent state with a default action.
+         Thus, detecting the absence of a lookahead is sufficient to
+         determine that there is no unexpected or expected token to
+         report.  In that case, just report a simple "syntax error".
+       - Don't assume there isn't a lookahead just because this state is
+         a consistent state with a default action.  There might have
+         been a previous inconsistent state, consistent state with a
+         non-default action, or user semantic action that manipulated
+         yyla.  (However, yyla is currently not documented for users.)
+       - Of course, the expected token list depends on states to have
+         correct lookahead information, and it depends on the parser not
+         to perform extra reductions after fetching a lookahead from the
+         scanner and before detecting a syntax error.  Thus, state merging
+         (from LALR or IELR) and default reductions corrupt the expected
+         token list.  However, the list is correct for canonical LR with
+         one exception: it will still contain any token that will not be
+         accepted due to an error action in a later state.
+    */
+
+    if (!yyctx.lookahead ().empty ())
+      {
+        if (yyarg)
+          yyarg[0] = yyctx.token ();
+        int yyn = yyctx.expected_tokens (yyarg ? yyarg + 1 : yyarg, yyargn - 1);
+        return yyn + 1;
+      }
+    return 0;
+  }
+
+  // Generate an error message.
+  std::string
+  parser::yysyntax_error_ (const context& yyctx) const
+  {
+    // Its maximum.
+    enum { YYARGS_MAX = 5 };
+    // Arguments of yyformat.
+    symbol_kind_type yyarg[YYARGS_MAX];
+    int yycount = yy_syntax_error_arguments_ (yyctx, yyarg, YYARGS_MAX);
+
+    char const* yyformat = YY_NULLPTR;
+    switch (yycount)
+      {
+#define YYCASE_(N, S)                         \
+        case N:                               \
+          yyformat = S;                       \
+        break
+      default: // Avoid compiler warnings.
+        YYCASE_ (0, YY_("syntax error"));
+        YYCASE_ (1, YY_("syntax error, unexpected %s"));
+        YYCASE_ (2, YY_("syntax error, unexpected %s, expecting %s"));
+        YYCASE_ (3, YY_("syntax error, unexpected %s, expecting %s or %s"));
+        YYCASE_ (4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
+        YYCASE_ (5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
+#undef YYCASE_
+      }
+
+    std::string yyres;
+    // Argument number.
+    std::ptrdiff_t yyi = 0;
+    for (char const* yyp = yyformat; *yyp; ++yyp)
+      if (yyp[0] == '%' && yyp[1] == 's' && yyi < yycount)
+        {
+          yyres += symbol_name (yyarg[yyi++]);
+          ++yyp;
+        }
+      else
+        yyres += *yyp;
+    return yyres;
+  }
+
+
+  const signed char parser::yypact_ninf_ = -91;
+
+  const signed char parser::yytable_ninf_ = -24;
+
+  const short
+  parser::yypact_[] =
+  {
+     -91,    11,    94,   -91,    50,     4,    15,    21,   -91,   -91,
+     -17,   -15,    -7,   -91,   -91,   -91,    24,   119,   123,   144,
+     153,   -91,   170,   -91,   425,   -91,   174,   -91,   -91,   -91,
+     -10,   -91,   191,   195,   212,   -91,   455,   216,   -91,   -91,
+     -91,    28,    55,    60,   461,    80,   137,   -91,   -91,   -91,
+     -91,   -91,   -91,   -91,   -91,   -91,   -91,    51,     8,   442,
+     -91,   -91,   -91,    53,    16,    32,    29,   -91,   -91,   -91,
+     -91,   -91,   -91,   -91,   -91,   233,   237,   254,   258,   275,
+      56,    18,   279,   296,   300,   317,   321,   338,   342,   359,
+     363,   380,   384,   401,   405,    57,    67,    54,   -91,   -91,
+      69,    73,    66,   -91,   422,   -91,   -91,   -91,   -91,   -91,
+     -91,   -91,   -91,   -91,   -91,   -91,   -91,   -91,   -91,   -91,
+     -91,   -91,   -91,    55,   -91,    60,   -91,   461,   -91,   461,
+     -91,    80,   -91,    80,   -91,    80,   -91,    80,   -91,   137,
+     -91,   137,   -91,   -91,   -91,   -91,   -91,   -91,   -91,   -91,
+     -91,   -91,   -91,   -91,   -91,   -91,   -91,   -91,    61,    36,
+      94,    35,    77,    84,    87,    89,    91,    99,    76,   101,
+      75,   -91,   -91,   -91,   -91,   -91,   -91,   -91,   -91,   -91,
+     -91,   -91,   -91,   109,   129,   131,   -91,   -91,   -91
+  };
+
+  const signed char
+  parser::yydefact_[] =
+  {
+       3,     0,     2,     1,     0,     0,     0,     0,    10,     4,
+       0,     0,     0,     8,     9,    41,     0,     0,     0,     0,
+       0,    33,     0,    22,    21,    40,     0,     5,     6,     7,
+      48,    12,     0,     0,     0,   103,   104,     0,   106,    11,
+      52,    53,    64,    67,    70,    75,    84,    89,    96,    17,
+      13,    18,    14,    19,    15,    20,    16,     0,     0,     0,
+     111,    24,    25,     0,     0,     0,     0,    34,   102,   104,
+      99,   100,    97,   101,    98,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,    26,    27,
+       0,     0,     0,    47,     0,    51,     3,   110,    50,    59,
+      54,    60,    55,    61,    56,    62,    57,    63,    58,   107,
+     108,   105,    66,    65,    69,    68,    73,    71,    74,    72,
+      80,    76,    81,    77,    82,    78,    83,    79,    87,    85,
+      88,    86,    93,    90,    94,    91,    95,    92,     3,     3,
+      32,     3,    29,     3,     3,    39,     3,    36,     0,     0,
+     109,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,    49,    30,    31,    28,    37,    38,    35,     3,     3,
+      46,     3,    43,     0,     0,     0,    44,    45,    42
+  };
+
+  const short
+  parser::yypgoto_[] =
+  {
+     -91,   -91,   160,    -2,   -91,   -91,   -91,   -91,   -91,   -91,
+     -91,   -91,   -91,   -16,   406,   -91,    81,    79,    37,   400,
+      42,   -19,   -91,   -40,   -90,   107
+  };
+
+  const unsigned char
+  parser::yydefgoto_[] =
+  {
+       0,     1,   160,   107,    10,    11,    12,    24,    13,    14,
+      15,    30,    67,    39,    40,    41,    42,    43,    44,    45,
+      46,    47,    48,   161,   108,    62
+  };
+
+  const short
+  parser::yytable_[] =
+  {
+       9,    50,    52,    54,    56,    21,    58,   152,    61,    96,
+      64,     3,   157,    70,    72,    74,    23,   101,    27,   120,
+      28,    81,    25,    65,    66,    31,   -23,   -23,    29,    22,
+     105,    82,   -23,   103,    97,    32,    33,   169,   -23,   -23,
+     -23,    34,   102,    98,   121,   -23,    26,    35,    36,    37,
+     -23,   -23,   -23,     4,    38,   150,   106,   104,     5,    83,
+       6,     7,   170,   171,     8,    84,    85,   155,    16,    17,
+      18,    19,    20,   143,   145,   147,   180,    95,     4,   100,
+     182,   151,   119,     5,   148,     6,     7,   168,   159,     8,
+       4,    90,    91,   156,   149,     5,   153,     6,     7,     4,
+     154,     8,   181,   178,     5,   172,     6,     7,   162,   163,
+       8,   164,   173,   165,   166,   174,   167,   175,     4,   176,
+      49,   127,   129,     5,    51,     6,     7,   177,   179,     8,
+      32,    33,   139,   141,    32,    33,    34,   186,   183,   184,
+      34,   185,    35,    36,    37,    53,    35,    36,    37,    38,
+      92,    93,    94,    38,    55,    32,    33,   187,     9,   188,
+       2,    34,   125,   123,    32,    33,    99,    35,    36,    37,
+      34,    57,     0,     0,    38,    63,    35,    36,    37,     0,
+       0,    32,    33,    38,     0,    32,    33,    34,     0,     0,
+       0,    34,    68,    35,    36,    37,    71,    35,    36,    37,
+      38,     0,    32,    33,    38,     0,    32,    33,    34,     0,
+       0,     0,    34,    73,    35,    69,    37,    80,    35,    69,
+      37,    38,     0,    32,    33,    38,     0,    32,    33,    34,
+       0,     0,     0,    34,   109,    35,    69,    37,   111,    35,
+      36,    37,    38,     0,    32,    33,    38,     0,    32,    33,
+      34,     0,     0,     0,    34,   113,    35,    36,    37,   115,
+      35,    36,    37,    38,     0,    32,    33,    38,     0,    32,
+      33,    34,     0,     0,     0,    34,   117,    35,    36,    37,
+     122,    35,    36,    37,    38,     0,    32,    33,    38,     0,
+      32,    33,    34,     0,     0,     0,    34,   124,    35,    36,
+      37,   126,    35,    69,    37,    38,     0,    32,    33,    38,
+       0,    32,    33,    34,     0,     0,     0,    34,   128,    35,
+      69,    37,   130,    35,    69,    37,    38,     0,    32,    33,
+      38,     0,    32,    33,    34,     0,     0,     0,    34,   132,
+      35,    69,    37,   134,    35,    69,    37,    38,     0,    32,
+      33,    38,     0,    32,    33,    34,     0,     0,     0,    34,
+     136,    35,    69,    37,   138,    35,    69,    37,    38,     0,
+      32,    33,    38,     0,    32,    33,    34,     0,     0,     0,
+      34,   140,    35,    69,    37,   142,    35,    69,    37,    38,
+       0,    32,    33,    38,     0,    32,    33,    34,     0,     0,
+       0,    34,   144,    35,    69,    37,   146,    35,    69,    37,
+      38,     0,    32,    33,    38,     0,    32,    33,    34,     0,
+       0,     0,    34,   158,    35,    69,    37,     0,    35,    69,
+      37,    38,     0,    32,    33,    38,    32,    33,     0,    34,
+       0,     0,    34,     0,     0,    35,    36,    37,    35,    36,
+      37,     0,    38,    32,    33,    38,     0,     0,     0,    34,
+       0,    59,    60,     0,     0,    35,    36,    37,    86,    87,
+      88,    89,    38,    75,    76,    77,    78,    79,     0,    60,
+       0,   110,   112,   114,   116,   118,   131,   133,   135,   137
+  };
+
+  const short
+  parser::yycheck_[] =
+  {
+       2,    17,    18,    19,    20,     1,    22,    97,    24,     1,
+      26,     0,   102,    32,    33,    34,     1,     1,    35,     1,
+      35,    37,     1,    33,    34,     1,    11,    12,    35,    25,
+       1,     3,    17,     1,    26,    11,    12,     1,    23,    24,
+      25,    17,    26,    59,    26,    30,    25,    23,    24,    25,
+      35,    36,    37,    24,    30,     1,    27,    25,    29,     4,
+      31,    32,    26,    28,    35,     5,     6,     1,    18,    19,
+      20,    21,    22,    92,    93,    94,     1,    26,    24,    26,
+     170,    27,    26,    29,    27,    31,    32,    26,   104,    35,
+      24,    11,    12,    27,    27,    29,    27,    31,    32,    24,
+      27,    35,    27,    27,    29,    28,    31,    32,   148,   149,
+      35,   151,    28,   153,   154,    28,   156,    28,    24,    28,
+       1,    84,    85,    29,     1,    31,    32,    28,    27,    35,
+      11,    12,    90,    91,    11,    12,    17,    28,   178,   179,
+      17,   181,    23,    24,    25,     1,    23,    24,    25,    30,
+      13,    14,    15,    30,     1,    11,    12,    28,   160,    28,
+       0,    17,    83,    82,    11,    12,    59,    23,    24,    25,
+      17,     1,    -1,    -1,    30,     1,    23,    24,    25,    -1,
+      -1,    11,    12,    30,    -1,    11,    12,    17,    -1,    -1,
+      -1,    17,     1,    23,    24,    25,     1,    23,    24,    25,
+      30,    -1,    11,    12,    30,    -1,    11,    12,    17,    -1,
+      -1,    -1,    17,     1,    23,    24,    25,     1,    23,    24,
+      25,    30,    -1,    11,    12,    30,    -1,    11,    12,    17,
+      -1,    -1,    -1,    17,     1,    23,    24,    25,     1,    23,
+      24,    25,    30,    -1,    11,    12,    30,    -1,    11,    12,
+      17,    -1,    -1,    -1,    17,     1,    23,    24,    25,     1,
+      23,    24,    25,    30,    -1,    11,    12,    30,    -1,    11,
+      12,    17,    -1,    -1,    -1,    17,     1,    23,    24,    25,
+       1,    23,    24,    25,    30,    -1,    11,    12,    30,    -1,
+      11,    12,    17,    -1,    -1,    -1,    17,     1,    23,    24,
+      25,     1,    23,    24,    25,    30,    -1,    11,    12,    30,
+      -1,    11,    12,    17,    -1,    -1,    -1,    17,     1,    23,
+      24,    25,     1,    23,    24,    25,    30,    -1,    11,    12,
+      30,    -1,    11,    12,    17,    -1,    -1,    -1,    17,     1,
+      23,    24,    25,     1,    23,    24,    25,    30,    -1,    11,
+      12,    30,    -1,    11,    12,    17,    -1,    -1,    -1,    17,
+       1,    23,    24,    25,     1,    23,    24,    25,    30,    -1,
+      11,    12,    30,    -1,    11,    12,    17,    -1,    -1,    -1,
+      17,     1,    23,    24,    25,     1,    23,    24,    25,    30,
+      -1,    11,    12,    30,    -1,    11,    12,    17,    -1,    -1,
+      -1,    17,     1,    23,    24,    25,     1,    23,    24,    25,
+      30,    -1,    11,    12,    30,    -1,    11,    12,    17,    -1,
+      -1,    -1,    17,     1,    23,    24,    25,    -1,    23,    24,
+      25,    30,    -1,    11,    12,    30,    11,    12,    -1,    17,
+      -1,    -1,    17,    -1,    -1,    23,    24,    25,    23,    24,
+      25,    -1,    30,    11,    12,    30,    -1,    -1,    -1,    17,
+      -1,    36,    37,    -1,    -1,    23,    24,    25,     7,     8,
+       9,    10,    30,    18,    19,    20,    21,    22,    -1,    37,
+      -1,    75,    76,    77,    78,    79,    86,    87,    88,    89
+  };
+
+  const signed char
+  parser::yystos_[] =
+  {
+       0,    39,    40,     0,    24,    29,    31,    32,    35,    41,
+      42,    43,    44,    46,    47,    48,    18,    19,    20,    21,
+      22,     1,    25,     1,    45,     1,    25,    35,    35,    35,
+      49,     1,    11,    12,    17,    23,    24,    25,    30,    51,
+      52,    53,    54,    55,    56,    57,    58,    59,    60,     1,
+      51,     1,    51,     1,    51,     1,    51,     1,    51,    36,
+      37,    51,    63,     1,    51,    33,    34,    50,     1,    24,
+      59,     1,    59,     1,    59,    18,    19,    20,    21,    22,
+       1,    51,     3,     4,     5,     6,     7,     8,     9,    10,
+      11,    12,    13,    14,    15,    26,     1,    26,    51,    63,
+      26,     1,    26,     1,    25,     1,    27,    41,    62,     1,
+      52,     1,    52,     1,    52,     1,    52,     1,    52,    26,
+       1,    26,     1,    54,     1,    55,     1,    56,     1,    56,
+       1,    57,     1,    57,     1,    57,     1,    57,     1,    58,
+       1,    58,     1,    59,     1,    59,     1,    59,    27,    27,
+       1,    27,    62,    27,    27,     1,    27,    62,     1,    51,
+      40,    61,    61,    61,    61,    61,    61,    61,    26,     1,
+      26,    28,    28,    28,    28,    28,    28,    28,    27,    27,
+       1,    27,    62,    61,    61,    61,    28,    28,    28
+  };
+
+  const signed char
+  parser::yyr1_[] =
+  {
+       0,    38,    39,    40,    40,    41,    41,    41,    41,    41,
+      41,    42,    42,    43,    43,    43,    43,    43,    43,    43,
+      43,    44,    44,    45,    45,    45,    45,    45,    46,    46,
+      46,    46,    46,    46,    47,    48,    48,    48,    48,    48,
+      48,    49,    49,    49,    49,    49,    49,    49,    50,    50,
+      50,    50,    51,    52,    52,    52,    52,    52,    52,    52,
+      52,    52,    52,    52,    53,    53,    53,    54,    54,    54,
+      55,    55,    55,    55,    55,    56,    56,    56,    56,    56,
+      56,    56,    56,    56,    57,    57,    57,    57,    57,    58,
+      58,    58,    58,    58,    58,    58,    59,    59,    59,    59,
+      59,    59,    59,    60,    60,    60,    60,    60,    60,    61,
+      62,    63
+  };
+
+  const signed char
+  parser::yyr2_[] =
+  {
+       0,     2,     1,     0,     2,     2,     2,     2,     1,     1,
+       1,     3,     3,     3,     3,     3,     3,     3,     3,     3,
+       3,     2,     2,     0,     2,     2,     3,     3,     7,     5,
+       7,     7,     5,     2,     3,     7,     5,     7,     7,     5,
+       2,     0,     8,     6,     8,     8,     6,     3,     0,     4,
+       2,     2,     1,     1,     3,     3,     3,     3,     3,     3,
+       3,     3,     3,     3,     1,     3,     3,     1,     3,     3,
+       1,     3,     3,     3,     3,     1,     3,     3,     3,     3,
+       3,     3,     3,     3,     1,     3,     3,     3,     3,     1,
+       3,     3,     3,     3,     3,     3,     1,     2,     2,     2,
+       2,     2,     2,     1,     1,     3,     1,     3,     3,     1,
+       1,     1
+  };
+
+
+
+
+#if YYDEBUG
+  const short
+  parser::yyrline_[] =
+  {
+       0,    75,    75,    81,    84,    91,    94,    97,   100,   103,
+     106,   112,   115,   122,   129,   136,   143,   150,   154,   158,
+     162,   169,   172,   179,   182,   186,   190,   194,   201,   207,
+     213,   217,   221,   225,   232,   247,   253,   259,   263,   267,
+     271,   278,   281,   288,   295,   299,   303,   307,   314,   315,
+     320,   325,   332,   336,   337,   340,   347,   354,   361,   368,
+     372,   376,   380,   384,   391,   392,   399,   406,   407,   414,
+     421,   422,   429,   436,   440,   447,   448,   455,   462,   469,
+     476,   480,   484,   488,   495,   496,   503,   510,   514,   521,
+     522,   529,   536,   543,   547,   551,   558,   559,   565,   571,
+     574,   578,   582,   589,   592,   595,   598,   601,   605,   612,
+     618,   626
+  };
+
+  void
+  parser::yy_stack_print_ () const
+  {
+    *yycdebug_ << "Stack now";
+    for (stack_type::const_iterator
+           i = yystack_.begin (),
+           i_end = yystack_.end ();
+         i != i_end; ++i)
+      *yycdebug_ << ' ' << int (i->state);
+    *yycdebug_ << '\n';
+  }
+
+  void
+  parser::yy_reduce_print_ (int yyrule) const
+  {
+    int yylno = yyrline_[yyrule];
+    int yynrhs = yyr2_[yyrule];
+    // Print the symbols being reduced, and their result.
+    *yycdebug_ << "Reducing stack by rule " << yyrule - 1
+               << " (line " << yylno << "):\n";
+    // The symbols being reduced.
+    for (int yyi = 0; yyi < yynrhs; yyi++)
+      YY_SYMBOL_PRINT ("   $" << yyi + 1 << " =",
+                       yystack_[(yynrhs) - (yyi + 1)]);
+  }
+#endif // YYDEBUG
+
+  parser::symbol_kind_type
+  parser::yytranslate_ (int t) YY_NOEXCEPT
+  {
+    // YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to
+    // TOKEN-NUM as returned by yylex.
+    static
+    const signed char
+    translate_table[] =
+    {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -565,1589 +2737,22 @@ static const yytype_int8 yytranslate[] =
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
-      35
-};
-
-#if YYDEBUG
-/* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_int16 yyrline[] =
-{
-       0,    77,    77,    87,    90,    97,   100,   103,   106,   109,
-     115,   122,   130,   138,   146,   157,   163,   169,   178,   193,
-     199,   208,   211,   218,   228,   229,   234,   242,   246,   247,
-     251,   259,   267,   275,   286,   287,   297,   298,   308,   309,
-     316,   326,   327,   334,   341,   348,   358,   359,   366,   376,
-     377,   384,   391,   401,   402,   408,   417,   420,   424,   427,
-     433,   444
-};
-#endif
-
-/** Accessing symbol of state STATE.  */
-#define YY_ACCESSING_SYMBOL(State) YY_CAST (yysymbol_kind_t, yystos[State])
-
-#if YYDEBUG || 0
-/* The user-facing name of the symbol whose (internal) number is
-   YYSYMBOL.  No bounds checking.  */
-static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
-
-/* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
-   First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
-static const char *const yytname[] =
-{
-  "\"end of file\"", "error", "\"invalid token\"", "OR", "AND", "ISEQ",
-  "ISNE", "ISAB", "ISABE", "ISLS", "ISLSE", "ADD", "SUB", "MUL", "DIV",
-  "REM", "NEG", "NOT", "AS", "ADDASGN", "SUBASGN", "MULASGN", "DIVASGN",
-  "NUM", "VAR", "LCIB", "RCIB", "LCUB", "RCUB", "WH", "IN", "PRINT", "IF",
-  "ELIF", "ELSE", "SC", "$accept", "program", "statements", "statement",
-  "assignment", "combined_assignment", "print_statement",
-  "while_statement", "condition_statement", "if_statement",
-  "elif_statements", "else_statement", "expression",
-  "assignment_expression", "logical_or_expression",
-  "logical_and_expression", "equality_expression", "relational_expression",
-  "additive_expression", "multiplicative_expression", "unary_expression",
-  "factor", "block", "one_stmt_block", YY_NULLPTR
-};
-
-static const char *
-yysymbol_name (yysymbol_kind_t yysymbol)
-{
-  return yytname[yysymbol];
-}
-#endif
-
-#define YYPACT_NINF (-81)
-
-#define yypact_value_is_default(Yyn) \
-  ((Yyn) == YYPACT_NINF)
-
-#define YYTABLE_NINF (-1)
-
-#define yytable_value_is_error(Yyn) \
-  0
-
-/* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
-   STATE-NUM.  */
-static const yytype_int8 yypact[] =
-{
-     -81,    10,    43,   -81,    58,    -9,     1,    -5,   -81,   -23,
-      12,    14,   -81,   -81,   -81,     1,     1,     1,     1,     1,
-       1,     5,     5,   -81,    64,     1,   -81,   -81,   -81,    49,
-      32,     9,    85,    22,    90,   -81,   -81,     1,   -81,   -81,
-     -81,    25,   -81,   -81,   -81,   -81,   -81,    27,   -81,   -81,
-     -81,     1,     1,     1,     1,     1,    47,     5,     5,     5,
-       5,     5,     5,     5,     5,     5,     5,     5,     5,     5,
-      74,    44,    13,   -81,    19,   -81,   -81,   -81,   -81,   -81,
-     -81,    32,     9,    85,    85,    22,    22,    22,    22,    90,
-      90,   -81,   -81,   -81,    33,     1,   -81,   -81,   -81,   -81,
-     -81,   -81,   -81,    75,    43,    80,    81,    82,    39,   -81,
-     -81,   -81,   -81,   -81,    83,   -81
-};
-
-/* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
-   Performed when YYTABLE does not specify something else to do.  Zero
-   means the default is an error.  */
-static const yytype_int8 yydefact[] =
-{
-       3,     0,     2,     1,     0,     0,     0,     0,     4,     0,
-       0,     0,     8,     9,    21,     0,     0,     0,     0,     0,
-       0,     0,     0,    56,    57,     0,    59,    15,    27,    28,
-      34,    36,    38,    41,    46,    49,    53,     0,     5,     6,
-       7,    24,    10,    11,    12,    13,    14,     0,    57,    54,
-      55,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,    18,     0,    29,    30,    31,    32,    33,
-      58,    35,    37,    39,    40,    42,    43,    44,    45,    47,
-      48,    50,    51,    52,     0,     0,     3,    61,    26,     3,
-      17,     3,    20,     0,    60,     0,     0,     0,     0,    25,
-      16,    19,     3,    23,     0,    22
-};
-
-/* YYPGOTO[NTERM-NUM].  */
-static const yytype_int8 yypgoto[] =
-{
-     -81,   -81,    61,    -2,   -81,   -81,   -81,   -81,   -81,   -81,
-     -81,   -81,   -14,    36,   -81,    55,    56,   -21,    35,    41,
-     -13,   -81,   -80,   -67
-};
-
-/* YYDEFGOTO[NTERM-NUM].  */
-static const yytype_int8 yydefgoto[] =
-{
-       0,     1,   104,    97,     9,    10,    11,    12,    13,    14,
-      41,    73,    27,    28,    29,    30,    31,    32,    33,    34,
-      35,    36,   105,    98
-};
-
-/* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
-   positive, shift that token.  If negative, reduce the rule whose
-   number is the opposite.  If YYTABLE_NINF, syntax error.  */
-static const yytype_int8 yytable[] =
-{
-       8,    42,    43,    44,    45,    46,    47,   100,    49,    50,
-       3,    56,    38,    21,    59,    60,    20,    21,    22,   106,
-      37,   107,    22,    70,    23,    24,    25,   102,    23,    48,
-      25,    26,   114,    65,    66,    26,    58,     4,    83,    84,
-      96,   113,     5,     4,     6,     7,    99,    39,     5,    40,
-       6,     7,    57,    74,    91,    92,    93,     4,    71,    72,
-     101,     2,     5,     4,     6,     7,   112,     4,     5,    95,
-       6,     7,     5,    80,     6,     7,    15,    16,    17,    18,
-      19,   103,    51,    52,    53,    54,    55,    75,    76,    77,
-      78,    79,    61,    62,    63,    64,    85,    86,    87,    88,
-      94,   108,     8,    67,    68,    69,    89,    90,   109,   110,
-     111,   115,    81,     0,    82
-};
-
-static const yytype_int8 yycheck[] =
-{
-       2,    15,    16,    17,    18,    19,    20,    74,    21,    22,
-       0,    25,    35,    12,     5,     6,    25,    12,    17,    99,
-      25,   101,    17,    37,    23,    24,    25,    94,    23,    24,
-      25,    30,   112,    11,    12,    30,     4,    24,    59,    60,
-      27,   108,    29,    24,    31,    32,    27,    35,    29,    35,
-      31,    32,     3,    26,    67,    68,    69,    24,    33,    34,
-      27,     0,    29,    24,    31,    32,    27,    24,    29,    25,
-      31,    32,    29,    26,    31,    32,    18,    19,    20,    21,
-      22,    95,    18,    19,    20,    21,    22,    51,    52,    53,
-      54,    55,     7,     8,     9,    10,    61,    62,    63,    64,
-      26,    26,   104,    13,    14,    15,    65,    66,    28,    28,
-      28,    28,    57,    -1,    58
-};
-
-/* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
-   state STATE-NUM.  */
-static const yytype_int8 yystos[] =
-{
-       0,    37,    38,     0,    24,    29,    31,    32,    39,    40,
-      41,    42,    43,    44,    45,    18,    19,    20,    21,    22,
-      25,    12,    17,    23,    24,    25,    30,    48,    49,    50,
-      51,    52,    53,    54,    55,    56,    57,    25,    35,    35,
-      35,    46,    48,    48,    48,    48,    48,    48,    24,    56,
-      56,    18,    19,    20,    21,    22,    48,     3,     4,     5,
-       6,     7,     8,     9,    10,    11,    12,    13,    14,    15,
-      48,    33,    34,    47,    26,    49,    49,    49,    49,    49,
-      26,    51,    52,    53,    53,    54,    54,    54,    54,    55,
-      55,    56,    56,    56,    26,    25,    27,    39,    59,    27,
-      59,    27,    59,    48,    38,    58,    58,    58,    26,    28,
-      28,    28,    27,    59,    58,    28
-};
-
-/* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
-static const yytype_int8 yyr1[] =
-{
-       0,    36,    37,    38,    38,    39,    39,    39,    39,    39,
-      40,    41,    41,    41,    41,    42,    43,    43,    44,    45,
-      45,    46,    46,    46,    47,    47,    47,    48,    49,    49,
-      49,    49,    49,    49,    50,    50,    51,    51,    52,    52,
-      52,    53,    53,    53,    53,    53,    54,    54,    54,    55,
-      55,    55,    55,    56,    56,    56,    57,    57,    57,    57,
-      58,    59
-};
-
-/* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
-static const yytype_int8 yyr2[] =
-{
-       0,     2,     1,     0,     2,     2,     2,     2,     1,     1,
-       3,     3,     3,     3,     3,     2,     7,     5,     3,     7,
-       5,     0,     8,     6,     0,     4,     2,     1,     1,     3,
-       3,     3,     3,     3,     1,     3,     1,     3,     1,     3,
-       3,     1,     3,     3,     3,     3,     1,     3,     3,     1,
-       3,     3,     3,     1,     2,     2,     1,     1,     3,     1,
-       1,     1
-};
-
-
-enum { YYENOMEM = -2 };
-
-#define yyerrok         (yyerrstatus = 0)
-#define yyclearin       (yychar = YYEMPTY)
-
-#define YYACCEPT        goto yyacceptlab
-#define YYABORT         goto yyabortlab
-#define YYERROR         goto yyerrorlab
-#define YYNOMEM         goto yyexhaustedlab
-
-
-#define YYRECOVERING()  (!!yyerrstatus)
-
-#define YYBACKUP(Token, Value)                                    \
-  do                                                              \
-    if (yychar == YYEMPTY)                                        \
-      {                                                           \
-        yychar = (Token);                                         \
-        yylval = (Value);                                         \
-        YYPOPSTACK (yylen);                                       \
-        yystate = *yyssp;                                         \
-        goto yybackup;                                            \
-      }                                                           \
-    else                                                          \
-      {                                                           \
-        yyerror (&yylloc, YY_("syntax error: cannot back up")); \
-        YYERROR;                                                  \
-      }                                                           \
-  while (0)
-
-/* Backward compatibility with an undocumented macro.
-   Use YYerror or YYUNDEF. */
-#define YYERRCODE YYUNDEF
-
-/* YYLLOC_DEFAULT -- Set CURRENT to span from RHS[1] to RHS[N].
-   If N is 0, then set CURRENT to the empty location which ends
-   the previous symbol: RHS[0] (always defined).  */
-
-#ifndef YYLLOC_DEFAULT
-# define YYLLOC_DEFAULT(Current, Rhs, N)                                \
-    do                                                                  \
-      if (N)                                                            \
-        {                                                               \
-          (Current).first_line   = YYRHSLOC (Rhs, 1).first_line;        \
-          (Current).first_column = YYRHSLOC (Rhs, 1).first_column;      \
-          (Current).last_line    = YYRHSLOC (Rhs, N).last_line;         \
-          (Current).last_column  = YYRHSLOC (Rhs, N).last_column;       \
-        }                                                               \
-      else                                                              \
-        {                                                               \
-          (Current).first_line   = (Current).last_line   =              \
-            YYRHSLOC (Rhs, 0).last_line;                                \
-          (Current).first_column = (Current).last_column =              \
-            YYRHSLOC (Rhs, 0).last_column;                              \
-        }                                                               \
-    while (0)
-#endif
-
-#define YYRHSLOC(Rhs, K) ((Rhs)[K])
-
-
-/* Enable debugging if requested.  */
-#if YYDEBUG
-
-# ifndef YYFPRINTF
-#  include <stdio.h> /* INFRINGES ON USER NAME SPACE */
-#  define YYFPRINTF fprintf
-# endif
-
-# define YYDPRINTF(Args)                        \
-do {                                            \
-  if (yydebug)                                  \
-    YYFPRINTF Args;                             \
-} while (0)
-
-
-/* YYLOCATION_PRINT -- Print the location on the stream.
-   This macro was not mandated originally: define only if we know
-   we won't break user code: when these are the locations we know.  */
-
-# ifndef YYLOCATION_PRINT
-
-#  if defined YY_LOCATION_PRINT
-
-   /* Temporary convenience wrapper in case some people defined the
-      undocumented and private YY_LOCATION_PRINT macros.  */
-#   define YYLOCATION_PRINT(File, Loc)  YY_LOCATION_PRINT(File, *(Loc))
-
-#  elif defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
-
-/* Print *YYLOCP on YYO.  Private, do not rely on its existence. */
-
-YY_ATTRIBUTE_UNUSED
-static int
-yy_location_print_ (FILE *yyo, YYLTYPE const * const yylocp)
-{
-  int res = 0;
-  int end_col = 0 != yylocp->last_column ? yylocp->last_column - 1 : 0;
-  if (0 <= yylocp->first_line)
-    {
-      res += YYFPRINTF (yyo, "%d", yylocp->first_line);
-      if (0 <= yylocp->first_column)
-        res += YYFPRINTF (yyo, ".%d", yylocp->first_column);
-    }
-  if (0 <= yylocp->last_line)
-    {
-      if (yylocp->first_line < yylocp->last_line)
-        {
-          res += YYFPRINTF (yyo, "-%d", yylocp->last_line);
-          if (0 <= end_col)
-            res += YYFPRINTF (yyo, ".%d", end_col);
-        }
-      else if (0 <= end_col && yylocp->first_column < end_col)
-        res += YYFPRINTF (yyo, "-%d", end_col);
-    }
-  return res;
-}
-
-#   define YYLOCATION_PRINT  yy_location_print_
-
-    /* Temporary convenience wrapper in case some people defined the
-       undocumented and private YY_LOCATION_PRINT macros.  */
-#   define YY_LOCATION_PRINT(File, Loc)  YYLOCATION_PRINT(File, &(Loc))
-
-#  else
-
-#   define YYLOCATION_PRINT(File, Loc) ((void) 0)
-    /* Temporary convenience wrapper in case some people defined the
-       undocumented and private YY_LOCATION_PRINT macros.  */
-#   define YY_LOCATION_PRINT  YYLOCATION_PRINT
-
-#  endif
-# endif /* !defined YYLOCATION_PRINT */
-
-
-# define YY_SYMBOL_PRINT(Title, Kind, Value, Location)                    \
-do {                                                                      \
-  if (yydebug)                                                            \
-    {                                                                     \
-      YYFPRINTF (stderr, "%s ", Title);                                   \
-      yy_symbol_print (stderr,                                            \
-                  Kind, Value, Location); \
-      YYFPRINTF (stderr, "\n");                                           \
-    }                                                                     \
-} while (0)
-
-
-/*-----------------------------------.
-| Print this symbol's value on YYO.  |
-`-----------------------------------*/
-
-static void
-yy_symbol_value_print (FILE *yyo,
-                       yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp)
-{
-  FILE *yyoutput = yyo;
-  YY_USE (yyoutput);
-  YY_USE (yylocationp);
-  if (!yyvaluep)
-    return;
-  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YY_USE (yykind);
-  YY_IGNORE_MAYBE_UNINITIALIZED_END
-}
-
-
-/*---------------------------.
-| Print this symbol on YYO.  |
-`---------------------------*/
-
-static void
-yy_symbol_print (FILE *yyo,
-                 yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp)
-{
-  YYFPRINTF (yyo, "%s %s (",
-             yykind < YYNTOKENS ? "token" : "nterm", yysymbol_name (yykind));
-
-  YYLOCATION_PRINT (yyo, yylocationp);
-  YYFPRINTF (yyo, ": ");
-  yy_symbol_value_print (yyo, yykind, yyvaluep, yylocationp);
-  YYFPRINTF (yyo, ")");
-}
-
-/*------------------------------------------------------------------.
-| yy_stack_print -- Print the state stack from its BOTTOM up to its |
-| TOP (included).                                                   |
-`------------------------------------------------------------------*/
-
-static void
-yy_stack_print (yy_state_t *yybottom, yy_state_t *yytop)
-{
-  YYFPRINTF (stderr, "Stack now");
-  for (; yybottom <= yytop; yybottom++)
-    {
-      int yybot = *yybottom;
-      YYFPRINTF (stderr, " %d", yybot);
-    }
-  YYFPRINTF (stderr, "\n");
-}
-
-# define YY_STACK_PRINT(Bottom, Top)                            \
-do {                                                            \
-  if (yydebug)                                                  \
-    yy_stack_print ((Bottom), (Top));                           \
-} while (0)
-
-
-/*------------------------------------------------.
-| Report that the YYRULE is going to be reduced.  |
-`------------------------------------------------*/
-
-static void
-yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp, YYLTYPE *yylsp,
-                 int yyrule)
-{
-  int yylno = yyrline[yyrule];
-  int yynrhs = yyr2[yyrule];
-  int yyi;
-  YYFPRINTF (stderr, "Reducing stack by rule %d (line %d):\n",
-             yyrule - 1, yylno);
-  /* The symbols being reduced.  */
-  for (yyi = 0; yyi < yynrhs; yyi++)
-    {
-      YYFPRINTF (stderr, "   $%d = ", yyi + 1);
-      yy_symbol_print (stderr,
-                       YY_ACCESSING_SYMBOL (+yyssp[yyi + 1 - yynrhs]),
-                       &yyvsp[(yyi + 1) - (yynrhs)],
-                       &(yylsp[(yyi + 1) - (yynrhs)]));
-      YYFPRINTF (stderr, "\n");
-    }
-}
-
-# define YY_REDUCE_PRINT(Rule)          \
-do {                                    \
-  if (yydebug)                          \
-    yy_reduce_print (yyssp, yyvsp, yylsp, Rule); \
-} while (0)
-
-/* Nonzero means print parse trace.  It is left uninitialized so that
-   multiple parsers can coexist.  */
-int yydebug;
-#else /* !YYDEBUG */
-# define YYDPRINTF(Args) ((void) 0)
-# define YY_SYMBOL_PRINT(Title, Kind, Value, Location)
-# define YY_STACK_PRINT(Bottom, Top)
-# define YY_REDUCE_PRINT(Rule)
-#endif /* !YYDEBUG */
-
-
-/* YYINITDEPTH -- initial size of the parser's stacks.  */
-#ifndef YYINITDEPTH
-# define YYINITDEPTH 200
-#endif
-
-/* YYMAXDEPTH -- maximum size the stacks can grow to (effective only
-   if the built-in stack extension method is used).
-
-   Do not make this value too large; the results are undefined if
-   YYSTACK_ALLOC_MAXIMUM < YYSTACK_BYTES (YYMAXDEPTH)
-   evaluated with infinite-precision integer arithmetic.  */
-
-#ifndef YYMAXDEPTH
-# define YYMAXDEPTH 10000
-#endif
-
-
-
-
-
-
-/*-----------------------------------------------.
-| Release the memory associated to this symbol.  |
-`-----------------------------------------------*/
-
-static void
-yydestruct (const char *yymsg,
-            yysymbol_kind_t yykind, YYSTYPE *yyvaluep, YYLTYPE *yylocationp)
-{
-  YY_USE (yyvaluep);
-  YY_USE (yylocationp);
-  if (!yymsg)
-    yymsg = "Deleting";
-  YY_SYMBOL_PRINT (yymsg, yykind, yyvaluep, yylocationp);
-
-  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YY_USE (yykind);
-  YY_IGNORE_MAYBE_UNINITIALIZED_END
-}
-
-
-
-
-
-
-/*----------.
-| yyparse.  |
-`----------*/
-
-int
-yyparse (void)
-{
-/* Lookahead token kind.  */
-int yychar;
-
-
-/* The semantic value of the lookahead symbol.  */
-/* Default value used for initialization, for pacifying older GCCs
-   or non-GCC compilers.  */
-YY_INITIAL_VALUE (static YYSTYPE yyval_default;)
-YYSTYPE yylval YY_INITIAL_VALUE (= yyval_default);
-
-/* Location data for the lookahead symbol.  */
-static YYLTYPE yyloc_default
-# if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
-  = { 1, 1, 1, 1 }
-# endif
-;
-YYLTYPE yylloc = yyloc_default;
-
-    /* Number of syntax errors so far.  */
-    int yynerrs = 0;
-
-    yy_state_fast_t yystate = 0;
-    /* Number of tokens to shift before error messages enabled.  */
-    int yyerrstatus = 0;
-
-    /* Refer to the stacks through separate pointers, to allow yyoverflow
-       to reallocate them elsewhere.  */
-
-    /* Their size.  */
-    YYPTRDIFF_T yystacksize = YYINITDEPTH;
-
-    /* The state stack: array, bottom, top.  */
-    yy_state_t yyssa[YYINITDEPTH];
-    yy_state_t *yyss = yyssa;
-    yy_state_t *yyssp = yyss;
-
-    /* The semantic value stack: array, bottom, top.  */
-    YYSTYPE yyvsa[YYINITDEPTH];
-    YYSTYPE *yyvs = yyvsa;
-    YYSTYPE *yyvsp = yyvs;
-
-    /* The location stack: array, bottom, top.  */
-    YYLTYPE yylsa[YYINITDEPTH];
-    YYLTYPE *yyls = yylsa;
-    YYLTYPE *yylsp = yyls;
-
-  int yyn;
-  /* The return value of yyparse.  */
-  int yyresult;
-  /* Lookahead symbol kind.  */
-  yysymbol_kind_t yytoken = YYSYMBOL_YYEMPTY;
-  /* The variables used to return semantic value and location from the
-     action routines.  */
-  YYSTYPE yyval;
-  YYLTYPE yyloc;
-
-  /* The locations where the error started and ended.  */
-  YYLTYPE yyerror_range[3];
-
-
-
-#define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N), yylsp -= (N))
-
-  /* The number of symbols on the RHS of the reduced rule.
-     Keep to zero when no symbol should be popped.  */
-  int yylen = 0;
-
-  YYDPRINTF ((stderr, "Starting parse\n"));
-
-  yychar = YYEMPTY; /* Cause a token to be read.  */
-
-  yylsp[0] = yylloc;
-  goto yysetstate;
-
-
-/*------------------------------------------------------------.
-| yynewstate -- push a new state, which is found in yystate.  |
-`------------------------------------------------------------*/
-yynewstate:
-  /* In all cases, when you get here, the value and location stacks
-     have just been pushed.  So pushing a state here evens the stacks.  */
-  yyssp++;
-
-
-/*--------------------------------------------------------------------.
-| yysetstate -- set current state (the top of the stack) to yystate.  |
-`--------------------------------------------------------------------*/
-yysetstate:
-  YYDPRINTF ((stderr, "Entering state %d\n", yystate));
-  YY_ASSERT (0 <= yystate && yystate < YYNSTATES);
-  YY_IGNORE_USELESS_CAST_BEGIN
-  *yyssp = YY_CAST (yy_state_t, yystate);
-  YY_IGNORE_USELESS_CAST_END
-  YY_STACK_PRINT (yyss, yyssp);
-
-  if (yyss + yystacksize - 1 <= yyssp)
-#if !defined yyoverflow && !defined YYSTACK_RELOCATE
-    YYNOMEM;
-#else
-    {
-      /* Get the current used size of the three stacks, in elements.  */
-      YYPTRDIFF_T yysize = yyssp - yyss + 1;
-
-# if defined yyoverflow
-      {
-        /* Give user a chance to reallocate the stack.  Use copies of
-           these so that the &'s don't force the real ones into
-           memory.  */
-        yy_state_t *yyss1 = yyss;
-        YYSTYPE *yyvs1 = yyvs;
-        YYLTYPE *yyls1 = yyls;
-
-        /* Each stack pointer address is followed by the size of the
-           data in use in that stack, in bytes.  This used to be a
-           conditional around just the two extra args, but that might
-           be undefined if yyoverflow is a macro.  */
-        yyoverflow (YY_("memory exhausted"),
-                    &yyss1, yysize * YYSIZEOF (*yyssp),
-                    &yyvs1, yysize * YYSIZEOF (*yyvsp),
-                    &yyls1, yysize * YYSIZEOF (*yylsp),
-                    &yystacksize);
-        yyss = yyss1;
-        yyvs = yyvs1;
-        yyls = yyls1;
-      }
-# else /* defined YYSTACK_RELOCATE */
-      /* Extend the stack our own way.  */
-      if (YYMAXDEPTH <= yystacksize)
-        YYNOMEM;
-      yystacksize *= 2;
-      if (YYMAXDEPTH < yystacksize)
-        yystacksize = YYMAXDEPTH;
-
-      {
-        yy_state_t *yyss1 = yyss;
-        union yyalloc *yyptr =
-          YY_CAST (union yyalloc *,
-                   YYSTACK_ALLOC (YY_CAST (YYSIZE_T, YYSTACK_BYTES (yystacksize))));
-        if (! yyptr)
-          YYNOMEM;
-        YYSTACK_RELOCATE (yyss_alloc, yyss);
-        YYSTACK_RELOCATE (yyvs_alloc, yyvs);
-        YYSTACK_RELOCATE (yyls_alloc, yyls);
-#  undef YYSTACK_RELOCATE
-        if (yyss1 != yyssa)
-          YYSTACK_FREE (yyss1);
-      }
-# endif
-
-      yyssp = yyss + yysize - 1;
-      yyvsp = yyvs + yysize - 1;
-      yylsp = yyls + yysize - 1;
-
-      YY_IGNORE_USELESS_CAST_BEGIN
-      YYDPRINTF ((stderr, "Stack size increased to %ld\n",
-                  YY_CAST (long, yystacksize)));
-      YY_IGNORE_USELESS_CAST_END
-
-      if (yyss + yystacksize - 1 <= yyssp)
-        YYABORT;
-    }
-#endif /* !defined yyoverflow && !defined YYSTACK_RELOCATE */
-
-
-  if (yystate == YYFINAL)
-    YYACCEPT;
-
-  goto yybackup;
-
-
-/*-----------.
-| yybackup.  |
-`-----------*/
-yybackup:
-  /* Do appropriate processing given the current state.  Read a
-     lookahead token if we need one and don't already have one.  */
-
-  /* First try to decide what to do without reference to lookahead token.  */
-  yyn = yypact[yystate];
-  if (yypact_value_is_default (yyn))
-    goto yydefault;
-
-  /* Not known => get a lookahead token if don't already have one.  */
-
-  /* YYCHAR is either empty, or end-of-input, or a valid lookahead.  */
-  if (yychar == YYEMPTY)
-    {
-      YYDPRINTF ((stderr, "Reading a token\n"));
-      yychar = yylex (&yylval, &yylloc);
-    }
-
-  if (yychar <= YYEOF)
-    {
-      yychar = YYEOF;
-      yytoken = YYSYMBOL_YYEOF;
-      YYDPRINTF ((stderr, "Now at end of input.\n"));
-    }
-  else if (yychar == YYerror)
-    {
-      /* The scanner already issued an error message, process directly
-         to error recovery.  But do not keep the error token as
-         lookahead, it is too special and may lead us to an endless
-         loop in error recovery. */
-      yychar = YYUNDEF;
-      yytoken = YYSYMBOL_YYerror;
-      yyerror_range[1] = yylloc;
-      goto yyerrlab1;
-    }
-  else
-    {
-      yytoken = YYTRANSLATE (yychar);
-      YY_SYMBOL_PRINT ("Next token is", yytoken, &yylval, &yylloc);
-    }
-
-  /* If the proper action on seeing token YYTOKEN is to reduce or to
-     detect an error, take that action.  */
-  yyn += yytoken;
-  if (yyn < 0 || YYLAST < yyn || yycheck[yyn] != yytoken)
-    goto yydefault;
-  yyn = yytable[yyn];
-  if (yyn <= 0)
-    {
-      if (yytable_value_is_error (yyn))
-        goto yyerrlab;
-      yyn = -yyn;
-      goto yyreduce;
-    }
-
-  /* Count tokens shifted since error; after three, turn off error
-     status.  */
-  if (yyerrstatus)
-    yyerrstatus--;
-
-  /* Shift the lookahead token.  */
-  YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
-  yystate = yyn;
-  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  *++yyvsp = yylval;
-  YY_IGNORE_MAYBE_UNINITIALIZED_END
-  *++yylsp = yylloc;
-
-  /* Discard the shifted token.  */
-  yychar = YYEMPTY;
-  goto yynewstate;
-
-
-/*-----------------------------------------------------------.
-| yydefault -- do the default action for the current state.  |
-`-----------------------------------------------------------*/
-yydefault:
-  yyn = yydefact[yystate];
-  if (yyn == 0)
-    goto yyerrlab;
-  goto yyreduce;
-
-
-/*-----------------------------.
-| yyreduce -- do a reduction.  |
-`-----------------------------*/
-yyreduce:
-  /* yyn is the number of a rule to reduce with.  */
-  yylen = yyr2[yyn];
-
-  /* If YYLEN is nonzero, implement the default value of the action:
-     '$$ = $1'.
-
-     Otherwise, the following line sets YYVAL to garbage.
-     This behavior is undocumented and Bison
-     users should not rely upon it.  Assigning to YYVAL
-     unconditionally makes the parser a bit smaller, and it avoids a
-     GCC warning that YYVAL may be used uninitialized.  */
-  yyval = yyvsp[1-yylen];
-
-  /* Default location. */
-  YYLLOC_DEFAULT (yyloc, (yylsp - yylen), yylen);
-  yyerror_range[1] = yyloc;
-  YY_REDUCE_PRINT (yyn);
-  switch (yyn)
-    {
-  case 2: /* program: statements  */
-#line 77 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-               {
-        for (auto stmt : *(yyvsp[0].stmt_vector))
-        {
-            program.statements.push_back(std::unique_ptr<ParaCL::Stmt>(stmt));
-        }
-        delete (yyvsp[0].stmt_vector);
-    }
-#line 1349 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 3: /* statements: %empty  */
-#line 87 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-           {
-        (yyval.stmt_vector) = new std::vector<ParaCL::Stmt*>();
-    }
-#line 1357 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 4: /* statements: statements statement  */
-#line 90 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                           {
-        (yyvsp[-1].stmt_vector)->push_back((yyvsp[0].stmt));
-        (yyval.stmt_vector) = (yyvsp[-1].stmt_vector);
-    }
-#line 1366 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 5: /* statement: assignment SC  */
-#line 97 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                  { 
-        (yyval.stmt) = (yyvsp[-1].stmt);
-    }
-#line 1374 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 6: /* statement: combined_assignment SC  */
-#line 100 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                             {
-        (yyval.stmt) = (yyvsp[-1].stmt);
-    }
-#line 1382 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 7: /* statement: print_statement SC  */
-#line 103 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                         {
-        (yyval.stmt) = (yyvsp[-1].stmt);
-    }
-#line 1390 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 8: /* statement: while_statement  */
-#line 106 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                      {
-        (yyval.stmt) = (yyvsp[0].stmt);
-    }
-#line 1398 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 9: /* statement: condition_statement  */
-#line 109 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                          {
-        (yyval.stmt) = (yyvsp[0].condition_stmt);
-    }
-#line 1406 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 10: /* assignment: VAR AS expression  */
-#line 115 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                      {
-        (yyval.stmt) = new ParaCL::AssignStmt(*(yyvsp[-2].str_value), std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr)));
-        delete (yyvsp[-2].str_value);
-    }
-#line 1415 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 11: /* combined_assignment: VAR ADDASGN expression  */
-#line 122 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                           {
-        (yyval.stmt) = new ParaCL::CombinedAssingStmt(
-            ParaCL::token_t::ADDASGN,
-            *(yyvsp[-2].str_value),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-        delete (yyvsp[-2].str_value);
-    }
-#line 1428 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 12: /* combined_assignment: VAR SUBASGN expression  */
-#line 130 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                             {
-        (yyval.stmt) = new ParaCL::CombinedAssingStmt(
-            ParaCL::token_t::SUBASGN,
-            *(yyvsp[-2].str_value),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-        delete (yyvsp[-2].str_value);
-    }
-#line 1441 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 13: /* combined_assignment: VAR MULASGN expression  */
-#line 138 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                             {
-        (yyval.stmt) = new ParaCL::CombinedAssingStmt(
-            ParaCL::token_t::MULASGN,
-            *(yyvsp[-2].str_value),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-        delete (yyvsp[-2].str_value);
-    }
-#line 1454 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 14: /* combined_assignment: VAR DIVASGN expression  */
-#line 146 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                             {
-        (yyval.stmt) = new ParaCL::CombinedAssingStmt(
-            ParaCL::token_t::DIVASGN,
-            *(yyvsp[-2].str_value),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-        delete (yyvsp[-2].str_value);
-    }
-#line 1467 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 15: /* print_statement: PRINT expression  */
-#line 157 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                     {
-        (yyval.stmt) = new ParaCL::PrintStmt(std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr)));
-    }
-#line 1475 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 16: /* while_statement: WH LCIB expression RCIB LCUB block RCUB  */
-#line 163 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                            {
-        (yyval.stmt) = new ParaCL::WhileStmt(
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-4].expr)),
-            std::unique_ptr<ParaCL::BlockStmt>((yyvsp[-1].block))
-        );
-    }
-#line 1486 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 17: /* while_statement: WH LCIB expression RCIB one_stmt_block  */
-#line 169 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                             {
-        (yyval.stmt) = new ParaCL::WhileStmt(
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-2].expr)), 
-            std::unique_ptr<ParaCL::BlockStmt>((yyvsp[0].block))
-        );
-    }
-#line 1497 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 18: /* condition_statement: if_statement elif_statements else_statement  */
-#line 178 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                {
-        auto cond_stmt = new ParaCL::ConditionStatement(
-            std::unique_ptr<ParaCL::IfStatement>((yyvsp[-2].if_stmt))
-        );
-
-        cond_stmt->add_elif_conditions((yyvsp[-1].elif_stmts));
-        delete (yyvsp[-1].elif_stmts);
-
-        if ((yyvsp[0].else_stmt)) cond_stmt->add_else_condition(std::unique_ptr<ParaCL::ElseStatement>((yyvsp[0].else_stmt)));
-
-        (yyval.condition_stmt) = cond_stmt;
-    }
-#line 1514 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 19: /* if_statement: IF LCIB expression RCIB LCUB block RCUB  */
-#line 193 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                            {
-        (yyval.if_stmt) = new ParaCL::IfStatement(
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-4].expr)),
-            std::unique_ptr<ParaCL::BlockStmt>((yyvsp[-1].block))
-        );
-    }
-#line 1525 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 20: /* if_statement: IF LCIB expression RCIB one_stmt_block  */
-#line 199 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                             {
-        (yyval.if_stmt) = new ParaCL::IfStatement(
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-2].expr)),
-            std::unique_ptr<ParaCL::BlockStmt>((yyvsp[0].block))
-        );
-    }
-#line 1536 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 21: /* elif_statements: %empty  */
-#line 208 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-           {
-        (yyval.elif_stmts) = new std::vector<ParaCL::ElifStatement*>();
-    }
-#line 1544 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 22: /* elif_statements: elif_statements ELIF LCIB expression RCIB LCUB block RCUB  */
-#line 211 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                                {
-        (yyvsp[-7].elif_stmts)->push_back(new ParaCL::ElifStatement(
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-4].expr)),
-            std::unique_ptr<ParaCL::BlockStmt>((yyvsp[-1].block))
-        ));
-        (yyval.elif_stmts) = (yyvsp[-7].elif_stmts);
-    }
-#line 1556 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 23: /* elif_statements: elif_statements ELIF LCIB expression RCIB one_stmt_block  */
-#line 218 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                               {
-        (yyvsp[-5].elif_stmts)->push_back(new ParaCL::ElifStatement(
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-2].expr)),
-            std::unique_ptr<ParaCL::BlockStmt>((yyvsp[0].block))
-        ));
-        (yyval.elif_stmts) = (yyvsp[-5].elif_stmts);
-    }
-#line 1568 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 24: /* else_statement: %empty  */
-#line 228 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-           { (yyval.else_stmt) = nullptr; }
-#line 1574 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 25: /* else_statement: ELSE LCUB block RCUB  */
-#line 229 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                           {
-        (yyval.else_stmt) = new ParaCL::ElseStatement(
-            std::unique_ptr<ParaCL::BlockStmt>((yyvsp[-1].block))
-        );
-    }
-#line 1584 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 26: /* else_statement: ELSE one_stmt_block  */
-#line 234 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                          {
-        (yyval.else_stmt) = new ParaCL::ElseStatement(
-            std::unique_ptr<ParaCL::BlockStmt>((yyvsp[0].block))
-        );
-    }
-#line 1594 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 27: /* expression: assignment_expression  */
-#line 242 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                          { (yyval.expr) = (yyvsp[0].expr); }
-#line 1600 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 28: /* assignment_expression: logical_or_expression  */
-#line 246 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                          { (yyval.expr) = (yyvsp[0].expr); }
-#line 1606 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 29: /* assignment_expression: VAR AS assignment_expression  */
-#line 247 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                            {
-        (yyval.expr) = new ParaCL::AssignExpr(*(yyvsp[-2].str_value), std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr)));
-        delete (yyvsp[-2].str_value);
-    }
-#line 1615 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 30: /* assignment_expression: VAR ADDASGN assignment_expression  */
-#line 251 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                      {
-        (yyval.expr) = new ParaCL::CombinedAssingExpr(
-            ParaCL::token_t::ADDASGN,
-            *(yyvsp[-2].str_value),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-        delete (yyvsp[-2].str_value);
-    }
-#line 1628 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 31: /* assignment_expression: VAR SUBASGN assignment_expression  */
-#line 259 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                      {
-        (yyval.expr) = new ParaCL::CombinedAssingExpr(
-            ParaCL::token_t::SUBASGN,
-            *(yyvsp[-2].str_value),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-        delete (yyvsp[-2].str_value);
-    }
-#line 1641 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 32: /* assignment_expression: VAR MULASGN assignment_expression  */
-#line 267 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                      {
-        (yyval.expr) = new ParaCL::CombinedAssingExpr(
-            ParaCL::token_t::MULASGN,
-            *(yyvsp[-2].str_value),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-        delete (yyvsp[-2].str_value);
-    }
-#line 1654 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 33: /* assignment_expression: VAR DIVASGN assignment_expression  */
-#line 275 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                      {
-        (yyval.expr) = new ParaCL::CombinedAssingExpr(
-            ParaCL::token_t::DIVASGN,
-            *(yyvsp[-2].str_value),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-        delete (yyvsp[-2].str_value);
-    }
-#line 1667 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 34: /* logical_or_expression: logical_and_expression  */
-#line 286 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                           { (yyval.expr) = (yyvsp[0].expr); }
-#line 1673 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 35: /* logical_or_expression: logical_or_expression OR logical_and_expression  */
-#line 287 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                               {
-        (yyval.expr) = new ParaCL::BinExpr(
-            ParaCL::token_t::OR,
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-2].expr)),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-    }
-#line 1685 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 36: /* logical_and_expression: equality_expression  */
-#line 297 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                        { (yyval.expr) = (yyvsp[0].expr); }
-#line 1691 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 37: /* logical_and_expression: logical_and_expression AND equality_expression  */
-#line 298 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                               {
-        (yyval.expr) = new ParaCL::BinExpr(
-            ParaCL::token_t::AND,
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-2].expr)),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-    }
-#line 1703 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 38: /* equality_expression: relational_expression  */
-#line 308 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                          { (yyval.expr) = (yyvsp[0].expr); }
-#line 1709 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 39: /* equality_expression: equality_expression ISEQ relational_expression  */
-#line 309 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                                {
-        (yyval.expr) = new ParaCL::BinExpr(
-            ParaCL::token_t::ISEQ,
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-2].expr)),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-    }
-#line 1721 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 40: /* equality_expression: equality_expression ISNE relational_expression  */
-#line 316 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                                {
-        (yyval.expr) = new ParaCL::BinExpr(
-            ParaCL::token_t::ISNE,
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-2].expr)),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-    }
-#line 1733 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 41: /* relational_expression: additive_expression  */
-#line 326 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                        { (yyval.expr) = (yyvsp[0].expr); }
-#line 1739 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 42: /* relational_expression: relational_expression ISAB additive_expression  */
-#line 327 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                                {
-        (yyval.expr) = new ParaCL::BinExpr(
-            ParaCL::token_t::ISAB,
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-2].expr)),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-    }
-#line 1751 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 43: /* relational_expression: relational_expression ISABE additive_expression  */
-#line 334 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                                  {
-        (yyval.expr) = new ParaCL::BinExpr(
-            ParaCL::token_t::ISABE,
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-2].expr)),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-    }
-#line 1763 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 44: /* relational_expression: relational_expression ISLS additive_expression  */
-#line 341 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                                {
-        (yyval.expr) = new ParaCL::BinExpr(
-            ParaCL::token_t::ISLS,
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-2].expr)),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-    }
-#line 1775 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 45: /* relational_expression: relational_expression ISLSE additive_expression  */
-#line 348 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                                  {
-        (yyval.expr) = new ParaCL::BinExpr(
-            ParaCL::token_t::ISLSE,
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-2].expr)),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-    }
-#line 1787 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 46: /* additive_expression: multiplicative_expression  */
-#line 358 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                              { (yyval.expr) = (yyvsp[0].expr); }
-#line 1793 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 47: /* additive_expression: additive_expression ADD multiplicative_expression  */
-#line 359 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                                  { 
-        (yyval.expr) = new ParaCL::BinExpr(
-            ParaCL::token_t::ADD,
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-2].expr)),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-    }
-#line 1805 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 48: /* additive_expression: additive_expression SUB multiplicative_expression  */
-#line 366 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                                  { 
-        (yyval.expr) = new ParaCL::BinExpr(
-            ParaCL::token_t::SUB,
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-2].expr)),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-    }
-#line 1817 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 49: /* multiplicative_expression: unary_expression  */
-#line 376 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                     { (yyval.expr) = (yyvsp[0].expr); }
-#line 1823 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 50: /* multiplicative_expression: multiplicative_expression MUL unary_expression  */
-#line 377 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                               { 
-        (yyval.expr) = new ParaCL::BinExpr(
-            ParaCL::token_t::MUL, 
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-2].expr)),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-    }
-#line 1835 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 51: /* multiplicative_expression: multiplicative_expression DIV unary_expression  */
-#line 384 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                               {
-        (yyval.expr) = new ParaCL::BinExpr(
-            ParaCL::token_t::DIV, 
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-2].expr)),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-    }
-#line 1847 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 52: /* multiplicative_expression: multiplicative_expression REM unary_expression  */
-#line 391 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                                               {
-        (yyval.expr) = new ParaCL::BinExpr(
-            ParaCL::token_t::REM,
-            std::unique_ptr<ParaCL::Expr>((yyvsp[-2].expr)),
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-    }
-#line 1859 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 53: /* unary_expression: factor  */
-#line 401 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-           { (yyval.expr) = (yyvsp[0].expr); }
-#line 1865 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 54: /* unary_expression: SUB unary_expression  */
-#line 402 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                     {
-        (yyval.expr) = new ParaCL::UnExpr(
-            ParaCL::token_t::SUB,
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-    }
-#line 1876 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 55: /* unary_expression: NOT unary_expression  */
-#line 408 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                                     {
-        (yyval.expr) = new ParaCL::UnExpr(
-            ParaCL::token_t::NOT,
-            std::unique_ptr<ParaCL::Expr>((yyvsp[0].expr))
-        );
-    }
-#line 1887 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 56: /* factor: NUM  */
-#line 417 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-        { 
-        (yyval.expr) = new ParaCL::NumExpr((yyvsp[0].num_value));
-    }
-#line 1895 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 57: /* factor: VAR  */
-#line 420 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-          { 
-        (yyval.expr) = new ParaCL::VarExpr(*(yyvsp[0].str_value));
-        delete (yyvsp[0].str_value);
-    }
-#line 1904 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 58: /* factor: LCIB expression RCIB  */
-#line 424 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-                           { 
-        (yyval.expr) = (yyvsp[-1].expr);
-    }
-#line 1912 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 59: /* factor: IN  */
-#line 427 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-         {
-        (yyval.expr) = new ParaCL::InputExpr();
-    }
-#line 1920 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 60: /* block: statements  */
-#line 433 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-               {
-        std::vector<std::unique_ptr<ParaCL::Stmt>> body_stmts;
-        for (auto stmt : *(yyvsp[0].stmt_vector))
-            body_stmts.push_back(std::unique_ptr<ParaCL::Stmt>(stmt));
-
-        (yyval.block) = new ParaCL::BlockStmt(std::move(body_stmts));
-        delete (yyvsp[0].stmt_vector); /* delete vector of statements, created in 'statements' rule */
-    }
-#line 1933 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-  case 61: /* one_stmt_block: statement  */
-#line 444 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-              {
-        std::vector<std::unique_ptr<ParaCL::Stmt>> body_stmts;
-        body_stmts.push_back(std::unique_ptr<ParaCL::Stmt>((yyvsp[0].stmt)));
-        (yyval.block) = new ParaCL::BlockStmt(std::move(body_stmts));
-    }
-#line 1943 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-    break;
-
-
-#line 1947 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
-
-      default: break;
-    }
-  /* User semantic actions sometimes alter yychar, and that requires
-     that yytoken be updated with the new translation.  We take the
-     approach of translating immediately before every use of yytoken.
-     One alternative is translating here after every semantic action,
-     but that translation would be missed if the semantic action invokes
-     YYABORT, YYACCEPT, or YYERROR immediately after altering yychar or
-     if it invokes YYBACKUP.  In the case of YYABORT or YYACCEPT, an
-     incorrect destructor might then be invoked immediately.  In the
-     case of YYERROR or YYBACKUP, subsequent parser actions might lead
-     to an incorrect destructor call or verbose syntax error message
-     before the lookahead is translated.  */
-  YY_SYMBOL_PRINT ("-> $$ =", YY_CAST (yysymbol_kind_t, yyr1[yyn]), &yyval, &yyloc);
-
-  YYPOPSTACK (yylen);
-  yylen = 0;
-
-  *++yyvsp = yyval;
-  *++yylsp = yyloc;
-
-  /* Now 'shift' the result of the reduction.  Determine what state
-     that goes to, based on the state we popped back to and the rule
-     number reduced by.  */
-  {
-    const int yylhs = yyr1[yyn] - YYNTOKENS;
-    const int yyi = yypgoto[yylhs] + *yyssp;
-    yystate = (0 <= yyi && yyi <= YYLAST && yycheck[yyi] == *yyssp
-               ? yytable[yyi]
-               : yydefgoto[yylhs]);
+      35,    36,    37
+    };
+    // Last valid token kind.
+    const int code_max = 292;
+
+    if (t <= 0)
+      return symbol_kind::S_YYEOF;
+    else if (t <= code_max)
+      return static_cast <symbol_kind_type> (translate_table[t]);
+    else
+      return symbol_kind::S_YYUNDEF;
   }
 
-  goto yynewstate;
+#line 7 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
+} // yy
+#line 2756 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp"
 
+#line 631 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
 
-/*--------------------------------------.
-| yyerrlab -- here on detecting error.  |
-`--------------------------------------*/
-yyerrlab:
-  /* Make sure we have latest lookahead translation.  See comments at
-     user semantic actions for why this is necessary.  */
-  yytoken = yychar == YYEMPTY ? YYSYMBOL_YYEMPTY : YYTRANSLATE (yychar);
-  /* If not already recovering from an error, report this error.  */
-  if (!yyerrstatus)
-    {
-      ++yynerrs;
-      yyerror (&yylloc, YY_("syntax error"));
-    }
-
-  yyerror_range[1] = yylloc;
-  if (yyerrstatus == 3)
-    {
-      /* If just tried and failed to reuse lookahead token after an
-         error, discard it.  */
-
-      if (yychar <= YYEOF)
-        {
-          /* Return failure if at end of input.  */
-          if (yychar == YYEOF)
-            YYABORT;
-        }
-      else
-        {
-          yydestruct ("Error: discarding",
-                      yytoken, &yylval, &yylloc);
-          yychar = YYEMPTY;
-        }
-    }
-
-  /* Else will try to reuse lookahead token after shifting the error
-     token.  */
-  goto yyerrlab1;
-
-
-/*---------------------------------------------------.
-| yyerrorlab -- error raised explicitly by YYERROR.  |
-`---------------------------------------------------*/
-yyerrorlab:
-  /* Pacify compilers when the user code never invokes YYERROR and the
-     label yyerrorlab therefore never appears in user code.  */
-  if (0)
-    YYERROR;
-  ++yynerrs;
-
-  /* Do not reclaim the symbols of the rule whose action triggered
-     this YYERROR.  */
-  YYPOPSTACK (yylen);
-  yylen = 0;
-  YY_STACK_PRINT (yyss, yyssp);
-  yystate = *yyssp;
-  goto yyerrlab1;
-
-
-/*-------------------------------------------------------------.
-| yyerrlab1 -- common code for both syntax error and YYERROR.  |
-`-------------------------------------------------------------*/
-yyerrlab1:
-  yyerrstatus = 3;      /* Each real token shifted decrements this.  */
-
-  /* Pop stack until we find a state that shifts the error token.  */
-  for (;;)
-    {
-      yyn = yypact[yystate];
-      if (!yypact_value_is_default (yyn))
-        {
-          yyn += YYSYMBOL_YYerror;
-          if (0 <= yyn && yyn <= YYLAST && yycheck[yyn] == YYSYMBOL_YYerror)
-            {
-              yyn = yytable[yyn];
-              if (0 < yyn)
-                break;
-            }
-        }
-
-      /* Pop the current state because it cannot handle the error token.  */
-      if (yyssp == yyss)
-        YYABORT;
-
-      yyerror_range[1] = *yylsp;
-      yydestruct ("Error: popping",
-                  YY_ACCESSING_SYMBOL (yystate), yyvsp, yylsp);
-      YYPOPSTACK (1);
-      yystate = *yyssp;
-      YY_STACK_PRINT (yyss, yyssp);
-    }
-
-  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  *++yyvsp = yylval;
-  YY_IGNORE_MAYBE_UNINITIALIZED_END
-
-  yyerror_range[2] = yylloc;
-  ++yylsp;
-  YYLLOC_DEFAULT (*yylsp, yyerror_range, 2);
-
-  /* Shift the error token.  */
-  YY_SYMBOL_PRINT ("Shifting", YY_ACCESSING_SYMBOL (yyn), yyvsp, yylsp);
-
-  yystate = yyn;
-  goto yynewstate;
-
-
-/*-------------------------------------.
-| yyacceptlab -- YYACCEPT comes here.  |
-`-------------------------------------*/
-yyacceptlab:
-  yyresult = 0;
-  goto yyreturnlab;
-
-
-/*-----------------------------------.
-| yyabortlab -- YYABORT comes here.  |
-`-----------------------------------*/
-yyabortlab:
-  yyresult = 1;
-  goto yyreturnlab;
-
-
-/*-----------------------------------------------------------.
-| yyexhaustedlab -- YYNOMEM (memory exhaustion) comes here.  |
-`-----------------------------------------------------------*/
-yyexhaustedlab:
-  yyerror (&yylloc, YY_("memory exhausted"));
-  yyresult = 2;
-  goto yyreturnlab;
-
-
-/*----------------------------------------------------------.
-| yyreturnlab -- parsing is finished, clean up and return.  |
-`----------------------------------------------------------*/
-yyreturnlab:
-  if (yychar != YYEMPTY)
-    {
-      /* Make sure we have latest lookahead translation.  See comments at
-         user semantic actions for why this is necessary.  */
-      yytoken = YYTRANSLATE (yychar);
-      yydestruct ("Cleanup: discarding lookahead",
-                  yytoken, &yylval, &yylloc);
-    }
-  /* Do not reclaim the symbols of the rule whose action triggered
-     this YYABORT or YYACCEPT.  */
-  YYPOPSTACK (yylen);
-  YY_STACK_PRINT (yyss, yyssp);
-  while (yyssp != yyss)
-    {
-      yydestruct ("Cleanup: popping",
-                  YY_ACCESSING_SYMBOL (+*yyssp), yyvsp, yylsp);
-      YYPOPSTACK (1);
-    }
-#ifndef yyoverflow
-  if (yyss != yyssa)
-    YYSTACK_FREE (yyss);
-#endif
-
-  return yyresult;
-}
-
-#line 450 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/parser/parser.y"
-
-
-void yyerror(YYLTYPE* loc, const char* msg)
-{
-    std::cerr << current_file     << ":"
-              << loc->first_line   << ":"
-              << loc->first_column << ":"
-              " paracl: error: " << msg << "\n";
-}

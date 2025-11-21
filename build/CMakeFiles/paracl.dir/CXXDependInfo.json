@@ -19,7 +19,9 @@
 	"linked-target-dirs" : 
 	[
 		"/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/options_parse.dir",
-		"/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/run_paracl.dir"
+		"/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/run_paracl.dir",
+		"/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/paracl_info.dir",
+		"/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/interpretor.dir"
 	],
 	"module-dir" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/paracl.dir"
 }

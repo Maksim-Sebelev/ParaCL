@@ -23,13 +23,19 @@
 		{
 			"lookup-method" : "by-name",
 			"path" : "CMakeFiles/options_parse.dir/paracl_extension.pcm"
+		},
+		"paracl_info" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "CMakeFiles/paracl_info.dir/paracl_info.pcm"
 		}
 	},
 	"usages" : 
 	{
 		"options_parser" : 
 		[
-			"paracl_extension"
+			"paracl_extension",
+			"paracl_info"
 		]
 	}
 }

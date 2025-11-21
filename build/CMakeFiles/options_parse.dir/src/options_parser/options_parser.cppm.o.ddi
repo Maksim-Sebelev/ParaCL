@@ -13,6 +13,9 @@
       "requires": [
         {
           "logical-name": "paracl_extension"
+        },
+        {
+          "logical-name": "paracl_info"
         }
       ]
     }

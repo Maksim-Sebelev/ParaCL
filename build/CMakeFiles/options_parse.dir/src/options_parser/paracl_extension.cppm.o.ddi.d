@@ -1,6 +1,6 @@
 CMakeFiles/options_parse.dir/src/options_parser/paracl_extension.cppm.o.ddi: \
   /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/options_parser/paracl_extension.cppm \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/string \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/filesystem \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/requires_hosted.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++config.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/os_defines.h \
@@ -13,9 +13,18 @@ CMakeFiles/options_parse.dir/src/options_parser/paracl_extension.cppm.o.ddi: \
   /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/cpu_defines.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/pstl/pstl_config.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/version.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fs_fwd.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/system_error \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/error_constants.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cerrno \
+  /usr/include/errno.h /usr/include/x86_64-linux-gnu/bits/errno.h \
+  /usr/include/linux/errno.h /usr/include/x86_64-linux-gnu/asm/errno.h \
+  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+  /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/iosfwd \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stringfwd.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/memoryfwd.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/char_traits.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/postypes.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cwchar \
   /usr/include/wchar.h \
@@ -36,14 +45,27 @@ CMakeFiles/options_parse.dir/src/options_parser/paracl_extension.cppm.o.ddi: \
   /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
   /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/stdexcept \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/exception \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/exception.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/exception_ptr.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/exception_defines.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/cxxabi_init_exception.h \
+  /usr/lib/clang/18/include/__stddef_ptrdiff_t.h \
+  /usr/lib/clang/18/include/__stddef_nullptr_t.h \
+  /usr/lib/clang/18/include/__stddef_max_align_t.h \
+  /usr/lib/clang/18/include/__stddef_offsetof.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/typeinfo \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/hash_bytes.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/new \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/move.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/type_traits \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/version.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/nested_exception.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/string \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/char_traits.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/compare \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/concepts \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_construct.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/new \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/exception.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/move.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_iterator_base_types.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/iterator_concepts.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/ptr_traits.h \
@@ -55,13 +77,11 @@ CMakeFiles/options_parse.dir/src/options_parser/paracl_extension.cppm.o.ddi: \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++allocator.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/new_allocator.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/functexcept.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/exception_defines.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/cpp_type_traits.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/localefwd.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++locale.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/clocale \
   /usr/include/locale.h /usr/include/x86_64-linux-gnu/bits/locale.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/iosfwd \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cctype \
   /usr/include/ctype.h /usr/include/x86_64-linux-gnu/bits/types.h \
   /usr/include/x86_64-linux-gnu/bits/typesizes.h \
@@ -90,7 +110,6 @@ CMakeFiles/options_parse.dir/src/options_parser/paracl_extension.cppm.o.ddi: \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/alloc_traits.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/string_view \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/functional_hash.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/hash_bytes.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/ranges_base.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/max_size_type.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/numbers \
@@ -129,33 +148,14 @@ CMakeFiles/options_parse.dir/src/options_parser/paracl_extension.cppm.o.ddi: \
   /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
   /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cerrno \
-  /usr/include/errno.h /usr/include/x86_64-linux-gnu/bits/errno.h \
-  /usr/include/linux/errno.h /usr/include/x86_64-linux-gnu/asm/errno.h \
-  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
-  /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/charconv.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/basic_string.tcc \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/memory_resource.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cstddef \
-  /usr/lib/clang/18/include/__stddef_ptrdiff_t.h \
-  /usr/lib/clang/18/include/__stddef_nullptr_t.h \
-  /usr/lib/clang/18/include/__stddef_max_align_t.h \
-  /usr/lib/clang/18/include/__stddef_offsetof.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/uses_allocator.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/uses_allocator_args.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/tuple \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/ranges_util.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/filesystem \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fs_fwd.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/system_error \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/error_constants.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/stdexcept \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/exception \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/exception_ptr.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/cxxabi_init_exception.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/typeinfo \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/nested_exception.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cstdint \
   /usr/lib/clang/18/include/stdint.h /usr/include/stdint.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
@@ -241,11 +241,6 @@ CMakeFiles/options_parse.dir/src/options_parser/paracl_extension.cppm.o.ddi: \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fs_dir.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fs_ops.h \
   /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/third-party/logger/Src/header-only/pineaplog.hpp \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/iostream \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/fstream \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/basic_file.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++io.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fstream.tcc \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cassert \
   /usr/include/assert.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cstdarg \
@@ -253,7 +248,12 @@ CMakeFiles/options_parse.dir/src/options_parser/paracl_extension.cppm.o.ddi: \
   /usr/lib/clang/18/include/__stdarg_va_arg.h \
   /usr/lib/clang/18/include/__stdarg___va_copy.h \
   /usr/lib/clang/18/include/__stdarg_va_copy.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/fstream \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/basic_file.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++io.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fstream.tcc \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/iostream \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/source_location \
-  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/third-party/logger/Src/header-only/log_background_settings.hpp \
   /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/third-party/logger/Src/header-only/custom_console_output.hpp \
-  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/third-party/logger/Src/header-only/global.hpp
+  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/third-party/logger/Src/header-only/global.hpp \
+  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/third-party/logger/Src/header-only/log_background_settings.hpp

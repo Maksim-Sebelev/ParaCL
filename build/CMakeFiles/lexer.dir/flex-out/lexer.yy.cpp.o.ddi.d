@@ -70,10 +70,30 @@ CMakeFiles/lexer.dir/flex-out/lexer.yy.cpp.o.ddi: \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/std_abs.h \
   /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/third-party/logger/Src/header-only/pineaplog.hpp \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/iostream \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cassert \
+  /usr/include/assert.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cstdarg \
+  /usr/lib/clang/18/include/__stdarg_va_list.h \
+  /usr/lib/clang/18/include/__stdarg_va_arg.h \
+  /usr/lib/clang/18/include/__stdarg___va_copy.h \
+  /usr/lib/clang/18/include/__stdarg_va_copy.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cstddef \
+  /usr/lib/clang/18/include/__stddef_ptrdiff_t.h \
+  /usr/lib/clang/18/include/__stddef_nullptr_t.h \
+  /usr/lib/clang/18/include/__stddef_max_align_t.h \
+  /usr/lib/clang/18/include/__stddef_offsetof.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/version.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ctime \
+  /usr/include/time.h /usr/include/x86_64-linux-gnu/bits/time.h \
+  /usr/include/x86_64-linux-gnu/bits/timex.h \
+  /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h \
+  /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/filesystem \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/requires_hosted.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ostream \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ios \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fs_fwd.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/system_error \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/error_constants.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cerrno \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/iosfwd \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stringfwd.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/memoryfwd.h \
@@ -82,22 +102,19 @@ CMakeFiles/lexer.dir/flex-out/lexer.yy.cpp.o.ddi: \
   /usr/include/wchar.h /usr/include/x86_64-linux-gnu/bits/wchar.h \
   /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/stdexcept \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/exception \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/exception.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/version.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/exception_ptr.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/exception_defines.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/cxxabi_init_exception.h \
-  /usr/lib/clang/18/include/__stddef_ptrdiff_t.h \
-  /usr/lib/clang/18/include/__stddef_nullptr_t.h \
-  /usr/lib/clang/18/include/__stddef_max_align_t.h \
-  /usr/lib/clang/18/include/__stddef_offsetof.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/typeinfo \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/hash_bytes.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/new \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/move.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/type_traits \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/nested_exception.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/string \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/char_traits.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/compare \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/concepts \
@@ -109,36 +126,17 @@ CMakeFiles/lexer.dir/flex-out/lexer.yy.cpp.o.ddi: \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_iterator_base_funcs.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/concept_check.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/debug/assertions.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/allocator.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++allocator.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/new_allocator.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/functexcept.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/cpp_type_traits.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/localefwd.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++locale.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/clocale \
   /usr/include/locale.h /usr/include/x86_64-linux-gnu/bits/locale.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cctype \
   /usr/include/ctype.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/ios_base.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ext/atomicity.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/gthr.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/gthr-default.h \
-  /usr/include/pthread.h /usr/include/sched.h \
-  /usr/include/x86_64-linux-gnu/bits/sched.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h \
-  /usr/include/x86_64-linux-gnu/bits/cpu-set.h /usr/include/time.h \
-  /usr/include/x86_64-linux-gnu/bits/time.h \
-  /usr/include/x86_64-linux-gnu/bits/timex.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h \
-  /usr/include/x86_64-linux-gnu/bits/setjmp.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct___jmp_buf_tag.h \
-  /usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/atomic_word.h \
-  /usr/include/x86_64-linux-gnu/sys/single_threaded.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/locale_classes.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/string \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/allocator.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++allocator.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/new_allocator.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/functexcept.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/cpp_type_traits.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/ostream_insert.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/cxxabi_forced.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_iterator.h \
@@ -167,56 +165,73 @@ CMakeFiles/lexer.dir/flex-out/lexer.yy.cpp.o.ddi: \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/string_view.tcc \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ext/string_conversions.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cstdio \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cerrno \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/charconv.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/basic_string.tcc \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/memory_resource.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cstddef \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/uses_allocator.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/uses_allocator_args.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/tuple \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/ranges_util.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cstdint \
+  /usr/lib/clang/18/include/stdint.h /usr/include/stdint.h \
+  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
+  /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/chrono.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ratio \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/limits \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/parse_numbers.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fs_path.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/locale \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/locale_classes.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ext/atomicity.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/gthr.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/gthr-default.h \
+  /usr/include/pthread.h /usr/include/sched.h \
+  /usr/include/x86_64-linux-gnu/bits/sched.h \
+  /usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h \
+  /usr/include/x86_64-linux-gnu/bits/cpu-set.h \
+  /usr/include/x86_64-linux-gnu/bits/setjmp.h \
+  /usr/include/x86_64-linux-gnu/bits/types/struct___jmp_buf_tag.h \
+  /usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/atomic_word.h \
+  /usr/include/x86_64-linux-gnu/sys/single_threaded.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/locale_classes.tcc \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/system_error \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/error_constants.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/stdexcept \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/streambuf \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/streambuf.tcc \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/basic_ios.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/locale_facets.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cwctype \
   /usr/include/wctype.h \
   /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/ctype_base.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/ios_base.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/streambuf \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/streambuf.tcc \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/streambuf_iterator.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/ctype_inline.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/locale_facets.tcc \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/basic_ios.tcc \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/format \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/array \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/charconv \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/limits \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/locale \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/locale_facets_nonio.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ctime \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/time_members.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/messages_members.h \
   /usr/include/libintl.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/codecvt.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/locale_facets_nonio.tcc \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/locale_conv.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/iomanip \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/quoted_string.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/sstream \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/istream \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ios \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/basic_ios.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/basic_ios.tcc \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ostream \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/format \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/array \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/charconv \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/optional \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/enable_special_members.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/span \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/variant \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/parse_numbers.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ext/aligned_buffer.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/ranges_algobase.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/unicode.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cstdint \
-  /usr/lib/clang/18/include/stdint.h /usr/include/stdint.h \
-  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_algo.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/algorithmfwd.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_heap.h \
@@ -224,27 +239,7 @@ CMakeFiles/lexer.dir/flex-out/lexer.yy.cpp.o.ddi: \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_tempbuf.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/unicode-data.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/ostream.tcc \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/istream \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/istream.tcc \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/fstream \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/basic_file.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++io.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fstream.tcc \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cassert \
-  /usr/include/assert.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cstdarg \
-  /usr/lib/clang/18/include/__stdarg_va_list.h \
-  /usr/lib/clang/18/include/__stdarg_va_arg.h \
-  /usr/lib/clang/18/include/__stdarg___va_copy.h \
-  /usr/lib/clang/18/include/__stdarg_va_copy.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/filesystem \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fs_fwd.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/chrono.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ratio \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fs_path.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/iomanip \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/quoted_string.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/sstream \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/sstream.tcc \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/codecvt \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ext/concurrence.h \
@@ -256,15 +251,18 @@ CMakeFiles/lexer.dir/flex-out/lexer.yy.cpp.o.ddi: \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_uninitialized.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fs_dir.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fs_ops.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/fstream \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/basic_file.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++io.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/fstream.tcc \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/iostream \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/source_location \
-  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/third-party/logger/Src/header-only/log_background_settings.hpp \
   /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/third-party/logger/Src/header-only/custom_console_output.hpp \
   /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/third-party/logger/Src/header-only/global.hpp \
+  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/third-party/logger/Src/header-only/log_background_settings.hpp \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cstring \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/vector \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_vector.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_bvector.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/vector.tcc \
+  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/include/frontend/parser/parse_error.hpp \
+  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.hpp \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/memory \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_raw_storage_iter.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/shared_ptr_atomic.h \
@@ -296,10 +294,14 @@ CMakeFiles/lexer.dir/flex-out/lexer.yy.cpp.o.ddi: \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/out_ptr.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/pstl/glue_memory_defs.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/pstl/execution_defs.h \
-  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/include/frontend/lexer/lexer.hpp \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/vector \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_vector.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_bvector.h \
+  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/vector.tcc \
   /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/include/frontend/parser/parser.hpp \
   /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/include/frontend/parser/ast.hpp \
   /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/include/frontend/parser/token_types.hpp \
   /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/include/global/global.hpp \
   /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/include/global/custom_console_output.hpp \
-  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.hpp
+  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/location.hh \
+  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/include/frontend/lexer/lexer.hpp

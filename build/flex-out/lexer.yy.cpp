@@ -14,30 +14,6 @@
 #define FLEX_BETA
 #endif
 
-#ifdef yyget_lval
-#define yyget_lval_ALREADY_DEFINED
-#else
-#define yyget_lval yyget_lval
-#endif
-
-#ifdef yyset_lval
-#define yyset_lval_ALREADY_DEFINED
-#else
-#define yyset_lval yyset_lval
-#endif
-
-#ifdef yyget_lloc
-#define yyget_lloc_ALREADY_DEFINED
-#else
-#define yyget_lloc yyget_lloc
-#endif
-
-#ifdef yyset_lloc
-#define yyset_lloc_ALREADY_DEFINED
-#else
-#define yyset_lloc yyset_lloc
-#endif
-
 /* First, we deal with  platform-specific or compiler-specific issues. */
 
 /* begin standard C headers. */
@@ -398,8 +374,8 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 45
-#define YY_END_OF_BUFFER 46
+#define YY_NUM_RULES 46
+#define YY_END_OF_BUFFER 47
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -407,16 +383,16 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static const flex_int16_t yy_accept[81] =
+static const flex_int16_t yy_accept[79] =
     {   0,
-        0,    0,   46,   44,    3,    6,    4,    2,   13,    7,
-       19,   44,   30,   31,   17,   15,   16,   18,   42,   41,
-       22,   36,   20,   35,   43,   43,   43,   43,   43,   43,
-       43,   43,   43,   32,   44,   33,    5,   25,    7,   10,
-       28,   42,   26,   27,    0,   29,   23,   24,   21,   43,
-       43,   43,   43,   38,   43,   11,   43,   43,   12,    0,
-        0,   43,    9,   43,   43,   43,   43,    8,   43,   40,
-       14,   43,   43,    1,    0,   37,   34,    0,   39,    0
+        0,    0,   47,   45,    2,    5,    3,    1,   12,   45,
+       18,   45,   29,   30,   16,   14,   41,   15,   17,   43,
+       40,   21,   35,   19,   34,   44,   44,   44,   44,   44,
+       44,   44,   44,   31,   45,   32,    4,   24,    0,   42,
+        9,   27,   25,   26,    0,    6,   28,   43,   22,   23,
+       20,   44,   44,   44,   37,   44,   10,   44,   44,   11,
+        0,    0,    6,    8,   44,   13,   44,   44,    7,   39,
+       44,   44,    0,   36,   33,    0,   38,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -424,17 +400,17 @@ static const YY_CHAR yy_ec[256] =
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         1,    1,    4,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    5,    6,    1,    7,    1,    8,    9,    1,   10,
-       11,   12,   13,    1,   14,    1,   15,   16,   16,   16,
-       16,   16,   16,   16,   16,   16,   16,    1,   17,   18,
-       19,   20,   21,    1,   22,   23,   24,   23,   25,   23,
-       23,   23,   23,   23,   23,   23,   23,   23,   23,   26,
-       23,   23,   27,   23,   23,   23,   23,   23,   23,   23,
-        1,    1,    1,    1,   23,    1,   28,   23,   23,   29,
+        1,    5,    6,    7,    1,    1,    8,    9,    1,   10,
+       11,   12,   13,   14,   15,    1,   16,   17,   17,   17,
+       17,   17,   17,   17,   17,   17,   17,    1,   18,   19,
+       20,   21,   22,    1,   23,   23,   23,   23,   23,   23,
+       23,   23,   23,   23,   23,   23,   23,   23,   23,   23,
+       23,   23,   23,   23,   23,   23,   23,   23,   23,   23,
+        1,    1,    1,    1,   23,    1,   24,   23,   23,   25,
 
-       30,   31,   23,   32,   33,   23,   23,   34,   23,   35,
-       36,   37,   23,   38,   39,   40,   23,   23,   41,   23,
-       23,   23,   42,   43,   44,    1,    1,    1,    1,    1,
+       26,   27,   23,   28,   29,   23,   23,   30,   23,   31,
+       32,   33,   23,   34,   35,   36,   23,   23,   37,   23,
+       23,   23,   38,   39,   40,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -451,89 +427,86 @@ static const YY_CHAR yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static const YY_CHAR yy_meta[45] =
+static const YY_CHAR yy_meta[41] =
     {   0,
         1,    1,    2,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    3,    1,    1,    1,    1,
-        1,    3,    3,    3,    3,    3,    3,    3,    3,    3,
-        3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
-        3,    1,    1,    1
+        1,    1,    1,    1,    1,    1,    3,    1,    1,    1,
+        1,    1,    3,    3,    3,    3,    3,    3,    3,    3,
+        3,    3,    3,    3,    3,    3,    3,    1,    1,    1
     } ;
 
-static const flex_int16_t yy_base[84] =
+static const flex_int16_t yy_base[83] =
     {   0,
-        0,    0,  107,  108,   43,  108,   47,   51,   87,    0,
-      108,   96,  108,  108,   85,   38,   42,   47,   87,  108,
-       83,   82,   81,  108,    0,   73,   63,   63,   65,   59,
-       56,   55,   60,  108,   48,  108,   58,  108,    0,  108,
-      108,   74,  108,  108,   77,  108,  108,  108,  108,    0,
-       66,   58,   47,    0,   45,    0,   51,   50,  108,   70,
-       52,   57,    0,   50,   74,   43,   43,  108,   51,   70,
-      108,   34,   39,    0,   32,    0,    0,   19,  108,  108,
-       67,   43,   70
+        0,    0,  102,  103,   39,  103,   43,   47,   81,   93,
+      103,   90,  103,  103,   78,   77,  103,   76,   30,   78,
+      103,   74,   73,   72,  103,    0,   60,   60,   62,   56,
+       53,   52,   57,  103,   45,  103,   51,  103,   76,  103,
+      103,  103,  103,  103,   70,    0,  103,   64,  103,  103,
+      103,    0,   55,   44,    0,   42,    0,   48,   47,  103,
+       63,   42,    0,    0,   48,    0,   42,   42,  103,   66,
+       34,   43,   39,    0,    0,   39,  103,  103,   58,   54,
+       61,   64
     } ;
 
-static const flex_int16_t yy_def[84] =
+static const flex_int16_t yy_def[83] =
     {   0,
-       80,    1,   80,   80,   80,   80,   80,   80,   80,   81,
-       80,   80,   80,   80,   80,   80,   80,   80,   80,   80,
-       80,   80,   80,   80,   82,   82,   82,   82,   82,   82,
-       82,   82,   82,   80,   80,   80,   80,   80,   81,   80,
-       80,   80,   80,   80,   83,   80,   80,   80,   80,   82,
-       82,   82,   82,   82,   82,   82,   82,   82,   80,   83,
-       83,   82,   82,   82,   82,   82,   82,   80,   82,   82,
-       80,   82,   82,   82,   80,   82,   82,   80,   80,    0,
-       80,   80,   80
+       78,    1,   78,   78,   78,   78,   78,   78,   78,   79,
+       78,   78,   78,   78,   78,   78,   78,   78,   78,   78,
+       78,   78,   78,   78,   78,   80,   80,   80,   80,   80,
+       80,   80,   80,   78,   78,   78,   78,   78,   79,   78,
+       78,   78,   78,   78,   81,   82,   78,   78,   78,   78,
+       78,   80,   80,   80,   80,   80,   80,   80,   80,   78,
+       81,   81,   82,   80,   80,   80,   80,   80,   78,   80,
+       80,   80,   78,   80,   80,   78,   78,    0,   78,   78,
+       78,   78
     } ;
 
-static const flex_int16_t yy_nxt[153] =
+static const flex_int16_t yy_nxt[144] =
     {   0,
         4,    5,    6,    7,    8,    9,   10,   11,   12,   13,
        14,   15,   16,   17,   18,   19,   20,   21,   22,   23,
-       24,   25,   25,   25,   25,   25,   26,   27,   25,   28,
-       25,   25,   29,   25,   30,   31,   32,   25,   25,   25,
-       33,   34,   35,   36,   37,   50,   37,   37,   37,   79,
-       37,   37,   37,   42,   37,   37,   43,   42,   45,   37,
-       44,   37,   37,   61,   78,   46,   68,   39,   77,   39,
-       60,   60,   60,   76,   75,   74,   73,   72,   71,   70,
-       69,   61,   67,   66,   65,   64,   63,   62,   61,   42,
-       59,   58,   57,   56,   55,   54,   53,   52,   51,   49,
+       24,   25,   26,   27,   26,   28,   26,   26,   29,   26,
+       30,   31,   32,   26,   26,   26,   33,   34,   35,   36,
+       37,   45,   37,   37,   37,   46,   37,   37,   37,   47,
+       37,   37,   37,   62,   37,   37,   52,   69,   39,   39,
+       39,   61,   61,   61,   63,   77,   63,   76,   75,   74,
+       73,   72,   71,   70,   62,   68,   67,   66,   65,   64,
+       48,   62,   40,   60,   59,   58,   57,   56,   55,   54,
+       53,   51,   50,   49,   48,   44,   43,   42,   41,   40,
 
-       48,   47,   42,   41,   40,   38,   80,    3,   80,   80,
-       80,   80,   80,   80,   80,   80,   80,   80,   80,   80,
-       80,   80,   80,   80,   80,   80,   80,   80,   80,   80,
-       80,   80,   80,   80,   80,   80,   80,   80,   80,   80,
-       80,   80,   80,   80,   80,   80,   80,   80,   80,   80,
-       80,   80
+       38,   78,    3,   78,   78,   78,   78,   78,   78,   78,
+       78,   78,   78,   78,   78,   78,   78,   78,   78,   78,
+       78,   78,   78,   78,   78,   78,   78,   78,   78,   78,
+       78,   78,   78,   78,   78,   78,   78,   78,   78,   78,
+       78,   78,   78
     } ;
 
-static const flex_int16_t yy_chk[153] =
+static const flex_int16_t yy_chk[144] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    5,   82,    5,    5,    7,   78,
-        7,    7,    8,   16,    8,    8,   16,   17,   18,   37,
-       17,   37,   37,   61,   75,   18,   61,   81,   73,   81,
-       83,   83,   83,   72,   70,   69,   67,   66,   65,   64,
-       62,   60,   58,   57,   55,   53,   52,   51,   45,   42,
-       35,   33,   32,   31,   30,   29,   28,   27,   26,   23,
+        5,   19,    5,    5,    7,   19,    7,    7,    8,   19,
+        8,    8,   37,   62,   37,   37,   80,   62,   79,   79,
+       79,   81,   81,   81,   82,   76,   82,   73,   72,   71,
+       70,   68,   67,   65,   61,   59,   58,   56,   54,   53,
+       48,   45,   39,   35,   33,   32,   31,   30,   29,   28,
+       27,   24,   23,   22,   20,   18,   16,   15,   12,   10,
 
-       22,   21,   19,   15,   12,    9,    3,   80,   80,   80,
-       80,   80,   80,   80,   80,   80,   80,   80,   80,   80,
-       80,   80,   80,   80,   80,   80,   80,   80,   80,   80,
-       80,   80,   80,   80,   80,   80,   80,   80,   80,   80,
-       80,   80,   80,   80,   80,   80,   80,   80,   80,   80,
-       80,   80
+        9,    3,   78,   78,   78,   78,   78,   78,   78,   78,
+       78,   78,   78,   78,   78,   78,   78,   78,   78,   78,
+       78,   78,   78,   78,   78,   78,   78,   78,   78,   78,
+       78,   78,   78,   78,   78,   78,   78,   78,   78,   78,
+       78,   78,   78
     } ;
 
 /* Table of booleans, true if rule could match eol. */
-static const flex_int32_t yy_rule_can_match_eol[46] =
+static const flex_int32_t yy_rule_can_match_eol[47] =
     {   0,
-0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-    0, 0, 0, 0, 0, 0,     };
+    0, 0, 1, 0, 0, 0, 0,     };
 
 static yy_state_type yy_last_accepting_state;
 static char *yy_last_accepting_cpos;
@@ -557,31 +530,18 @@ char *yytext;
 
 #include <string>
 #include <cstdlib>
-#include <cassert>
 #include <cstring>
 #include <iostream>
-#include <vector>
-#include <memory>
-#include <cassert>
 #include <sstream>
-#include <source_location>
+#include "parser/parse_error.hpp"
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
-#include "parser.tab.hpp"
 #include "global/global.hpp"
-#include "global/custom_console_output.hpp"
 
 std::string current_file;
-int current_num_value;
-std::string current_var_value;
-int eof_reached = 0;
 
-void process_number  (const char* text);
-void process_variable(const char* text);
+#define YY_DECL int yylex(yy::parser::semantic_type* yylval, yy::parser::location_type* yylloc)
 
-extern void yyerror(YYLTYPE* loc, const char* msg);
-
-extern FILE* yyin;
 
 /* ну я так хочу да */
 ON_LOGGER(
@@ -591,34 +551,34 @@ static size_t tokens_counter = 0;
 ) /* ON_LOGGER */
 
 #define YY_USER_ACTION do {                      \
-    yylloc->first_line = yylloc->last_line;       \
-    yylloc->first_column = yylloc->last_column;    \
+    yylloc->begin.line = yylloc->end.line;        \
+    yylloc->begin.column = yylloc->end.column;     \
     char c = '\0';                                  \
     for (size_t i = 0; (c = yytext[i]) != '\0'; ++i) \
     {                                                 \
         if (c == '\n') {                               \
-            yylloc->last_line++;                        \
-            yylloc->last_column = 1;                     \
+            yylloc->end.line++;                         \
+            yylloc->end.column = 1;                      \
             continue;                                     \
         } else if (c == '\t') {                            \
-            yylloc->last_column += 4;                       \
+            yylloc->end.column += 4;                        \
             continue;                                        \
         } else if (c == '\r') {                               \
             continue;                                          \
         }                                                       \
-        yylloc->last_column++;                                   \
+        yylloc->end.column++;                                    \
     }                                                             \
     ON_LOGGER( \
         PineapLog::glog.logc(PineapLog::LogColor::White, "[", PineapLog::tokens_counter, "]"); \
         PineapLog::tokens_counter++; \
         PineapLog::LogColor color = (PineapLog::tokens_counter % 3 == 0) ? PineapLog::LogColor::Green : (PineapLog::tokens_counter % 3 == 1) ? PineapLog::LogColor::Yellow : PineapLog::LogColor::Red; \
-        PineapLog::glog.logc(color, "{", "\n\tfirst line: ", yylloc->first_line, "\n\tfirst col : ", yylloc->first_column, "\n\tlast line: ", yylloc->last_line, "\n\tlast col : ", yylloc->last_column, "\n\tword = '", yytext, "'\n}"); \
+        PineapLog::glog.logc(color, "{", "\n\tfirst line: ", yylloc->begin.line, "\n\tfirst col : ", yylloc->begin.column, "\n\tlast line: ", yylloc->end.line, "\n\tlast col : ", yylloc->end.column, "\n\tword = '", yytext, "'\n}"); \
     ) \
-} while (0); /* YY_USER_ACTION */
+} while (0);
 
-#line 620 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/flex-out/lexer.yy.cpp"
+#line 580 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/flex-out/lexer.yy.cpp"
 #define YY_NO_INPUT 1
-#line 622 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/flex-out/lexer.yy.cpp"
+#line 582 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/flex-out/lexer.yy.cpp"
 
 #define INITIAL 0
 
@@ -665,14 +625,6 @@ int yyget_lineno ( void );
 
 void yyset_lineno ( int _line_number  );
 
-YYSTYPE * yyget_lval ( void );
-
-void yyset_lval ( YYSTYPE * yylval_param  );
-
-       YYLTYPE *yyget_lloc ( void );
-    
-        void yyset_lloc ( YYLTYPE * yylloc_param  );
-    
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
  */
@@ -786,11 +738,9 @@ static int input ( void );
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int yylex \
-               (YYSTYPE * yylval_param, YYLTYPE * yylloc_param );
+extern int yylex (void);
 
-#define YY_DECL int yylex \
-               (YYSTYPE * yylval_param, YYLTYPE * yylloc_param )
+#define YY_DECL int yylex (void)
 #endif /* !YY_DECL */
 
 /* Code executed at the beginning of each rule, after yytext and yyleng
@@ -816,14 +766,6 @@ YY_DECL
 	char *yy_cp, *yy_bp;
 	int yy_act;
     
-        YYSTYPE * yylval;
-    
-        YYLTYPE * yylloc;
-    
-    yylval = yylval_param;
-
-    yylloc = yylloc_param;
-
 	if ( !(yy_init) )
 		{
 		(yy_init) = 1;
@@ -851,10 +793,10 @@ YY_DECL
 		}
 
 	{
-#line 84 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+#line 71 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
 
 
-#line 858 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/flex-out/lexer.yy.cpp"
+#line 800 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/flex-out/lexer.yy.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -881,13 +823,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 81 )
+				if ( yy_current_state >= 79 )
 					yy_c = yy_meta[yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 108 );
+		while ( yy_base[yy_current_state] != 103 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -923,252 +865,285 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 86 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-
+#line 73 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 88 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+#line 74 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
 { }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 89 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+#line 75 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
 { }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 90 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+#line 76 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
 { }
 	YY_BREAK
 case 5:
+/* rule 5 can match eol */
 YY_RULE_SETUP
-#line 91 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+#line 77 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
 { }
 	YY_BREAK
 case 6:
-/* rule 6 can match eol */
 YY_RULE_SETUP
-#line 92 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ }
-	YY_BREAK
-case 7:
-YY_RULE_SETUP
-#line 94 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+#line 79 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
 { /* one-line comment */ }
 	YY_BREAK
-case 8:
-/* rule 8 can match eol */
+case 7:
+/* rule 7 can match eol */
 YY_RULE_SETUP
-#line 96 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+#line 80 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
 { /* multy-line comment */ }
+	YY_BREAK
+case 8:
+YY_RULE_SETUP
+#line 82 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::AND; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 98 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return AND; }
+#line 83 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::AND; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 99 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return AND; }
+#line 84 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::OR; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 100 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return OR; }
+#line 85 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::OR; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 101 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return OR; }
+#line 86 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::NOT; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 102 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return NOT; }
+#line 87 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::NOT; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 103 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return NOT; }
+#line 88 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::ADD; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 104 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return ADD; }
+#line 89 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::SUB; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 105 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return SUB; }
+#line 90 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::MUL; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 106 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return MUL; }
+#line 91 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::DIV; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 107 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return DIV; }
+#line 92 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::REM; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 108 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return REM; }
+#line 93 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::ISAB; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 109 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return ISAB; }
+#line 94 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::ISABE; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 110 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return ISABE; }
+#line 95 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::ISLS; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 111 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return ISLS; }
+#line 96 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::ISLSE; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 112 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return ISLSE; }
+#line 97 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::ISEQ; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 113 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return ISEQ; }
+#line 98 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::ISNE; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 114 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return ISNE; }
+#line 99 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::ADDASGN; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 115 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return ADDASGN; }
+#line 100 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::SUBASGN; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 116 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return SUBASGN; }
+#line 101 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::MULASGN; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 117 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return MULASGN; }
+#line 102 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::DIVASGN; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 118 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return DIVASGN; }
+#line 103 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::LCIB; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 119 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return LCIB; }
+#line 104 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::RCIB; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 120 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return RCIB; }
+#line 105 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::LCUB; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 121 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return LCUB; }
+#line 106 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::RCUB; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 122 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return RCUB; }
+#line 107 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::WH; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 123 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return WH; }
+#line 108 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::IN; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 124 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return IN; }
+#line 109 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::AS; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 125 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return AS; }
+#line 110 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::PRINT; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 126 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return PRINT; }
+#line 111 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::IF; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 127 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return IF; }
+#line 112 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::ELIF; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 128 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return ELIF; }
+#line 113 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::ELSE; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 129 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return ELSE; }
+#line 114 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::SC; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 130 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ return SC; }
+#line 115 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::COMMA; }
 	YY_BREAK
 case 42:
+/* rule 42 can match eol */
 YY_RULE_SETUP
-#line 132 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+#line 117 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
 { 
-                process_number(yytext); 
-                yylval->num_value = current_num_value;
-                return NUM; 
+                std::ostringstream result;
+
+                for (size_t it = 1, ite = yyleng - 1; it < ite; ++it)
+                {
+                    const char c = *(yytext + it);
+                    const char next_c = *(yytext + it + 1);
+
+                    if (c != '\\' && next_c != '\0')
+                    {
+                        result << c;
+                        continue;
+                    }
+
+                    switch (next_c)
+                    {
+                        case 'n':  result << '\n'; break;
+                        case 't':  result << '\t'; break;
+                        case 'r':  result << '\r'; break;
+                        case '\\': result << '\\'; break;
+                        case '\"': result << '\"'; break;
+                        case '0':  result << '\0'; break;
+                        case 'a':  result << '\a'; break;
+                        case 'b':  result << '\b'; break;
+                        case 'v':  result << '\v'; break;
+                        case 'f':  result << '\f'; break;
+                        default:   result << c   ; continue;
+                    }
+                    ++it;
+                }
+                yylval->build<std::string>(std::move(result.str()));
+                return yy::parser::token::STRING;
             }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 138 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
-{ 
-                process_variable(yytext); 
-                yylval->str_value = new std::string(current_var_value);
-                return VAR; 
-            }
-	YY_BREAK
-case YY_STATE_EOF(INITIAL):
-#line 144 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+#line 151 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
 {
-                return EXIT_SUCCESS;
+                yylval->build<int>(atoi(yytext));
+                return yy::parser::token::NUM;
             }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 148 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+#line 156 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
 {
-    std::ostringstream oss;
-    oss << "use of undeclared identifier '" << yytext << "'";
-
-    yyerror(yylloc, oss.str().c_str());
-    return EXIT_FAILURE;
-}
+                yylval->build<std::string>(yytext);
+                return yy::parser::token::VAR;
+            }
+	YY_BREAK
+case YY_STATE_EOF(INITIAL):
+#line 161 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ return yy::parser::token::YYEOF; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 156 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+#line 163 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+{ 
+                ErrorHandler::throwError(*yylloc,
+                                         "unexpected character '" + std::string(yytext) + "'",
+                                         {1, 1, 1});
+                return yy::parser::token::YYerror;
+            }
+	YY_BREAK
+case 46:
+YY_RULE_SETUP
+#line 170 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
 ECHO;
 	YY_BREAK
-#line 1172 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/flex-out/lexer.yy.cpp"
+#line 1147 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/flex-out/lexer.yy.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1463,7 +1438,7 @@ static int yy_get_next_buffer (void)
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 81 )
+			if ( yy_current_state >= 79 )
 				yy_c = yy_meta[yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
@@ -1491,11 +1466,11 @@ static int yy_get_next_buffer (void)
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 81 )
+		if ( yy_current_state >= 79 )
 			yy_c = yy_meta[yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
-	yy_is_jam = (yy_current_state == 80);
+	yy_is_jam = (yy_current_state == 78);
 
 		return yy_is_jam ? 0 : yy_current_state;
 }
@@ -2142,18 +2117,11 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 156 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
+#line 170 "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/src/frontend/lexer/lexer.l"
 
-
-void process_number(const char* text) {
-    current_num_value = atoi(text);
-}
-
-void process_variable(const char* text) {
-    current_var_value = text;
-}
 
 void set_current_paracl_file(const std::string& file)
 {
     current_file = file;
 }
+

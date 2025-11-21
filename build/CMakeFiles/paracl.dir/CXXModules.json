@@ -7,6 +7,11 @@
 			"lookup-method" : "by-name",
 			"path" : "CMakeFiles/run_paracl.dir/ast_graph_dump.pcm"
 		},
+		"name_table" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "CMakeFiles/interpretor.dir/name_table.pcm"
+		},
 		"options_parser" : 
 		{
 			"lookup-method" : "by-name",
@@ -17,15 +22,20 @@
 			"lookup-method" : "by-name",
 			"path" : "CMakeFiles/options_parse.dir/paracl_extension.pcm"
 		},
+		"paracl_info" : 
+		{
+			"lookup-method" : "by-name",
+			"path" : "CMakeFiles/paracl_info.dir/paracl_info.pcm"
+		},
 		"paracl_interpreter" : 
 		{
 			"lookup-method" : "by-name",
-			"path" : "CMakeFiles/run_paracl.dir/paracl_interpreter.pcm"
+			"path" : "CMakeFiles/interpretor.dir/paracl_interpreter.pcm"
 		},
-		"parse_paracl_exit_code" : 
+		"parse_paracl_exceptions" : 
 		{
 			"lookup-method" : "by-name",
-			"path" : "CMakeFiles/run_paracl.dir/parse_paracl_exit_code.pcm"
+			"path" : "CMakeFiles/run_paracl.dir/parse_paracl_exceptions.pcm"
 		},
 		"run_paracl" : 
 		{
@@ -37,15 +47,21 @@
 	{
 		"options_parser" : 
 		[
-			"paracl_extension"
+			"paracl_extension",
+			"paracl_info"
+		],
+		"paracl_interpreter" : 
+		[
+			"name_table"
 		],
 		"run_paracl" : 
 		[
 			"ast_graph_dump",
+			"name_table",
 			"options_parser",
 			"paracl_extension",
-			"paracl_interpreter",
-			"parse_paracl_exit_code"
+			"paracl_info",
+			"paracl_interpreter"
 		]
 	}
 }

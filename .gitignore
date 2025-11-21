@@ -1,0 +1,11 @@
+.venv
+build/
+.vscode/
+settings.json
+*.png
+Doxyfile
+imgs/
+log/
+.cache
+ast-dump/
+tmp/

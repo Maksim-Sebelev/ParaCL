@@ -1,143 +1,186 @@
 #pragma once
 
-#include <cstddef>
+#include <memory>
 #include <string>
 #include <vector>
-#include <string>
-#include <memory>
-
 #include "parser/token_types.hpp"
-#include "global/global.hpp"
 
 namespace ParaCL
 {
 
-struct ASTNode {
+struct ASTNode
+{
     virtual ~ASTNode() = default;
 };
 
 // expressions
-struct Expr : ASTNode {};
+struct Expression : ASTNode
+{
+};
 
-struct NumExpr : Expr {
+struct NumExpr : Expression
+{
     int value;
-    NumExpr(int v) : value(v) {}
+    NumExpr(int v) : value(v)
+    {
+    }
 };
 
-struct VarExpr : Expr {
+struct VarExpr : Expression
+{
     std::string name;
-    VarExpr(std::string n) : name(std::move(n)) {}
+    VarExpr(std::string n) : name(std::move(n))
+    {
+    }
 };
 
-struct InputExpr : Expr {};
+struct InputExpr : Expression
+{
+};
 
-struct UnExpr : Expr {
+struct UnExpr : Expression
+{
     token_t op;
-    std::unique_ptr<Expr> operand;
-    UnExpr(token_t op, std::unique_ptr<Expr> v)
-        : op(op), operand(std::move(v)) {}
+    std::unique_ptr<Expression> operand;
+    UnExpr(token_t op, std::unique_ptr<Expression> v) : op(op), operand(std::move(v))
+    {
+    }
 };
 
-struct BinExpr : Expr {
+struct BinExpr : Expression
+{
     token_t op;
-    std::unique_ptr<Expr> left;
-    std::unique_ptr<Expr> right;
-    BinExpr(token_t op, std::unique_ptr<Expr> lhs, std::unique_ptr<Expr> rhs)
-        : op(op), left(std::move(lhs)), right(std::move(rhs)) {}
+    std::unique_ptr<Expression> left;
+    std::unique_ptr<Expression> right;
+    BinExpr(token_t op, std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs)
+        : op(op), left(std::move(lhs)), right(std::move(rhs))
+    {
+    }
 };
 
-struct AssignExpr : Expr {
+struct AssignExpr : Expression
+{
     std::string name;
-    std::unique_ptr<Expr> value;
-    AssignExpr(std::string n, std::unique_ptr<Expr> v)
-        : name(std::move(n)), value(std::move(v)) {}
+    std::unique_ptr<Expression> value;
+    AssignExpr(std::string n, std::unique_ptr<Expression> v) : name(std::move(n)), value(std::move(v))
+    {
+    }
 };
 
-struct CombinedAssingExpr : Expr
+struct CombinedAssingExpr : Expression
 {
     token_t op;
     std::string name;
-    std::unique_ptr<Expr> value;
-    CombinedAssingExpr(token_t op, std::string n, std::unique_ptr<Expr> value)
-        : op(op), name(std::move(n)), value(std::move(value)) {} 
+    std::unique_ptr<Expression> value;
+    CombinedAssingExpr(token_t op, std::string n, std::unique_ptr<Expression> value)
+        : op(op), name(std::move(n)), value(std::move(value))
+    {
+    }
 };
 
 // statements
-struct Stmt : ASTNode {};
-
-struct AssignStmt : Stmt {
-    std::string name;
-    std::unique_ptr<Expr> value;
-    AssignStmt(std::string n, std::unique_ptr<Expr> v)
-        : name(std::move(n)), value(std::move(v)) {}
+struct Statement : ASTNode
+{
 };
 
-struct CombinedAssingStmt : Stmt
+struct AssignStmt : Statement
+{
+    std::string name;
+    std::unique_ptr<Expression> value;
+    AssignStmt(std::string n, std::unique_ptr<Expression> v) : name(std::move(n)), value(std::move(v))
+    {
+    }
+};
+
+struct CombinedAssingStmt : Statement
 {
     token_t op;
     std::string name;
-    std::unique_ptr<Expr> value;
-    CombinedAssingStmt(token_t op, std::string n, std::unique_ptr<Expr> value)
-        : op(op), name(std::move(n)), value(std::move(value)) {}
+    std::unique_ptr<Expression> value;
+    CombinedAssingStmt(token_t op, std::string n, std::unique_ptr<Expression> value)
+        : op(op), name(std::move(n)), value(std::move(value))
+    {
+    }
 };
 
-struct PrintStmt : Stmt {
-    std::unique_ptr<Expr> expr;
-    PrintStmt(std::unique_ptr<Expr> e) : expr(std::move(e)) {}
+struct StringConstant : Expression
+{
+    std::string value;
+    StringConstant(std::string str) : value(std::move(str)) {}
 };
 
-struct BlockStmt : Stmt {
-    std::vector<std::unique_ptr<Stmt>> statements;
+struct PrintStmt : Statement
+{
+    std::vector<std::unique_ptr<Expression>> args;
+    PrintStmt(std::vector<std::unique_ptr<Expression>> arguments) : args(std::move(arguments))
+    {
+    }
+};
+
+struct BlockStmt : Statement
+{
+    std::vector<std::unique_ptr<Statement>> statements;
     BlockStmt() = default;
-    BlockStmt(std::vector<std::unique_ptr<Stmt>> stmts)
-        : statements(std::move(stmts)) {}
+    BlockStmt(std::vector<std::unique_ptr<Statement>> stmts) : statements(std::move(stmts))
+    {
+    }
 };
 
-struct WhileStmt : Stmt {
-    std::unique_ptr<Expr> condition;
+struct WhileStmt : Statement
+{
+    std::unique_ptr<Expression> condition;
     std::unique_ptr<BlockStmt> body;
-    WhileStmt(std::unique_ptr<Expr> cond, std::unique_ptr<BlockStmt> b)
-        : condition(std::move(cond)), body(std::move(b)) {}
+    WhileStmt(std::unique_ptr<Expression> cond, std::unique_ptr<BlockStmt> b) : condition(std::move(cond)), body(std::move(b))
+    {
+    }
 };
 
-
-struct IfStatement {
-    std::unique_ptr<Expr> condition;
+struct IfStatement
+{
+    std::unique_ptr<Expression> condition;
     std::unique_ptr<BlockStmt> body;
 
-    IfStatement(std::unique_ptr<Expr> cond, std::unique_ptr<BlockStmt> b)
-        : condition(std::move(cond)), body(std::move(b)) {}
+    IfStatement(std::unique_ptr<Expression> cond, std::unique_ptr<BlockStmt> b)
+        : condition(std::move(cond)), body(std::move(b))
+    {
+    }
 };
 
-struct ElifStatement {
-    std::unique_ptr<Expr> condition;
+struct ElifStatement
+{
+    std::unique_ptr<Expression> condition;
     std::unique_ptr<BlockStmt> body;
-    ElifStatement(std::unique_ptr<Expr> cond, std::unique_ptr<BlockStmt> b)
-        : condition(std::move(cond)), body(std::move(b)) {}
+    ElifStatement(std::unique_ptr<Expression> cond, std::unique_ptr<BlockStmt> b)
+        : condition(std::move(cond)), body(std::move(b))
+    {
+    }
 };
 
-struct ElseStatement {
+struct ElseStatement
+{
     std::unique_ptr<BlockStmt> body;
-    ElseStatement(std::unique_ptr<BlockStmt> b)
-        :  body(std::move(b)) {}
+    ElseStatement(std::unique_ptr<BlockStmt> b) : body(std::move(b))
+    {
+    }
 };
 
-struct ConditionStatement : Stmt {
-                std::unique_ptr<IfStatement>    if_stmt;
+struct ConditionStatement : Statement
+{
+    std::unique_ptr<IfStatement> if_stmt;
     std::vector<std::unique_ptr<ElifStatement>> elif_stmts;
-                std::unique_ptr<ElseStatement>  else_stmt;
+    std::unique_ptr<ElseStatement> else_stmt;
 
-    ConditionStatement(std::unique_ptr<IfStatement> base_if_stmt)
-        : if_stmt(std::move(base_if_stmt)) {}
-
-    void add_elif_conditions(const std::vector<ElifStatement*>* elif_stmts_) {
-        msg_assert(elif_stmts_, "nullptr is no expect here");
-
-        for (size_t it = 0, ie = elif_stmts_->size(); it < ie; ++it)
-            elif_stmts.push_back(std::unique_ptr<ElifStatement>(std::unique_ptr<ElifStatement>((*elif_stmts_)[it])));
+    ConditionStatement(std::unique_ptr<IfStatement> base_if_stmt) : if_stmt(std::move(base_if_stmt))
+    {
     }
 
-    void add_else_condition(std::unique_ptr<ElseStatement> else_stmt_) {
+    void add_elif_condition(std::unique_ptr<ElifStatement> elif_stmt)
+    {
+        elif_stmts.push_back(std::move(elif_stmt));
+    }
+
+    void add_else_condition(std::unique_ptr<ElseStatement> else_stmt_)
+    {
         if (not else_stmt_.get())
             return;
 
@@ -145,8 +188,10 @@ struct ConditionStatement : Stmt {
     }
 };
 
-struct ProgramAST {
-    std::vector<std::unique_ptr<Stmt>> statements;
+struct ProgramAST
+{
+    std::vector<std::unique_ptr<Statement>> statements;
 };
 
-}; // namespace ParaCL
+}; /* namespace ParaCL */
+

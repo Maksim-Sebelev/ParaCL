@@ -1,7 +1,8 @@
 -x c++-module
 -fmodule-output=CMakeFiles/run_paracl.dir/run_paracl.pcm
+-fmodule-file=ast_graph_dump=CMakeFiles/run_paracl.dir/ast_graph_dump.pcm
 -fmodule-file=paracl_extension=CMakeFiles/options_parse.dir/paracl_extension.pcm
 -fmodule-file=options_parser=CMakeFiles/options_parse.dir/options_parser.pcm
--fmodule-file=paracl_interpreter=CMakeFiles/run_paracl.dir/paracl_interpreter.pcm
--fmodule-file=parse_paracl_exit_code=CMakeFiles/run_paracl.dir/parse_paracl_exit_code.pcm
--fmodule-file=ast_graph_dump=CMakeFiles/run_paracl.dir/ast_graph_dump.pcm
+-fmodule-file=paracl_interpreter=CMakeFiles/interpretor.dir/paracl_interpreter.pcm
+-fmodule-file=name_table=CMakeFiles/interpretor.dir/name_table.pcm
+-fmodule-file=paracl_info=CMakeFiles/paracl_info.dir/paracl_info.pcm

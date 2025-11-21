@@ -12,6 +12,9 @@
       ],
       "requires": [
         {
+          "logical-name": "ast_graph_dump"
+        },
+        {
           "logical-name": "paracl_extension"
         },
         {
@@ -19,12 +22,6 @@
         },
         {
           "logical-name": "paracl_interpreter"
-        },
-        {
-          "logical-name": "parse_paracl_exit_code"
-        },
-        {
-          "logical-name": "ast_graph_dump"
         }
       ]
     }

@@ -1,30 +1,40 @@
-%{
+%require "3.2"
+%language "c++"
+%locations
+%define api.value.type variant
+%define parse.error detailed
+
+%define api.namespace {yy}
+%define api.parser.class {parser}
+
+%code requires {
+
 #include <iostream>
 #include <cstdio>
-#include <unordered_map>
 #include <memory>
 #include <vector>
-#include "lexer/lexer.hpp"
+#include <string>
+#include <string.h>
 #include "parser/parser.hpp"
 #include "global/global.hpp"
 
 extern FILE* yyin;
-extern int yyparse();
-
-inline ParaCL::ProgramAST program;
-
 extern std::string current_file;
 
-typedef struct YYLTYPE YYLTYPE;
-typedef union YYSTYPE YYSTYPE;
+extern int current_num_value;
+extern std::string current_var_value;
 
-void yyerror(YYLTYPE* loc, const char* msg);
-int yylex(YYSTYPE* yylval_param, YYLTYPE* yylloc_param);
+}
 
-%}
+%code {
 
-%define api.pure full
-%locations
+#include "parser/parse_error.hpp"
+#include "lexer/lexer.hpp"
+
+ParaCL    ::ProgramAST        program;
+
+int  yylex            (yy::parser::semantic_type* yylval, yy::parser::location_type* yylloc);
+} /* %code */
 
 %precedence OR
 %precedence AND
@@ -39,35 +49,23 @@ int yylex(YYSTYPE* yylval_param, YYLTYPE* yylloc_param);
 %precedence MULASGN
 %precedence DIVASGN
 
-%union {
-    int                                      num_value     ;
-    std   ::string                         * str_value     ;
-    ParaCL::Stmt                           * stmt          ;
-    ParaCL::Expr                           * expr          ;
-    ParaCL::BlockStmt                      * block         ;
-    ParaCL::ConditionStatement             * condition_stmt;
-    ParaCL::IfStatement                    * if_stmt       ;
-    std   ::vector<ParaCL::ElifStatement*> * elif_stmts    ;
-    ParaCL::ElifStatement                  * elif_stmt     ;
-    ParaCL::ElseStatement                  * else_stmt     ;
-    std   ::vector<ParaCL::Stmt*>          * stmt_vector   ;
-}
-
-%token <num_value> NUM
-%token <str_value> VAR
+%token <int> NUM
+%token <std::string> VAR
 %token LCIB RCIB LCUB RCUB
 %token WH IN PRINT IF ELIF ELSE
-%token SC
+%token SC COMMA
+%token <std::string> STRING
 
-%type <stmt_vector> program statements
-%type <block> block one_stmt_block
-%type <stmt> statement assignment combined_assignment print_statement while_statement
-%type <expr> expression assignment_expression logical_or_expression logical_and_expression equality_expression relational_expression additive_expression multiplicative_expression unary_expression factor
+%type <std::vector<std::unique_ptr<ParaCL::Statement>>> program statements
+%type <std::unique_ptr<ParaCL::BlockStmt>> block one_stmt_block
+%type <std::unique_ptr<ParaCL::Statement>> statement assignment combined_assignment print_statement while_statement
+%type <std::unique_ptr<ParaCL::Expression>> expression assignment_expression logical_or_expression logical_and_expression equality_expression relational_expression additive_expression multiplicative_expression unary_expression factor string_constant
+%type <std::vector<std::unique_ptr<ParaCL::Expression>>> print_args
 
-%type <condition_stmt> condition_statement
-%type <if_stmt>               if_statement
-%type <elif_stmts>          elif_statements
-%type <else_stmt>           else_statement
+%type <std::unique_ptr<ParaCL::ConditionStatement>> condition_statement
+%type <std::unique_ptr<ParaCL::IfStatement>> if_statement
+%type <std::vector<std::unique_ptr<ParaCL::ElifStatement>>> elif_statements
+%type <std::unique_ptr<ParaCL::ElseStatement>> else_statement
 
 %start program
 
@@ -75,384 +73,559 @@ int yylex(YYSTYPE* yylval_param, YYLTYPE* yylloc_param);
 
 program:
     statements {
-        for (auto stmt : *$1)
-        {
-            program.statements.push_back(std::unique_ptr<ParaCL::Stmt>(stmt));
-        }
-        delete $1;
+        program.statements = std::move($1);
     }
     ;
 
 statements:
     %empty {
-        $$ = new std::vector<ParaCL::Stmt*>();
+        $$ = std::vector<std::unique_ptr<ParaCL::Statement>>();
     }
     | statements statement {
-        $1->push_back($2);
-        $$ = $1;
+        $1.push_back(std::move($2));
+        $$ = std::move($1);
     }
     ;
 
 statement:
     assignment SC { 
-        $$ = $1;
+        $$ = std::move($1);
     }
     | combined_assignment SC {
-        $$ = $1;
+        $$ = std::move($1);
     }
     | print_statement SC {
-        $$ = $1;
+        $$ = std::move($1);
     }
     | while_statement {
-        $$ = $1;
+        $$ = std::move($1);
     }
     | condition_statement {
-        $$ = $1;
+        $$ = std::move($1);
+    }
+    | SC {
+        $$ = std::make_unique<ParaCL::BlockStmt>();
     }
     ;
 
 assignment:
     VAR AS expression {
-        $$ = new ParaCL::AssignStmt(*$1, std::unique_ptr<ParaCL::Expr>($3));
-        delete $1;
+        $$ = std::make_unique<ParaCL::AssignStmt>($1, std::move($3));
+    }
+    | VAR AS error {
+        ErrorHandler::throwError(@3, "expected expression after assignment");
+        YYABORT;
     }
     ;
 
 combined_assignment:
     VAR ADDASGN expression {
-        $$ = new ParaCL::CombinedAssingStmt(
+        $$ = std::make_unique<ParaCL::CombinedAssingStmt>(
             ParaCL::token_t::ADDASGN,
-            *$1,
-            std::unique_ptr<ParaCL::Expr>($3)
+            $1,
+            std::move($3)
         );
-        delete $1;
     }
     | VAR SUBASGN expression {
-        $$ = new ParaCL::CombinedAssingStmt(
+        $$ = std::make_unique<ParaCL::CombinedAssingStmt>(
             ParaCL::token_t::SUBASGN,
-            *$1,
-            std::unique_ptr<ParaCL::Expr>($3)
+            $1,
+            std::move($3)
         );
-        delete $1;
     }
     | VAR MULASGN expression {
-        $$ = new ParaCL::CombinedAssingStmt(
+        $$ = std::make_unique<ParaCL::CombinedAssingStmt>(
             ParaCL::token_t::MULASGN,
-            *$1,
-            std::unique_ptr<ParaCL::Expr>($3)
+            $1,
+            std::move($3)
         );
-        delete $1;
     }
     | VAR DIVASGN expression {
-        $$ = new ParaCL::CombinedAssingStmt(
+        $$ = std::make_unique<ParaCL::CombinedAssingStmt>(
             ParaCL::token_t::DIVASGN,
-            *$1,
-            std::unique_ptr<ParaCL::Expr>($3)
+            $1,
+            std::move($3)
         );
-        delete $1;
+    }
+    | VAR ADDASGN error {
+        ErrorHandler::throwError(@3, "expected expression after '+=' assignment");
+        YYABORT;
+    }
+    | VAR SUBASGN error {
+        ErrorHandler::throwError(@3, "expected expression after '-=' assignment");
+        YYABORT;
+    }
+    | VAR MULASGN error {
+        ErrorHandler::throwError(@3, "expected expression after '*=' assignment");
+        YYABORT;
+    }
+    | VAR DIVASGN error {
+        ErrorHandler::throwError(@3, "expected expression after '/=' assignment");
+        YYABORT;
     }
     ;
 
 print_statement:
-    PRINT expression {
-        $$ = new ParaCL::PrintStmt(std::unique_ptr<ParaCL::Expr>($2));
+    PRINT print_args {
+        $$ = std::make_unique<ParaCL::PrintStmt>(std::move($2));
+    }
+    | PRINT error {
+        ErrorHandler::throwError(@2, "expected expressions and string constants after print");
+        YYABORT;
+    }
+    ;
+
+print_args:
+    %empty {
+        $$ = std::vector<std::unique_ptr<ParaCL::Expression>>();
+    }
+    | print_args expression {
+        $1.push_back(std::move($2));
+        $$ = std::move($1);
+    }
+    | print_args string_constant {
+        $1.push_back(std::move($2));
+        $$ = std::move($1);
+    }
+    | print_args COMMA expression {
+        $1.push_back(std::move($3));
+        $$ = std::move($1);
+    }
+    | print_args COMMA string_constant {
+        $1.push_back(std::move($3));
+        $$ = std::move($1);
     }
     ;
 
 while_statement:
     WH LCIB expression RCIB LCUB block RCUB {
-        $$ = new ParaCL::WhileStmt(
-            std::unique_ptr<ParaCL::Expr>($3),
-            std::unique_ptr<ParaCL::BlockStmt>($6)
+        $$ = std::make_unique<ParaCL::WhileStmt>(
+            std::move($3),
+            std::move($6)
         );
     }
     | WH LCIB expression RCIB one_stmt_block {
-        $$ = new ParaCL::WhileStmt(
-            std::unique_ptr<ParaCL::Expr>($3), 
-            std::unique_ptr<ParaCL::BlockStmt>($5)
+        $$ = std::make_unique<ParaCL::WhileStmt>(
+            std::move($3), 
+            std::move($5)
         );
+    }
+    | WH LCIB error RCIB LCUB block RCUB {
+        ErrorHandler::throwError(@3, "expected condition expression in while statement");
+        YYABORT;
+    }
+    | WH LCIB expression error LCUB block RCUB {
+        ErrorHandler::throwError(@4, "expected ')' after while condition");
+        YYABORT;
+    }
+    | WH LCIB expression RCIB error {
+        ErrorHandler::throwError(@5, "expected block or statement after while condition");
+        YYABORT;
+    }
+    | WH error {
+        ErrorHandler::throwError(@2, "expected '(' after while");
+        YYABORT;
     }
     ;
 
 condition_statement:
     if_statement elif_statements else_statement {
-        auto cond_stmt = new ParaCL::ConditionStatement(
-            std::unique_ptr<ParaCL::IfStatement>($1)
+        auto cond_stmt = std::make_unique<ParaCL::ConditionStatement>(
+            std::move($1)
         );
 
-        cond_stmt->add_elif_conditions($2);
-        delete $2;
+        for (auto&& elif_stmt: $2)
+            cond_stmt->add_elif_condition(std::move(elif_stmt));
 
-        if ($3) cond_stmt->add_else_condition(std::unique_ptr<ParaCL::ElseStatement>($3));
-
-        $$ = cond_stmt;
+        if ($3) cond_stmt->add_else_condition(std::move($3));
+        
+        $$ = std::move(cond_stmt);
     }
     ;
 
 if_statement:
     IF LCIB expression RCIB LCUB block RCUB {
-        $$ = new ParaCL::IfStatement(
-            std::unique_ptr<ParaCL::Expr>($3),
-            std::unique_ptr<ParaCL::BlockStmt>($6)
+        $$ = std::make_unique<ParaCL::IfStatement>(
+            std::move($3),
+            std::move($6)
         );
     }
     | IF LCIB expression RCIB one_stmt_block {
-        $$ = new ParaCL::IfStatement(
-            std::unique_ptr<ParaCL::Expr>($3),
-            std::unique_ptr<ParaCL::BlockStmt>($5)
+        $$ = std::make_unique<ParaCL::IfStatement>(
+            std::move($3),
+            std::move($5)
         );
+    }
+    | IF LCIB error RCIB LCUB block RCUB {
+        ErrorHandler::throwError(@3, "expected condition expression in if statement");
+        YYABORT;
+    }
+    | IF LCIB expression error LCUB block RCUB {
+        ErrorHandler::throwError(@4, "expected ')' after if condition");
+        YYABORT;
+    }
+    | IF LCIB expression RCIB error {
+        ErrorHandler::throwError(@5, "expected block or statement after if condition");
+        YYABORT;
+    }
+    | IF error {
+        ErrorHandler::throwError(@2, "expected '(' after if");
+        YYABORT;
     }
     ;
 
 elif_statements:
     %empty {
-        $$ = new std::vector<ParaCL::ElifStatement*>();
+        $$ = std::vector<std::unique_ptr<ParaCL::ElifStatement>>();
     }
     | elif_statements ELIF LCIB expression RCIB LCUB block RCUB {
-        $1->push_back(new ParaCL::ElifStatement(
-            std::unique_ptr<ParaCL::Expr>($4),
-            std::unique_ptr<ParaCL::BlockStmt>($7)
+        $1.push_back(std::make_unique<ParaCL::ElifStatement>(
+            std::move($4),
+            std::move($7)
         ));
-        $$ = $1;
+        $$ = std::move($1);
     }
     | elif_statements ELIF LCIB expression RCIB one_stmt_block {
-        $1->push_back(new ParaCL::ElifStatement(
-            std::unique_ptr<ParaCL::Expr>($4),
-            std::unique_ptr<ParaCL::BlockStmt>($6)
+        $1.push_back(std::make_unique<ParaCL::ElifStatement>(
+            std::move($4),
+            std::move($6)
         ));
-        $$ = $1;
+        $$ = std::move($1);
+    }
+    | elif_statements ELIF LCIB error RCIB LCUB block RCUB {
+        ErrorHandler::throwError(@4, "expected condition expression in elif statement");
+        YYABORT;
+    }
+    | elif_statements ELIF LCIB expression error LCUB block RCUB {
+        ErrorHandler::throwError(@5, "expected ')' after elif condition");
+        YYABORT;
+    }
+    | elif_statements ELIF LCIB expression RCIB error {
+        ErrorHandler::throwError(@6, "expected block or statement after elif condition");
+        YYABORT;
+    }
+    | elif_statements ELIF error {
+        ErrorHandler::throwError(@3, "expected '(' after elif");
+        YYABORT;
     }
     ;
 
 else_statement:
     %empty { $$ = nullptr; }
     | ELSE LCUB block RCUB {
-        $$ = new ParaCL::ElseStatement(
-            std::unique_ptr<ParaCL::BlockStmt>($3)
+        $$ = std::make_unique<ParaCL::ElseStatement>(
+            std::move($3)
         );
     }
     | ELSE one_stmt_block {
-        $$ = new ParaCL::ElseStatement(
-            std::unique_ptr<ParaCL::BlockStmt>($2)
+        $$ = std::make_unique<ParaCL::ElseStatement>(
+            std::move($2)
         );
+    }
+    | ELSE error {
+        ErrorHandler::throwError(@2, "expected block or statement after else");
+        YYABORT;
     }
     ;
 
 expression:
-    assignment_expression { $$ = $1; }
+    assignment_expression { $$ = std::move($1); }
     ;
 
 assignment_expression:
-    logical_or_expression { $$ = $1; }
+    logical_or_expression { $$ = std::move($1); }
     | VAR AS assignment_expression %prec AS {
-        $$ = new ParaCL::AssignExpr(*$1, std::unique_ptr<ParaCL::Expr>($3));
-        delete $1;
+        $$ = std::make_unique<ParaCL::AssignExpr>($1, std::move($3));
     }
     | VAR ADDASGN assignment_expression %prec ADDASGN {
-        $$ = new ParaCL::CombinedAssingExpr(
+        $$ = std::make_unique<ParaCL::CombinedAssingExpr>(
             ParaCL::token_t::ADDASGN,
-            *$1,
-            std::unique_ptr<ParaCL::Expr>($3)
+            $1,
+            std::move($3)
         );
-        delete $1;
     }
     | VAR SUBASGN assignment_expression %prec SUBASGN {
-        $$ = new ParaCL::CombinedAssingExpr(
+        $$ = std::make_unique<ParaCL::CombinedAssingExpr>(
             ParaCL::token_t::SUBASGN,
-            *$1,
-            std::unique_ptr<ParaCL::Expr>($3)
+            $1,
+            std::move($3)
         );
-        delete $1;
     }
     | VAR MULASGN assignment_expression %prec MULASGN {
-        $$ = new ParaCL::CombinedAssingExpr(
+        $$ = std::make_unique<ParaCL::CombinedAssingExpr>(
             ParaCL::token_t::MULASGN,
-            *$1,
-            std::unique_ptr<ParaCL::Expr>($3)
+            $1,
+            std::move($3)
         );
-        delete $1;
     }
     | VAR DIVASGN assignment_expression %prec DIVASGN {
-        $$ = new ParaCL::CombinedAssingExpr(
+        $$ = std::make_unique<ParaCL::CombinedAssingExpr>(
             ParaCL::token_t::DIVASGN,
-            *$1,
-            std::unique_ptr<ParaCL::Expr>($3)
+            $1,
+            std::move($3)
         );
-        delete $1;
+    }
+    | VAR AS error {
+        ErrorHandler::throwError(@3, "expected expression after assignment");
+        YYABORT;
+    }
+    | VAR ADDASGN error {
+        ErrorHandler::throwError(@3, "expected expression after '+=' assignment");
+        YYABORT;
+    }
+    | VAR SUBASGN error {
+        ErrorHandler::throwError(@3, "expected expression after '-=' assignment");
+        YYABORT;
+    }
+    | VAR MULASGN error {
+        ErrorHandler::throwError(@3, "expected expression after '*=' assignment");
+        YYABORT;
+    }
+    | VAR DIVASGN error {
+        ErrorHandler::throwError(@3, "expected expression after '/=' assignment");
+        YYABORT;
     }
     ;
 
 logical_or_expression:
-    logical_and_expression { $$ = $1; }
+    logical_and_expression { $$ = std::move($1); }
     | logical_or_expression OR logical_and_expression %prec OR {
-        $$ = new ParaCL::BinExpr(
+        $$ = std::make_unique<ParaCL::BinExpr>(
             ParaCL::token_t::OR,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
+            std::move($1),
+            std::move($3)
         );
+    }
+    | logical_or_expression OR error {
+        ErrorHandler::throwError(@3, "expected expression after 'or' operator");
+        YYABORT;
     }
     ;
 
 logical_and_expression:
-    equality_expression { $$ = $1; }
+    equality_expression { $$ = std::move($1); }
     | logical_and_expression AND equality_expression %prec AND {
-        $$ = new ParaCL::BinExpr(
+        $$ = std::make_unique<ParaCL::BinExpr>(
             ParaCL::token_t::AND,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
+            std::move($1),
+            std::move($3)
         );
+    }
+    | logical_and_expression AND error {
+        ErrorHandler::throwError(@3, "expected expression after 'and' operator");
+        YYABORT;
     }
     ;
 
 equality_expression:
-    relational_expression { $$ = $1; }
+    relational_expression { $$ = std::move($1); }
     | equality_expression ISEQ relational_expression %prec ISEQ {
-        $$ = new ParaCL::BinExpr(
+        $$ = std::make_unique<ParaCL::BinExpr>(
             ParaCL::token_t::ISEQ,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
+            std::move($1),
+            std::move($3)
         );
     }
     | equality_expression ISNE relational_expression %prec ISNE {
-        $$ = new ParaCL::BinExpr(
+        $$ = std::make_unique<ParaCL::BinExpr>(
             ParaCL::token_t::ISNE,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
+            std::move($1),
+            std::move($3)
         );
+    }
+    | equality_expression ISEQ error {
+        ErrorHandler::throwError(@3, "expected expression after '==' operator");
+        YYABORT;
+    }
+    | equality_expression ISNE error {
+        ErrorHandler::throwError(@3, "expected expression after '!=' operator");
+        YYABORT;
     }
     ;
 
 relational_expression:
-    additive_expression { $$ = $1; }
+    additive_expression { $$ = std::move($1); }
     | relational_expression ISAB additive_expression %prec ISAB {
-        $$ = new ParaCL::BinExpr(
+        $$ = std::make_unique<ParaCL::BinExpr>(
             ParaCL::token_t::ISAB,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
+            std::move($1),
+            std::move($3)
         );
     }
     | relational_expression ISABE additive_expression %prec ISABE {
-        $$ = new ParaCL::BinExpr(
+        $$ = std::make_unique<ParaCL::BinExpr>(
             ParaCL::token_t::ISABE,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
+            std::move($1),
+            std::move($3)
         );
     }
     | relational_expression ISLS additive_expression %prec ISLS {
-        $$ = new ParaCL::BinExpr(
+        $$ = std::make_unique<ParaCL::BinExpr>(
             ParaCL::token_t::ISLS,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
+            std::move($1),
+            std::move($3)
         );
     }
     | relational_expression ISLSE additive_expression %prec ISLSE {
-        $$ = new ParaCL::BinExpr(
+        $$ = std::make_unique<ParaCL::BinExpr>(
             ParaCL::token_t::ISLSE,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
+            std::move($1),
+            std::move($3)
         );
+    }
+    | relational_expression ISAB error {
+        ErrorHandler::throwError(@3, "expected expression after '>' operator");
+        YYABORT;
+    }
+    | relational_expression ISABE error {
+        ErrorHandler::throwError(@3, "expected expression after '>=' operator");
+        YYABORT;
+    }
+    | relational_expression ISLS error {
+        ErrorHandler::throwError(@3, "expected expression after '<' operator");
+        YYABORT;
+    }
+    | relational_expression ISLSE error {
+        ErrorHandler::throwError(@3, "expected expression after '<=' operator");
+        YYABORT;
     }
     ;
 
 additive_expression:
-    multiplicative_expression { $$ = $1; }
+    multiplicative_expression { $$ = std::move($1); }
     | additive_expression ADD multiplicative_expression %prec ADD { 
-        $$ = new ParaCL::BinExpr(
+        $$ = std::make_unique<ParaCL::BinExpr>(
             ParaCL::token_t::ADD,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
+            std::move($1),
+            std::move($3)
         );
     }
     | additive_expression SUB multiplicative_expression %prec SUB { 
-        $$ = new ParaCL::BinExpr(
+        $$ = std::make_unique<ParaCL::BinExpr>(
             ParaCL::token_t::SUB,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
+            std::move($1),
+            std::move($3)
         );
+    }
+    | additive_expression ADD error {
+        ErrorHandler::throwError(@3, "expected expression after '+' operator");
+        YYABORT;
+    }
+    | additive_expression SUB error {
+        ErrorHandler::throwError(@3, "expected expression after '-' operator");
+        YYABORT;
     }
     ;
 
 multiplicative_expression:
-    unary_expression { $$ = $1; }
+    unary_expression { $$ = std::move($1); }
     | multiplicative_expression MUL unary_expression %prec MUL { 
-        $$ = new ParaCL::BinExpr(
+        $$ = std::make_unique<ParaCL::BinExpr>(
             ParaCL::token_t::MUL, 
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
+            std::move($1),
+            std::move($3)
         );
     }
     | multiplicative_expression DIV unary_expression %prec DIV {
-        $$ = new ParaCL::BinExpr(
+        $$ = std::make_unique<ParaCL::BinExpr>(
             ParaCL::token_t::DIV, 
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
+            std::move($1),
+            std::move($3)
         );
     }
     | multiplicative_expression REM unary_expression %prec REM {
-        $$ = new ParaCL::BinExpr(
+        $$ = std::make_unique<ParaCL::BinExpr>(
             ParaCL::token_t::REM,
-            std::unique_ptr<ParaCL::Expr>($1),
-            std::unique_ptr<ParaCL::Expr>($3)
+            std::move($1),
+            std::move($3)
         );
+    }
+    | multiplicative_expression MUL error {
+        ErrorHandler::throwError(@3, "expected expression after '*' operator");
+        YYABORT;
+    }
+    | multiplicative_expression DIV error {
+        ErrorHandler::throwError(@3, "expected expression after '/' operator");
+        YYABORT;
+    }
+    | multiplicative_expression REM error {
+        ErrorHandler::throwError(@3, "expected expression after '%' operator");
+        YYABORT;
     }
     ;
 
 unary_expression:
-    factor { $$ = $1; }
+    factor { $$ = std::move($1); }
     | SUB unary_expression %prec NEG {
-        $$ = new ParaCL::UnExpr(
+        $$ = std::make_unique<ParaCL::UnExpr>(
             ParaCL::token_t::SUB,
-            std::unique_ptr<ParaCL::Expr>($2)
+            std::move($2)
         );
     }
     | NOT unary_expression %prec NOT {
-        $$ = new ParaCL::UnExpr(
+        $$ = std::make_unique<ParaCL::UnExpr>(
             ParaCL::token_t::NOT,
-            std::unique_ptr<ParaCL::Expr>($2)
+            std::move($2)
         );
+    }
+    | ADD unary_expression %prec NEG {
+        $$ = std::move($2);
+    }
+    | SUB error {
+        ErrorHandler::throwError(@2, "expected expression after unary '-'");
+        YYABORT;
+    }
+    | NOT error {
+        ErrorHandler::throwError(@2, "expected expression after 'not' operator");
+        YYABORT;
+    }
+    | ADD error {
+        ErrorHandler::throwError(@2, "expected expression after unary '+'");
+        YYABORT;
     }
     ;
 
 factor:
     NUM { 
-        $$ = new ParaCL::NumExpr($1);
+        $$ = std::make_unique<ParaCL::NumExpr>($1);
     }
     | VAR { 
-        $$ = new ParaCL::VarExpr(*$1);
-        delete $1;
+        $$ = std::make_unique<ParaCL::VarExpr>(std::move($1));
     }
     | LCIB expression RCIB { 
-        $$ = $2;
+        $$ = std::move($2);
     }
     | IN {
-        $$ = new ParaCL::InputExpr();
+        $$ = std::make_unique<ParaCL::InputExpr>();
+    }
+    | LCIB error RCIB {
+        ErrorHandler::throwError(@2, "expected expression inside parentheses");
+        YYABORT;
+    }
+    | LCIB expression error {
+        ErrorHandler::throwError(@3, "expected ')' after expression");
+        YYABORT;
     }
     ;
 
 block:
     statements {
-        std::vector<std::unique_ptr<ParaCL::Stmt>> body_stmts;
-        for (auto stmt : *$1)
-            body_stmts.push_back(std::unique_ptr<ParaCL::Stmt>(stmt));
-
-        $$ = new ParaCL::BlockStmt(std::move(body_stmts));
-        delete $1; /* delete vector of statements, created in 'statements' rule */
+        $$ = std::make_unique<ParaCL::BlockStmt>(std::move($1));
     }
     ;
 
 one_stmt_block:
     statement {
-        std::vector<std::unique_ptr<ParaCL::Stmt>> body_stmts;
-        body_stmts.push_back(std::unique_ptr<ParaCL::Stmt>($1));
-        $$ = new ParaCL::BlockStmt(std::move(body_stmts));
+        std::vector<std::unique_ptr<ParaCL::Statement>> body_stmts;
+        body_stmts.push_back(std::move($1));
+        $$ = std::make_unique<ParaCL::BlockStmt>(std::move(body_stmts));
     }
     ;
-%%
 
-void yyerror(YYLTYPE* loc, const char* msg)
-{
-    std::cerr << current_file     << ":"
-              << loc->first_line   << ":"
-              << loc->first_column << ":"
-              " paracl: error: " << msg << "\n";
-}
+string_constant:
+    STRING {
+        $$ = std::make_unique<ParaCL::StringConstant>(std::move($1));
+    }
+    ;
+
+%%

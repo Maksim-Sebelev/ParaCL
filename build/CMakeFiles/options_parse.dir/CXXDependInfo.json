@@ -39,6 +39,9 @@
 		"/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/third-party/logger/Src/header-only"
 	],
 	"language" : "CXX",
-	"linked-target-dirs" : [],
+	"linked-target-dirs" : 
+	[
+		"/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/paracl_info.dir"
+	],
 	"module-dir" : "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/options_parse.dir"
 }

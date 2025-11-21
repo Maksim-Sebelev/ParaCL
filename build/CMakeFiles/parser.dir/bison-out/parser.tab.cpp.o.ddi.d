@@ -1,5 +1,6 @@
 CMakeFiles/parser.dir/bison-out/parser.tab.cpp.o.ddi: \
   /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.cpp \
+  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.hpp \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/iostream \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/requires_hosted.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++config.h \
@@ -222,12 +223,6 @@ CMakeFiles/parser.dir/bison-out/parser.tab.cpp.o.ddi: \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/ostream.tcc \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/istream \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/istream.tcc \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/unordered_map \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/unordered_map.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/hashtable.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/hashtable_policy.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/node_handle.h \
-  /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/erase_if.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/memory \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_uninitialized.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_raw_storage_iter.h \
@@ -270,7 +265,7 @@ CMakeFiles/parser.dir/bison-out/parser.tab.cpp.o.ddi: \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_vector.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_bvector.h \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/vector.tcc \
-  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/include/frontend/lexer/lexer.hpp \
+  /usr/include/string.h /usr/include/strings.h \
   /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/include/frontend/parser/parser.hpp \
   /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/include/frontend/parser/ast.hpp \
   /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/include/frontend/parser/token_types.hpp \
@@ -278,4 +273,6 @@ CMakeFiles/parser.dir/bison-out/parser.tab.cpp.o.ddi: \
   /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/include/global/custom_console_output.hpp \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/sstream \
   /usr/bin/../lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/sstream.tcc \
-  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/parser.tab.hpp
+  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/bison-out/location.hh \
+  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/include/frontend/parser/parse_error.hpp \
+  /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/include/frontend/lexer/lexer.hpp

@@ -1,6 +1,8 @@
+/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/paracl_info.dir
 /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/parser.dir
 /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/lexer.dir
 /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/options_parse.dir
+/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/interpretor.dir
 /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/run_paracl.dir
 /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/paracl.dir
 /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/build/CMakeFiles/Experimental.dir

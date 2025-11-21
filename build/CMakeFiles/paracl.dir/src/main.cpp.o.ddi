@@ -11,7 +11,7 @@
           "logical-name": "run_paracl"
         },
         {
-          "logical-name": "parse_paracl_exit_code"
+          "logical-name": "parse_paracl_exceptions"
         }
       ]
     }
