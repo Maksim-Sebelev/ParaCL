@@ -1,9 +1,0 @@
-{
-  "revision": 0,
-  "rules": [
-    {
-      "primary-output": "CMakeFiles/lexer.dir/flex-out/lexer.yy.cpp.o"
-    }
-  ],
-  "version": 1
-}

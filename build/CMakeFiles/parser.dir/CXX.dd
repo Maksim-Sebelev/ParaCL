@@ -1,5 +1,0 @@
-ninja_dyndep_version = 1.0
-build CMakeFiles/parser.dir/bison-out/parser.tab.cpp.o: dyndep
-
-build CMakeFiles/parser.dir/src/frontend/parser/parse_error.cpp.o: dyndep
-
