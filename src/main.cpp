@@ -1,8 +1,4 @@
-#if defined(LOGGER)
-#include "pineaplog.hpp"
-#endif /* defined(LOGGER) */
-
-#include <iostream>
+#include <cstdlib>
 #include <stdexcept>
 
 import options_parser;

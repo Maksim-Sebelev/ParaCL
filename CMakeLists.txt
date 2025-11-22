@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.28)
 project(paraCL
     LANGUAGES CXX
-    VERSION 1.3
+    VERSION 1.4
 )
 
 # =================================================================================================
@@ -121,7 +121,7 @@ add_custom_command(
     COMMAND
         ${CMAKE_COMMAND} -E make_directory ${BISON_OUT_DIR}
     COMMAND
-        ${BISON_EXECUTABLE} -o ${BISON_OUT_DIR}/${BISON_PARSER_CPP} ${BISON_SRC} -d
+        ${BISON_EXECUTABLE} -Wcounterexamples -o ${BISON_OUT_DIR}/${BISON_PARSER_CPP} ${BISON_SRC} -d
     DEPENDS
         ${BISON_SRC}
     COMMENT
@@ -190,7 +190,7 @@ target_add_logger(${LEXER_LIB})
 # =================================================================================================
 # add options parser library
 
-set(OPTIONS_PARSER_LIB options_parse)
+set(OPTIONS_PARSER_LIB options_parser)
 add_library(${OPTIONS_PARSER_LIB})
 
 set(OPTIONS_PARSER_SRC_DIR ${SRC_DIR}/options_parser)
@@ -231,10 +231,10 @@ target_add_logger(${OPTIONS_PARSER_LIB})
 # =================================================================================================
 # paracl intepretor
 
-set(PARACL_INTERPRETOR_LIB interpretor)
+set(PARACL_INTERPRETOR_LIB interpreter)
 add_library(${PARACL_INTERPRETOR_LIB})
 
-set(PARACL_INTERPRETOR_SRC_DIR ${BACKEND_SRC_DIR}/interpretor)
+set(PARACL_INTERPRETOR_SRC_DIR ${BACKEND_SRC_DIR}/interpreter)
 set(PARACL_INTERPRETOR_SRC
     ${PARACL_INTERPRETOR_SRC_DIR}/interpreter.cppm
     ${PARACL_INTERPRETOR_SRC_DIR}/name_table.cppm
