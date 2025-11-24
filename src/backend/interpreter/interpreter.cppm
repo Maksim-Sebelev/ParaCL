@@ -226,7 +226,6 @@ int execute_combined_assign_expression(const CombinedAssingExpr *combinedAssingE
     return value;
 }
 
-// Existing functions (остаются без изменений)
 int execute_binary_operation(int lhs, int rhs, token_t binary_operator)
 {
     switch (binary_operator)
