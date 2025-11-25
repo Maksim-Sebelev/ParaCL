@@ -1,0 +1,113 @@
+[2025-11-26 02:19:35] [info] [main.cpp:20] paracl: start
+[2025-11-26 02:19:35] [info] [main.cpp:21] paracl: parse program options
+[2025-11-26 02:19:35] [info] [options_parser.cppm:104] paracl: options parser: begin parse options
+[2025-11-26 02:19:35] [info] [options_parser.cppm:218] paracl: options parser: parse not a flag: "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl"
+[2025-11-26 02:19:35] [info] [options_parser.cppm:227] paracl: options parser: find source file: "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl"
+[2025-11-26 02:19:35] [info] [options_parser.cppm:247] paracl: options parser: set getopt arg default values
+[2025-11-26 02:19:35] [info] [options_parser.cppm:132] paracl: options parser: parse options completed
+[2025-11-26 02:19:35] [info] [options_parser.cppm:104] paracl: options parser: begin parse options
+[2025-11-26 02:19:35] [info] [options_parser.cppm:218] paracl: options parser: parse not a flag: "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl"
+[2025-11-26 02:19:35] [info] [options_parser.cppm:227] paracl: options parser: find source file: "/home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl"
+[2025-11-26 02:19:35] [info] [options_parser.cppm:247] paracl: options parser: set getopt arg default values
+[2025-11-26 02:19:35] [info] [options_parser.cppm:132] paracl: options parser: parse options completed
+[2025-11-26 02:19:35] [info] [main.cpp:23] paracl: parse program options completed
+[2025-11-26 02:19:35] [info] [main.cpp:24] paracl: run
+[2025-11-26 02:19:35] [info] [parser.y:90] paracl: parser: rule: statements -> empty
+[2025-11-26 02:19:35] [info] [lexer.l:159] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:1:1:"a"
+[2025-11-26 02:19:35] [info] [lexer.yy.cpp:869] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:1:2:" "
+[2025-11-26 02:19:35] [info] [lexer.l:113] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:1:3:"="
+[2025-11-26 02:19:35] [info] [lexer.yy.cpp:869] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:1:4:" "
+[2025-11-26 02:19:35] [info] [lexer.l:154] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:1:5:"0"
+[2025-11-26 02:19:35] [info] [parser.y:731] paracl: parser: rule: factor -> NUM
+[2025-11-26 02:19:35] [info] [parser.y:691] paracl: parser: rule: unary_expression -> factor
+[2025-11-26 02:19:35] [info] [parser.y:645] paracl: parser: rule: multiplicative_expression -> unary_expression
+[2025-11-26 02:19:35] [info] [lexer.l:118] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:1:6:";"
+[2025-11-26 02:19:35] [info] [parser.y:612] paracl: parser: rule: additive_expression -> multiplicative_expression
+[2025-11-26 02:19:35] [info] [parser.y:553] paracl: parser: rule: relational_expression -> additive_expression
+[2025-11-26 02:19:35] [info] [parser.y:520] paracl: parser: rule: equality_expression -> relational_expression
+[2025-11-26 02:19:35] [info] [parser.y:500] paracl: parser: rule: logical_and_expression -> equality_expression
+[2025-11-26 02:19:35] [info] [parser.y:480] paracl: parser: rule: logical_or_expression -> logical_and_expression
+[2025-11-26 02:19:35] [info] [parser.y:412] paracl: parser: rule: assignment_expression -> logical_or_expression
+[2025-11-26 02:19:35] [info] [parser.y:405] paracl: parser: rule: expression -> assignment_expression
+[2025-11-26 02:19:35] [info] [parser.y:134] paracl: parser: rule: assignment -> VAR AS expression
+[2025-11-26 02:19:35] [info] [parser.y:107] paracl: parser: rule: statement -> assignment SC
+[2025-11-26 02:19:35] [info] [parser.y:94] paracl: parser: rule: statements -> statements statement
+[2025-11-26 02:19:35] [info] [lexer.l:82] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:1:7:"
+"
+[2025-11-26 02:19:35] [info] [lexer.l:159] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:2:1:"b"
+[2025-11-26 02:19:35] [info] [lexer.yy.cpp:869] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:2:2:" "
+[2025-11-26 02:19:35] [info] [lexer.l:113] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:2:3:"="
+[2025-11-26 02:19:35] [info] [lexer.yy.cpp:869] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:2:4:" "
+[2025-11-26 02:19:35] [info] [lexer.l:154] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:2:5:"5"
+[2025-11-26 02:19:35] [info] [parser.y:731] paracl: parser: rule: factor -> NUM
+[2025-11-26 02:19:35] [info] [parser.y:691] paracl: parser: rule: unary_expression -> factor
+[2025-11-26 02:19:35] [info] [parser.y:645] paracl: parser: rule: multiplicative_expression -> unary_expression
+[2025-11-26 02:19:35] [info] [lexer.l:118] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:2:6:";"
+[2025-11-26 02:19:35] [info] [parser.y:612] paracl: parser: rule: additive_expression -> multiplicative_expression
+[2025-11-26 02:19:35] [info] [parser.y:553] paracl: parser: rule: relational_expression -> additive_expression
+[2025-11-26 02:19:35] [info] [parser.y:520] paracl: parser: rule: equality_expression -> relational_expression
+[2025-11-26 02:19:35] [info] [parser.y:500] paracl: parser: rule: logical_and_expression -> equality_expression
+[2025-11-26 02:19:35] [info] [parser.y:480] paracl: parser: rule: logical_or_expression -> logical_and_expression
+[2025-11-26 02:19:35] [info] [parser.y:412] paracl: parser: rule: assignment_expression -> logical_or_expression
+[2025-11-26 02:19:35] [info] [parser.y:405] paracl: parser: rule: expression -> assignment_expression
+[2025-11-26 02:19:35] [info] [parser.y:134] paracl: parser: rule: assignment -> VAR AS expression
+[2025-11-26 02:19:35] [info] [parser.y:107] paracl: parser: rule: statement -> assignment SC
+[2025-11-26 02:19:35] [info] [parser.y:94] paracl: parser: rule: statements -> statements statement
+[2025-11-26 02:19:35] [info] [lexer.l:82] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:2:7:"
+"
+[2025-11-26 02:19:35] [info] [lexer.l:111] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:3:1:"while"
+[2025-11-26 02:19:35] [info] [lexer.yy.cpp:869] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:3:6:" "
+[2025-11-26 02:19:35] [info] [lexer.l:107] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:3:7:"("
+[2025-11-26 02:19:35] [info] [lexer.l:159] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:3:8:"b"
+[2025-11-26 02:19:35] [info] [lexer.yy.cpp:869] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:3:9:" "
+[2025-11-26 02:19:35] [info] [lexer.l:97] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:3:10:">"
+[2025-11-26 02:19:35] [info] [parser.y:735] paracl: parser: rule: factor -> VAR
+[2025-11-26 02:19:35] [info] [parser.y:691] paracl: parser: rule: unary_expression -> factor
+[2025-11-26 02:19:35] [info] [parser.y:645] paracl: parser: rule: multiplicative_expression -> unary_expression
+[2025-11-26 02:19:35] [info] [parser.y:612] paracl: parser: rule: additive_expression -> multiplicative_expression
+[2025-11-26 02:19:35] [info] [parser.y:553] paracl: parser: rule: relational_expression -> additive_expression
+[2025-11-26 02:19:35] [info] [lexer.yy.cpp:869] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:3:11:" "
+[2025-11-26 02:19:35] [info] [lexer.l:154] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:3:12:"0"
+[2025-11-26 02:19:35] [info] [parser.y:731] paracl: parser: rule: factor -> NUM
+[2025-11-26 02:19:35] [info] [parser.y:691] paracl: parser: rule: unary_expression -> factor
+[2025-11-26 02:19:35] [info] [parser.y:645] paracl: parser: rule: multiplicative_expression -> unary_expression
+[2025-11-26 02:19:35] [info] [lexer.l:108] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:3:13:")"
+[2025-11-26 02:19:35] [info] [parser.y:612] paracl: parser: rule: additive_expression -> multiplicative_expression
+[2025-11-26 02:19:35] [info] [parser.y:557] paracl: parser: rule: relational_expression -> relational_expression ISAB additive_expression
+[2025-11-26 02:19:35] [info] [parser.y:520] paracl: parser: rule: equality_expression -> relational_expression
+[2025-11-26 02:19:35] [info] [parser.y:500] paracl: parser: rule: logical_and_expression -> equality_expression
+[2025-11-26 02:19:35] [info] [parser.y:480] paracl: parser: rule: logical_or_expression -> logical_and_expression
+[2025-11-26 02:19:35] [info] [parser.y:412] paracl: parser: rule: assignment_expression -> logical_or_expression
+[2025-11-26 02:19:35] [info] [parser.y:405] paracl: parser: rule: expression -> assignment_expression
+[2025-11-26 02:19:35] [info] [lexer.yy.cpp:869] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:3:14:" "
+[2025-11-26 02:19:35] [info] [lexer.l:109] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:3:15:"{"
+[2025-11-26 02:19:35] [info] [parser.y:90] paracl: parser: rule: statements -> empty
+[2025-11-26 02:19:35] [info] [lexer.l:82] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:3:16:"
+"
+[2025-11-26 02:19:35] [info] [lexer.l:80] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:4:1:"    "
+[2025-11-26 02:19:35] [info] [lexer.l:159] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:4:5:"a"
+[2025-11-26 02:19:35] [info] [lexer.yy.cpp:869] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:4:6:" "
+[2025-11-26 02:19:35] [info] [lexer.l:103] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:4:7:"+="
+[2025-11-26 02:19:35] [info] [lexer.yy.cpp:869] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:4:9:" "
+[2025-11-26 02:19:35] [info] [lexer.l:159] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:4:10:"b"
+[2025-11-26 02:19:35] [info] [lexer.yy.cpp:869] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:4:11:" "
+[2025-11-26 02:19:35] [info] [lexer.l:94] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:4:12:"*"
+[2025-11-26 02:19:35] [info] [parser.y:735] paracl: parser: rule: factor -> VAR
+[2025-11-26 02:19:35] [info] [parser.y:691] paracl: parser: rule: unary_expression -> factor
+[2025-11-26 02:19:35] [info] [parser.y:645] paracl: parser: rule: multiplicative_expression -> unary_expression
+[2025-11-26 02:19:35] [info] [lexer.yy.cpp:869] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:4:13:" "
+[2025-11-26 02:19:35] [info] [lexer.l:159] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:4:14:"b"
+[2025-11-26 02:19:35] [info] [parser.y:735] paracl: parser: rule: factor -> VAR
+[2025-11-26 02:19:35] [info] [parser.y:691] paracl: parser: rule: unary_expression -> factor
+[2025-11-26 02:19:35] [info] [parser.y:649] paracl: parser: rule: multiplicative_expression -> multiplicative_expression MUL unary_expression
+[2025-11-26 02:19:35] [info] [lexer.l:118] paracl: lexer: parse token: /home/ananasik/projects/C++/vlados/5/ParaCL/1_version/tests/e2e/dat/0004.cl:4:15:";"
+[2025-11-26 02:19:35] [info] [parser.y:612] paracl: parser: rule: additive_expression -> multiplicative_expression
+[2025-11-26 02:19:35] [info] [parser.y:553] paracl: parser: rule: relational_expression -> additive_expression
+[2025-11-26 02:19:35] [info] [parser.y:520] paracl: parser: rule: equality_expression -> relational_expression
+[2025-11-26 02:19:35] [info] [parser.y:500] paracl: parser: rule: logical_and_expression -> equality_expression
+[2025-11-26 02:19:35] [info] [parser.y:480] paracl: parser: rule: logical_or_expression -> logical_and_expression
+[2025-11-26 02:19:35] [info] [parser.y:412] paracl: parser: rule: assignment_expression -> logical_or_expression
+[2025-11-26 02:19:35] [info] [parser.y:405] paracl: parser: rule: expression -> assignment_expression
+[2025-11-26 02:19:35] [info] [parser.y:147] paracl: parser: rule: combined_assignment -> VAR ADDASGN expression
+[2025-11-26 02:19:35] [error] [parser.y:150] paracl: parser: use undeclareted variable: "a"
+[2025-11-26 02:19:35] [error] [main.cpp:38] paracl: exit failure: run time error

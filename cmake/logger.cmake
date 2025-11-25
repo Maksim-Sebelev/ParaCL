@@ -2,7 +2,7 @@ if (LOGGER)
 SET(PINEAPLOG_DIR ${PROJECT_SOURCE_DIR}/third-party/logger/Src/modules-based)
 set(SPDLOG_DIR    ${PROJECT_SOURCE_DIR}/third-party/spdlog)
 
-set(LOG_OUT_DIR "${CMAKE_SOURCE_DIR}/log/")
+set(LOG_OUT_DIR "${CMAKE_SOURCE_DIR}/logs/")
 
 
 add_subdirectory(${PINEAPLOG_DIR})
