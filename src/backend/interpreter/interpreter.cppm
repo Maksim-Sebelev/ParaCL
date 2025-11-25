@@ -57,19 +57,19 @@ void execute_statement(const Statement *stmt, NameTable &table)
     if (auto assign = dynamic_cast<const AssignStmt *>(stmt))
         return execute_assign_statement(assign, table);
 
-    else if (auto combined_assign_statement = dynamic_cast<const CombinedAssingStmt *>(stmt))
+    if (auto combined_assign_statement = dynamic_cast<const CombinedAssingStmt *>(stmt))
         return execute_combined_assign_statement(combined_assign_statement, table);
 
-    else if (auto print_statement = dynamic_cast<const PrintStmt *>(stmt))
+    if (auto print_statement = dynamic_cast<const PrintStmt *>(stmt))
         return execute_print_statement(print_statement, table);
 
-    else if (auto while_stmt = dynamic_cast<const WhileStmt *>(stmt))
+    if (auto while_stmt = dynamic_cast<const WhileStmt *>(stmt))
         return execute_while_statement(while_stmt, table);
 
-    else if (auto block = dynamic_cast<const BlockStmt *>(stmt))
+    if (auto block = dynamic_cast<const BlockStmt *>(stmt))
         return execute_block_statement(block, table);
 
-    else if (auto condition = dynamic_cast<const ConditionStatement *>(stmt))
+    if (auto condition = dynamic_cast<const ConditionStatement *>(stmt))
         return execute_condition_statement(condition, table);
 
     builtin_unreachable_wrapper("we must return in some else-if");
@@ -80,22 +80,22 @@ int execute_expression(const Expression *expr, NameTable &table)
     if (auto bin = dynamic_cast<const BinExpr *>(expr))
         return execute_binary_expression(bin, table);
 
-    else if (auto un = dynamic_cast<const UnExpr *>(expr))
+    if (auto un = dynamic_cast<const UnExpr *>(expr))
         return execute_unary_expression(un, table);
 
-    else if (auto num = dynamic_cast<const NumExpr *>(expr))
+    if (auto num = dynamic_cast<const NumExpr *>(expr))
         return execute_number_expression(num, table);
 
-    else if (auto var = dynamic_cast<const VarExpr *>(expr))
+    if (auto var = dynamic_cast<const VarExpr *>(expr))
         return execute_variable_expression(var, table);
 
-    else if (auto in = dynamic_cast<const InputExpr *>(expr))
+    if (auto in = dynamic_cast<const InputExpr *>(expr))
         return execute_input_expression(in, table);
 
-    else if (auto assignExpr = dynamic_cast<const AssignExpr *>(expr))
+    if (auto assignExpr = dynamic_cast<const AssignExpr *>(expr))
         return execute_assign_expression(assignExpr, table);
 
-    else if (auto combinedAssingExpr = dynamic_cast<const CombinedAssingExpr *>(expr))
+    if (auto combinedAssingExpr = dynamic_cast<const CombinedAssingExpr *>(expr))
         return execute_combined_assign_expression(combinedAssingExpr, table);
 
     builtin_unreachable_wrapper("we must return in some else-if");
@@ -155,8 +155,8 @@ int execute_binary_expression(const BinExpr *bin, NameTable &table)
     auto leftExpr = dynamic_cast<const Expression *>(bin->left.get());
     auto rightExpr = dynamic_cast<const Expression *>(bin->right.get());
 
-    if (not leftExpr || not rightExpr)
-        throw std::runtime_error("BinExpr children are not Expression");
+    msg_assert(leftExpr , "left bin expr child is not expr");
+    msg_assert(rightExpr, "rihgt bin expr child is not expr");
 
     int leftResult = execute_expression(leftExpr, table);
     int rightResult = execute_expression(rightExpr, table);
@@ -195,8 +195,7 @@ int execute_input_expression([[maybe_unused]] const InputExpr *in, [[maybe_unuse
 int execute_assign_expression(const AssignExpr *assignExpr, NameTable &table)
 {
     auto e = dynamic_cast<const Expression *>(assignExpr->value.get());
-    if (not e)
-        throw std::runtime_error("BinExpr children are not Expression");
+    msg_assert(e, "BinExpr children are not Expression");
 
     auto result = execute_expression(e, table);
 
@@ -214,8 +213,7 @@ int execute_combined_assign_expression(const CombinedAssingExpr *combinedAssingE
         throw std::runtime_error("error: '" + combinedAssingExpr->name + "' was not declared in this scope\n");
 
     auto expr = dynamic_cast<const Expression *>(combinedAssingExpr->value.get());
-    if (not expr)
-        throw std::runtime_error("BinExpr children are not Expression");
+    msg_assert(expr, "BinExpr children are not Expression");
 
     auto result = execute_expression(expr, table);
 
@@ -288,19 +286,15 @@ int execute_combined_assign(int rhs, int value, token_t combined_assign)
     case token_t::SUBASGN:
         rhs -= value;
         break;
-        ;
     case token_t::MULASGN:
         rhs *= value;
         break;
-        ;
     case token_t::DIVASGN:
         rhs /= value;
         break;
-        ;
     case token_t::REMASGN:
         rhs %= value;
         break;
-        ;
     default:
         builtin_unreachable_wrapper("here we parse only combined assign operations");
     }
@@ -310,8 +304,7 @@ int execute_combined_assign(int rhs, int value, token_t combined_assign)
 void execute_assign_statement(const AssignStmt *assign, NameTable &table)
 {
     auto e = dynamic_cast<const Expression *>(assign->value.get());
-    if (not e)
-        throw std::runtime_error("BinExpr children are not Expression");
+    msg_assert(e, "BinExpr children are not Expression");
 
     auto result = execute_expression(e, table);
 
@@ -328,9 +321,7 @@ void execute_combined_assign_statement(const CombinedAssingStmt *combined_assign
                                  "paracl: failed with exit code 1");
 
     auto expr = dynamic_cast<const Expression *>(combined_assign_statement->value.get());
-
-    if (not expr)
-        throw std::runtime_error("BinExpr children are not Expression");
+    msg_assert(expr, "BinExpr children are not Expression");
 
     auto result = execute_expression(expr, table);
 
@@ -348,14 +339,13 @@ void execute_print_statement(const PrintStmt *print_statement, NameTable &table)
             std::cout << string->value << std::flush;
             continue;
         }
-        else if (auto expr = dynamic_cast<const Expression *>(arg.get()))
+        if (auto expr = dynamic_cast<const Expression *>(arg.get()))
         {
             auto result = execute_expression(expr, table);
             std::cout << result << std::flush;
             continue;
         }
-
-        throw std::runtime_error("bad 'print_statement' args type");
+        builtin_unreachable_wrapper("bad 'print_statement' args type");
     }
 
     std::cout << std::endl;
