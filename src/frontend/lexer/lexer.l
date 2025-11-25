@@ -1,8 +1,4 @@
 %{
-#if defined(LOGGER)
-#include "pineaplog.hpp"
-#endif /* defined(LOGGER) */
-
 #include <string>
 #include <cstdlib>
 #include <cstring>
@@ -12,6 +8,8 @@
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
 #include "global/global.hpp"
+
+#include "log/log_api.hpp"
 
 std::string current_file;
 
@@ -43,12 +41,16 @@ static size_t tokens_counter = 0;
         }                                                       \
         yylloc->end.column++;                                    \
     }                                                             \
-    ON_LOGGER( \
-        PineapLog::glog.logc(PineapLog::LogColor::White, "[", PineapLog::tokens_counter, "]"); \
-        PineapLog::tokens_counter++; \
-        PineapLog::LogColor color = (PineapLog::tokens_counter % 3 == 0) ? PineapLog::LogColor::Green : (PineapLog::tokens_counter % 3 == 1) ? PineapLog::LogColor::Yellow : PineapLog::LogColor::Red; \
-        PineapLog::glog.logc(color, "{", "\n\tfirst line: ", yylloc->begin.line, "\n\tfirst col : ", yylloc->begin.column, "\n\tlast line: ", yylloc->end.line, "\n\tlast col : ", yylloc->end.column, "\n\tword = '", yytext, "'\n}"); \
-    ) \
+    LOGINFO("paracl: lexer: parse token: {}:{}:{}:\"{}\"", current_file, yylloc->begin.line, yylloc->begin.column, yytext); \
+    HTMLCOLLOG(PineapLog::LogColor::White, "[", PineapLog::tokens_counter++, "]"); \
+    HTMLCOLLOG((PineapLog::tokens_counter % 3 == 0) ? \
+                PineapLog::LogColor::Green : (PineapLog::tokens_counter % 3 == 1) ? \
+                PineapLog::LogColor::Yellow : PineapLog::LogColor::Red, \
+                "{", "\n\tfirst line: ", yylloc->begin.line, \
+                     "\n\tfirst col : ", yylloc->begin.column, \
+                     "\n\tlast line: ", yylloc->end.line, \
+                     "\n\tlast col : ", yylloc->end.column, \
+                     "\n\tword = '", yytext, "'\n}"); \
 } while (0);
 
 %}

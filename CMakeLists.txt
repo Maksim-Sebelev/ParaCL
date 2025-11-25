@@ -29,6 +29,19 @@ option(GRAPHVIZ "Enable graphviz visualization (graphviz)" OFF)
 string(TIMESTAMP CURRENT_TIME "%Y-%m-%d %H:%M:%S")
 
 # =================================================================================================
+# set some global varibles
+
+set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
+set(INC_DIR ${PROJECT_SOURCE_DIR}/include)
+
+set(BACKEND_SRC_DIR ${SRC_DIR}/backend)
+set(FRONTEND_SRC_DIR ${SRC_DIR}/frontend)
+
+set(FRONTEND_INC_DIR ${INC_DIR}/frontend)
+
+set(DEBUG_DIR ${PROJECT_SOURCE_DIR}/debug)
+
+# =================================================================================================
 
 set(CMAKE_SETTINGS_DIR ${PROJECT_SOURCE_DIR}/cmake)
 
@@ -42,19 +55,6 @@ set(CMAKE_DEPS_DIR ${CMAKE_SETTINGS_DIR}/dep)
 
 include(${CMAKE_DEPS_DIR}/check-flex.cmake)
 include(${CMAKE_DEPS_DIR}/check-bison.cmake)
-
-# =================================================================================================
-# set some global varibles
-
-set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
-set(INC_DIR ${PROJECT_SOURCE_DIR}/include)
-
-set(BACKEND_SRC_DIR ${SRC_DIR}/backend)
-set(FRONTEND_SRC_DIR ${SRC_DIR}/frontend)
-
-set(FRONTEND_INC_DIR ${INC_DIR}/frontend)
-
-set(DEBUG_DIR ${PROJECT_SOURCE_DIR}/debug)
 
 # =================================================================================================
 # crete paracl info library
@@ -330,6 +330,11 @@ target_link_libraries(${PARACL_EXE}
     PRIVATE
         ${OPTIONS_PARSER_LIB}
         ${RUN_PARACL_LIB}
+)
+
+target_include_directories(${PARACL_EXE}
+    PRIVATE
+        ${INC_DIR}
 )
 
 add_target_debug_options(${PARACL_EXE} hard)
