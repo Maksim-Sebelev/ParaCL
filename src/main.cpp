@@ -12,8 +12,6 @@ import parse_paracl_exceptions;
 import spdlog_init;
 #endif /* defined(LOGGER)*/
 
-// #define SPDINFO(...) spdlog::info("[{} { ]")
-
 int main(int argc, char *argv[])
 try
 {
