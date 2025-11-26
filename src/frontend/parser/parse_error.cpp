@@ -1,7 +1,8 @@
-
 #include "parser/parse_error.hpp"
 #include "parser.tab.hpp"
 #include <algorithm>
+#include <cstring>
+#include <exception>
 #include <iostream>
 #include <limits>
 #include <string.h>
@@ -17,6 +18,47 @@ void yy::parser::error(const location &loc, const std::string &msg)
 
 namespace ErrorHandler
 {
+
+namespace Detail
+{
+
+void show_error_context(const yy::location &loc);
+size_t levenshtein_distance(const std::string &s1, const std::string &s2);
+std::string find_possible_token(const char *unexpected);
+std::string extract_token_at_position(const yy::location &loc);
+
+} /* namespace Detail */
+
+void throwError(const yy::location &loc, const std::string &msg, const ErrorParseOptions &options)
+{
+    std::cerr << current_file << ":" << loc.begin.line << ":" << loc.begin.column
+              << ": paracl: error:"
+                 " ---> "
+              << msg << "\n";
+
+    std::string bad_token = ErrorHandler::Detail::extract_token_at_position(loc);
+
+    if (options.show_bad_token)
+    {
+        std::cerr << "Problematic place: '";
+        bad_token.empty() ? std::cerr << "???" : std::cerr << bad_token;
+        std::cerr << "'\n\n";
+    }
+
+    if (options.show_error_context)
+    {
+        ErrorHandler::Detail::show_error_context(loc);
+    }
+
+    if (options.show_posible_token)
+    {
+        std::string possible_token = ErrorHandler::Detail::find_possible_token(bad_token.c_str());
+        std::cerr << "\nPossible fix: ";
+        possible_token.empty() ? std::cerr << "no suggestions"
+                               : std::cerr << "Did you mean: '" << possible_token << "'?";
+        std::cerr << "\n";
+    }
+}
 
 namespace Detail
 {
@@ -183,37 +225,6 @@ std::string extract_token_at_position(const yy::location &loc)
     return token;
 }
 
-} // namespace Detail
+} /* namespace Detail */
 
-void throwError(const yy::location &loc, const std::string &msg, const ErrorParseOptions &options)
-{
-    std::cerr << current_file << ":" << loc.begin.line << ":" << loc.begin.column
-              << ": paracl: error:"
-                 " ---> "
-              << msg << "\n";
-
-    std::string bad_token = ErrorHandler::Detail::extract_token_at_position(loc);
-
-    if (options.show_bad_token)
-    {
-        std::cerr << "Problematic place: '";
-        bad_token.empty() ? std::cerr << "???" : std::cerr << bad_token;
-        std::cerr << "'\n\n";
-    }
-
-    if (options.show_error_context)
-    {
-        ErrorHandler::Detail::show_error_context(loc);
-    }
-
-    if (options.show_posible_token)
-    {
-        std::string possible_token = ErrorHandler::Detail::find_possible_token(bad_token.c_str());
-        std::cerr << "\nPossible fix: ";
-        possible_token.empty() ? std::cerr << "no suggestions"
-                               : std::cerr << "Did you mean: '" << possible_token << "'?";
-        std::cerr << "\n";
-    }
-}
-
-} // namespace ErrorHandler
+} /* namespace ErrorHandler */

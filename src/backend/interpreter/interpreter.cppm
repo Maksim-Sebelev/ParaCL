@@ -44,7 +44,7 @@ int execute_unary_operation(int rhs, token_t unary_operator);
 
 export void interpret(const ProgramAST &progAST)
 {
-    LOGINFO("paracl: interpreter: start iterpret");
+    LOGINFO("paracl: interpreter: start interpret");
 
     NameTable table;
 

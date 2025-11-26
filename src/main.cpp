@@ -2,6 +2,7 @@
 #include <stdexcept>
 
 #include "log/log_api.hpp"
+#include "parser/parser_exceptions.hpp"
 
 import options_parser;
 import run_paracl;
@@ -11,16 +12,12 @@ import parse_paracl_exceptions;
 import spdlog_init;
 #endif /* defined(LOGGER)*/
 
-// #define SPDINFO(...) spdlog::info("[{} { ]")
-
 int main(int argc, char *argv[])
 try
 {
     ON_LOGGER(spdlog::init_spdlogger();)
     LOGINFO("paracl: start");
-    LOGINFO("paracl: parse program options");
     const OptionsParsing::program_options_t program_options = OptionsParsing::parse_program_options(argc, argv);
-    LOGINFO("paracl: parse program options completed");
     LOGINFO("paracl: run");
     ParaCL::run_paracl(program_options);
     LOGINFO("paracl: exit success");
@@ -28,19 +25,33 @@ try
 }
 catch (const std::invalid_argument &e)
 {
-    ParaCL::invalid_argument(e);
     LOGERR("paracl: exit failure: bad argument");
+    ParaCL::invalid_argument(e);
     return EXIT_FAILURE;
 }
 catch (const std::runtime_error &e)
 {
-    ParaCL::runtime_error(e);
     LOGERR("paracl: exit failure: run time error");
+    ParaCL::runtime_error(e);
+    return EXIT_FAILURE;
+}
+/* FIXME: add throw for ErrorHandler::parse_grammar_error */
+catch (const ErrorHandler::parse_grammar_error &e)
+{
+    LOGERR("paracl: exit failure: parse grammar error");
+    ParaCL::parse_grammar_error(e);
+    return EXIT_FAILURE;
+}
+/* FIXME: add throw for ErrorHandler::undeclareted_variale_error */
+catch (const ErrorHandler::undeclarated_variable_error &e)
+{
+    LOGERR("paracl: exit failure: parse grammar error");
+    ParaCL::undeclarated_variable_error(e);
     return EXIT_FAILURE;
 }
 catch (...)
 {
+    LOGERR("paracl: exit failure: undefined exception");
     ParaCL::undefined_error();
-    LOGERR("paracl: exit failure: undefined exceprion");
     return EXIT_FAILURE;
 }
