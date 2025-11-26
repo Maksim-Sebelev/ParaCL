@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.28)
 project(paraCL
     LANGUAGES CXX
-    VERSION 1.5
+    VERSION 1.6
 )
 
 # =================================================================================================
@@ -137,6 +137,8 @@ target_sources(${PARSER_LIB}
     PRIVATE
         ${BISON_PARSER_SRC_DIR}/${BISON_PARSER_CPP}
         ${BISON_SRC_DIR}/parse_error.cpp
+        ${BISON_SRC_DIR}/check_variables.cpp
+        ${BISON_SRC_DIR}/parser_exceptions.cpp
 )
 
 target_include_directories(${PARSER_LIB}
@@ -256,12 +258,6 @@ target_include_directories(${PARACL_INTERPRETOR_LIB}
         ${FRONTEND_INC_DIR}
 )
 
-# target_link_libraries(${PARACL_INTERPRETOR_LIB}
-#     PRIVATE
-#         ${PARSER_LIB}
-#         ${LEXER_LIB}
-# )
-
 add_target_debug_options(${PARACL_INTERPRETOR_LIB} hard)
 target_add_logger(${PARACL_INTERPRETOR_LIB})
 
@@ -335,6 +331,8 @@ target_link_libraries(${PARACL_EXE}
 target_include_directories(${PARACL_EXE}
     PRIVATE
         ${INC_DIR}
+        ${FRONTEND_INC_DIR}
+        ${BACKEND_INC_DIR}
 )
 
 add_target_debug_options(${PARACL_EXE} hard)

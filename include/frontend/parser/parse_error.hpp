@@ -1,7 +1,8 @@
 #pragma once
 
-#include <cstdint>
+#include <exception>
 #include <string>
+#include <stdexcept>
 
 #include "parser.tab.hpp"
 

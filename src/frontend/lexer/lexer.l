@@ -41,7 +41,7 @@ static size_t tokens_counter = 0;
         }                                                       \
         yylloc->end.column++;                                    \
     }                                                             \
-    LOGINFO("paracl: lexer: parse token: {}:{}:{}:\"{}\"", current_file, yylloc->begin.line, yylloc->begin.column, yytext); \
+    LOGINFO("paracl: lexer: parse token: '{}:{}:{}':\"{}\"", current_file, yylloc->begin.line, yylloc->begin.column, yytext); \
     HTMLCOLLOG(PineapLog::LogColor::White, "[", PineapLog::tokens_counter++, "]"); \
     HTMLCOLLOG((PineapLog::tokens_counter % 3 == 0) ? \
                 PineapLog::LogColor::Green : (PineapLog::tokens_counter % 3 == 1) ? \

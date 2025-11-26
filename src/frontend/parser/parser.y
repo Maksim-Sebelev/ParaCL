@@ -33,9 +33,13 @@ extern std::string current_var_value;
 #include "parser/parse_error.hpp"
 #include "lexer/lexer.hpp"
 
-ParaCL    ::ProgramAST        program;
+#include "parser/check_variables.hpp"
 
-int  yylex            (yy::parser::semantic_type* yylval, yy::parser::location_type* yylloc);
+ParaCL::ProgramAST program;
+
+ParaCL::NameTable name_table;
+
+int yylex(yy::parser::semantic_type* yylval, yy::parser::location_type* yylloc);
 } /* %code */
 
 %precedence OR
@@ -59,7 +63,7 @@ int  yylex            (yy::parser::semantic_type* yylval, yy::parser::location_t
 %token <std::string> STRING
 
 %type <std::vector<std::unique_ptr<ParaCL::Statement>>> program statements
-%type <std::unique_ptr<ParaCL::BlockStmt>> block one_stmt_block
+%type <std::unique_ptr<ParaCL::BlockStmt>> scope one_stmt_scope
 %type <std::unique_ptr<ParaCL::Statement>> statement assignment combined_assignment print_statement while_statement
 %type <std::unique_ptr<ParaCL::Expression>> expression assignment_expression logical_or_expression logical_and_expression equality_expression relational_expression additive_expression multiplicative_expression unary_expression factor string_constant
 %type <std::vector<std::unique_ptr<ParaCL::Expression>>> print_args
@@ -69,14 +73,27 @@ int  yylex            (yy::parser::semantic_type* yylval, yy::parser::location_t
 %type <std::vector<std::unique_ptr<ParaCL::ElifStatement>>> elif_statements
 %type <std::unique_ptr<ParaCL::ElseStatement>> else_statement
 
+
 %start program
 
 %%
 
 program:
-    statements {
+    create_global_scope statements leave_global_scope {
         LOGINFO("paracl: parser: rule: program -> statements");
-        program.statements = std::move($1);
+        program.statements = std::move($2);
+    }
+    ;
+
+create_global_scope:
+    %empty {
+        name_table.new_scope();
+    }
+    ;
+
+leave_global_scope:
+    %empty {
+        name_table.leave_scope();
     }
     ;
 
@@ -90,8 +107,8 @@ statements:
         $1.push_back(std::move($2));
         $$ = std::move($1);
     }
-    | statements LCUB block RCUB {
-        LOGINFO("paracl: parser: rule: statements -> statements LCUB block RCUB");
+    | statements LCUB scope RCUB {
+        LOGINFO("paracl: parser: rule: statements -> statements LCUB scope RCUB");
         $1.push_back(std::move($3));
         $$ = std::move($1);
     }
@@ -128,6 +145,7 @@ assignment:
     VAR AS expression {
         LOGINFO("paracl: parser: rule: assignment -> VAR AS expression");
         $$ = std::make_unique<ParaCL::AssignStmt>($1, std::move($3));
+        name_table.declare_or_do_nothing_if_already_declared($1);   
     }
     | VAR AS error {
         LOGERR("paracl: parser: rule: assignment -> VAR AS error");
@@ -139,6 +157,13 @@ assignment:
 combined_assignment:
     VAR ADDASGN expression {
         LOGINFO("paracl: parser: rule: combined_assignment -> VAR ADDASGN expression");
+        if (name_table.is_not_declare($1))
+        {
+            LOGERR("paracl: parser: rule: combined_assignment -> VAR ADDASGN expression: using undeclareted variable: \"{}\"", $1);
+            ErrorHandler::throwError(@1, "using undeclareted variable: " + ($1));
+            YYABORT;
+        }
+
         $$ = std::make_unique<ParaCL::CombinedAssingStmt>(
             ParaCL::token_t::ADDASGN,
             $1,
@@ -147,6 +172,13 @@ combined_assignment:
     }
     | VAR SUBASGN expression {
         LOGINFO("paracl: parser: rule: combined_assignment -> VAR SUBASGN expression");
+        if (name_table.is_not_declare($1))
+        {
+            LOGERR("paracl: parser: rule: combined_assignment -> VAR SUBASGN expression: using undeclareted variable: \"{}\"", $1);
+            ErrorHandler::throwError(@1, "using undeclareted variable: " + ($1));
+            YYABORT;
+        }
+
         $$ = std::make_unique<ParaCL::CombinedAssingStmt>(
             ParaCL::token_t::SUBASGN,
             $1,
@@ -155,6 +187,13 @@ combined_assignment:
     }
     | VAR MULASGN expression {
         LOGINFO("paracl: parser: rule: combined_assignment -> VAR MULASGN expression");
+        if (name_table.is_not_declare($1))
+        {
+            LOGERR("paracl: parser: rule: combined_assignment -> VAR MULASGN expression: using undeclareted variable: \"{}\"", $1);
+            ErrorHandler::throwError(@1, "using undeclareted variable: " + ($1));
+            YYABORT;
+        }
+    
         $$ = std::make_unique<ParaCL::CombinedAssingStmt>(
             ParaCL::token_t::MULASGN,
             $1,
@@ -163,6 +202,13 @@ combined_assignment:
     }
     | VAR DIVASGN expression {
         LOGINFO("paracl: parser: rule: combined_assignment -> VAR DIVASGN expression");
+        if (name_table.is_not_declare($1))
+        {
+            LOGERR("paracl: parser: rule: combined_assignment -> VAR DIVASGN expression: using undeclareted variable: \"{}\"", $1);
+            ErrorHandler::throwError(@1, "using undeclareted variable: " + ($1));
+            YYABORT;
+        }
+
         $$ = std::make_unique<ParaCL::CombinedAssingStmt>(
             ParaCL::token_t::DIVASGN,
             $1,
@@ -231,33 +277,33 @@ print_args:
     ;
 
 while_statement:
-    WH LCIB expression RCIB LCUB block RCUB {
-        LOGINFO("paracl: parser: rule: while_statement -> WH LCIB expression RCIB LCUB block RCUB");
+    WH LCIB expression RCIB LCUB scope RCUB {
+        LOGINFO("paracl: parser: rule: while_statement -> WH LCIB expression RCIB LCUB scope RCUB");
         $$ = std::make_unique<ParaCL::WhileStmt>(
             std::move($3),
             std::move($6)
         );
     }
-    | WH LCIB expression RCIB one_stmt_block {
-        LOGINFO("paracl: parser: rule: while_statement -> WH LCIB expression RCIB one_stmt_block");
+    | WH LCIB expression RCIB one_stmt_scope {
+        LOGINFO("paracl: parser: rule: while_statement -> WH LCIB expression RCIB one_stmt_scope");
         $$ = std::make_unique<ParaCL::WhileStmt>(
             std::move($3), 
             std::move($5)
         );
     }
-    | WH LCIB error RCIB LCUB block RCUB {
-        LOGERR("paracl: parser: rule: while_statement -> WH LCIB error RCIB LCUB block RCUB");
+    | WH LCIB error RCIB LCUB scope RCUB {
+        LOGERR("paracl: parser: rule: while_statement -> WH LCIB error RCIB LCUB scope RCUB");
         ErrorHandler::throwError(@3, "expected condition expression in while statement");
         YYABORT;
     }
-    | WH LCIB expression error LCUB block RCUB {
-        LOGERR("paracl: parser: rule: while_statement -> WH LCIB expression error LCUB block RCUB");
+    | WH LCIB expression error LCUB scope RCUB {
+        LOGERR("paracl: parser: rule: while_statement -> WH LCIB expression error LCUB scope RCUB");
         ErrorHandler::throwError(@4, "expected ')' after while condition");
         YYABORT;
     }
     | WH LCIB expression RCIB error {
         LOGERR("paracl: parser: rule: while_statement -> WH LCIB expression RCIB error");
-        ErrorHandler::throwError(@5, "expected block or statement after while condition");
+        ErrorHandler::throwError(@5, "expected scope or statement after while condition");
         YYABORT;
     }
     | WH error {
@@ -284,33 +330,33 @@ condition_statement:
     ;
 
 if_statement:
-    IF LCIB expression RCIB LCUB block RCUB {
-        LOGINFO("paracl: parser: rule: if_statement -> IF LCIB expression RCIB LCUB block RCUB");
+    IF LCIB expression RCIB LCUB scope RCUB {
+        LOGINFO("paracl: parser: rule: if_statement -> IF LCIB expression RCIB LCUB scope RCUB");
         $$ = std::make_unique<ParaCL::IfStatement>(
             std::move($3),
             std::move($6)
         );
     }
-    | IF LCIB expression RCIB one_stmt_block {
-        LOGINFO("paracl: parser: rule: if_statement -> IF LCIB expression RCIB one_stmt_block");
+    | IF LCIB expression RCIB one_stmt_scope {
+        LOGINFO("paracl: parser: rule: if_statement -> IF LCIB expression RCIB one_stmt_scope");
         $$ = std::make_unique<ParaCL::IfStatement>(
             std::move($3),
             std::move($5)
         );
     }
-    | IF LCIB error RCIB LCUB block RCUB {
-        LOGERR("paracl: parser: rule: if_statement -> IF LCIB error RCIB LCUB block RCUB");
+    | IF LCIB error RCIB LCUB scope RCUB {
+        LOGERR("paracl: parser: rule: if_statement -> IF LCIB error RCIB LCUB scope RCUB");
         ErrorHandler::throwError(@3, "expected condition expression in if statement");
         YYABORT;
     }
-    | IF LCIB expression error LCUB block RCUB {
-        LOGERR("paracl: parser: rule: if_statement -> IF LCIB expression error LCUB block RCUB");
+    | IF LCIB expression error LCUB scope RCUB {
+        LOGERR("paracl: parser: rule: if_statement -> IF LCIB expression error LCUB scope RCUB");
         ErrorHandler::throwError(@4, "expected ')' after if condition");
         YYABORT;
     }
     | IF LCIB expression RCIB error {
         LOGERR("paracl: parser: rule: if_statement -> IF LCIB expression RCIB error");
-        ErrorHandler::throwError(@5, "expected block or statement after if condition");
+        ErrorHandler::throwError(@5, "expected scope or statement after if condition");
         YYABORT;
     }
     | IF error {
@@ -325,35 +371,35 @@ elif_statements:
         LOGINFO("paracl: parser: rule: elif_statements -> empty");
         $$ = std::vector<std::unique_ptr<ParaCL::ElifStatement>>();
     }
-    | elif_statements ELIF LCIB expression RCIB LCUB block RCUB {
-        LOGINFO("paracl: parser: rule: elif_statements -> elif_statements ELIF LCIB expression RCIB LCUB block RCUB");
+    | elif_statements ELIF LCIB expression RCIB LCUB scope RCUB {
+        LOGINFO("paracl: parser: rule: elif_statements -> elif_statements ELIF LCIB expression RCIB LCUB scope RCUB");
         $1.push_back(std::make_unique<ParaCL::ElifStatement>(
             std::move($4),
             std::move($7)
         ));
         $$ = std::move($1);
     }
-    | elif_statements ELIF LCIB expression RCIB one_stmt_block {
-        LOGINFO("paracl: parser: rule: elif_statements -> elif_statements ELIF LCIB expression RCIB one_stmt_block");
+    | elif_statements ELIF LCIB expression RCIB one_stmt_scope {
+        LOGINFO("paracl: parser: rule: elif_statements -> elif_statements ELIF LCIB expression RCIB one_stmt_scope");
         $1.push_back(std::make_unique<ParaCL::ElifStatement>(
             std::move($4),
             std::move($6)
         ));
         $$ = std::move($1);
     }
-    | elif_statements ELIF LCIB error RCIB LCUB block RCUB {
-        LOGERR("paracl: parser: rule: elif_statements -> elif_statements ELIF LCIB error RCIB LCUB block RCUB");
+    | elif_statements ELIF LCIB error RCIB LCUB scope RCUB {
+        LOGERR("paracl: parser: rule: elif_statements -> elif_statements ELIF LCIB error RCIB LCUB scope RCUB");
         ErrorHandler::throwError(@4, "expected condition expression in elif statement");
         YYABORT;
     }
-    | elif_statements ELIF LCIB expression error LCUB block RCUB {
-        LOGERR("paracl: parser: rule: elif_statements -> elif_statements ELIF LCIB expression error LCUB block RCUB");
+    | elif_statements ELIF LCIB expression error LCUB scope RCUB {
+        LOGERR("paracl: parser: rule: elif_statements -> elif_statements ELIF LCIB expression error LCUB scope RCUB");
         ErrorHandler::throwError(@5, "expected ')' after elif condition");
         YYABORT;
     }
     | elif_statements ELIF LCIB expression RCIB error {
         LOGERR("paracl: parser: rule: elif_statements -> elif_statements ELIF LCIB expression RCIB error");
-        ErrorHandler::throwError(@6, "expected block or statement after elif condition");
+        ErrorHandler::throwError(@6, "expected scope or statement after elif condition");
         YYABORT;
     }
     | elif_statements ELIF error {
@@ -368,21 +414,21 @@ else_statement:
         LOGINFO("paracl: parser: rule: else_statement -> empty");
         $$ = nullptr; 
     }
-    | ELSE LCUB block RCUB {
-        LOGINFO("paracl: parser: rule: else_statement -> ELSE LCUB block RCUB");
+    | ELSE LCUB scope RCUB {
+        LOGINFO("paracl: parser: rule: else_statement -> ELSE LCUB scope RCUB");
         $$ = std::make_unique<ParaCL::ElseStatement>(
             std::move($3)
         );
     }
-    | ELSE one_stmt_block {
-        LOGINFO("paracl: parser: rule: else_statement -> ELSE one_stmt_block");
+    | ELSE one_stmt_scope {
+        LOGINFO("paracl: parser: rule: else_statement -> ELSE one_stmt_scope");
         $$ = std::make_unique<ParaCL::ElseStatement>(
             std::move($2)
         );
     }
     | ELSE error {
         LOGERR("paracl: parser: rule: else_statement -> ELSE error");
-        ErrorHandler::throwError(@2, "expected block or statement after else");
+        ErrorHandler::throwError(@2, "expected scope or statement after else");
         YYABORT;
     }
     ;
@@ -402,9 +448,17 @@ assignment_expression:
     | VAR AS assignment_expression %prec AS {
         LOGINFO("paracl: parser: rule: assignment_expression -> VAR AS assignment_expression");
         $$ = std::make_unique<ParaCL::AssignExpr>($1, std::move($3));
+        name_table.declare_or_do_nothing_if_already_declared($1);
     }
     | VAR ADDASGN assignment_expression %prec ADDASGN {
         LOGINFO("paracl: parser: rule: assignment_expression -> VAR ADDASGN assignment_expression");
+        if (name_table.is_not_declare($1))
+        {
+            LOGERR("paracl: parser: rule: assignment_expression -> VAR ADDASGN assignment_expression %prec ADDASGN: using undeclareted variable: \"{}\"", $1);
+            ErrorHandler::throwError(@1, "using undeclareted variable: " + ($1));
+            YYABORT;
+        }
+
         $$ = std::make_unique<ParaCL::CombinedAssingExpr>(
             ParaCL::token_t::ADDASGN,
             $1,
@@ -413,6 +467,13 @@ assignment_expression:
     }
     | VAR SUBASGN assignment_expression %prec SUBASGN {
         LOGINFO("paracl: parser: rule: assignment_expression -> VAR SUBASGN assignment_expression");
+        if (name_table.is_not_declare($1))
+        {
+            LOGERR("paracl: parser: rule: assignment_expression -> VAR SUBASGN assignment_expression %prec SUBASGN: using undeclareted variable: \"{}\"", $1);
+            ErrorHandler::throwError(@1, "using undeclareted variable: " + ($1));
+            YYABORT;
+        }
+
         $$ = std::make_unique<ParaCL::CombinedAssingExpr>(
             ParaCL::token_t::SUBASGN,
             $1,
@@ -421,6 +482,13 @@ assignment_expression:
     }
     | VAR MULASGN assignment_expression %prec MULASGN {
         LOGINFO("paracl: parser: rule: assignment_expression -> VAR MULASGN assignment_expression");
+        if (name_table.is_not_declare($1))
+        {
+            LOGERR("paracl: parser: rule: assignment_expression -> VAR MULASGN assignment_expression %prec MULASGN: using undeclareted variable: \"{}\"", $1);
+            ErrorHandler::throwError(@1, "using undeclareted variable: " + ($1));
+            YYABORT;
+        }
+
         $$ = std::make_unique<ParaCL::CombinedAssingExpr>(
             ParaCL::token_t::MULASGN,
             $1,
@@ -429,6 +497,13 @@ assignment_expression:
     }
     | VAR DIVASGN assignment_expression %prec DIVASGN {
         LOGINFO("paracl: parser: rule: assignment_expression -> VAR DIVASGN assignment_expression");
+        if (name_table.is_not_declare($1))
+        {
+            LOGERR("paracl: parser: rule: assignment_expression -> VAR DINASGN assignment_expression %prec DIVASGN: using undeclareted variable: \"{}\"", $1);
+            ErrorHandler::throwError(@1, "using undeclareted variable: " + ($1));
+            YYABORT;
+        }
+
         $$ = std::make_unique<ParaCL::CombinedAssingExpr>(
             ParaCL::token_t::DIVASGN,
             $1,
@@ -720,6 +795,13 @@ factor:
     }
     | VAR { 
         LOGINFO("paracl: parser: rule: factor -> VAR");
+        if (name_table.is_not_declare($1))
+        {
+            LOGERR("paracl: parser: rule: factor -> VAR: using undeclarated variable: \"{}\"", $1);
+            ErrorHandler::throwError(@1, "using undeclareted variable: " + ($1));
+            YYABORT;
+        }
+    
         $$ = std::make_unique<ParaCL::VarExpr>(std::move($1));
     }
     | LCIB expression RCIB { 
@@ -742,19 +824,32 @@ factor:
     }
     ;
 
-block:
-    statements {
-        LOGINFO("paracl: parser: rule: block -> statements");
-        $$ = std::make_unique<ParaCL::BlockStmt>(std::move($1));
+scope:
+    scope_enter_action statements scope_leave_action {
+        LOGINFO("paracl: parser: rule: scope -> statements");
+        $$ = std::make_unique<ParaCL::BlockStmt>(std::move($2));
+        LOGINFO("leave scope");
     }
     ;
 
-one_stmt_block:
-    statement {
-        LOGINFO("paracl: parser: rule: one_stmt_block -> statement");
+one_stmt_scope:
+    scope_enter_action statement scope_leave_action {
+        LOGINFO("paracl: parser: rule: one_stmt_scope -> statement");
         std::vector<std::unique_ptr<ParaCL::Statement>> body_stmts;
-        body_stmts.push_back(std::move($1));
+        body_stmts.push_back(std::move($2));
         $$ = std::make_unique<ParaCL::BlockStmt>(std::move(body_stmts));
+    }
+    ;
+
+scope_enter_action:
+    %empty {
+        name_table.new_scope();
+    }
+    ;
+
+scope_leave_action:
+    %empty {
+        name_table.leave_scope();
     }
     ;
 

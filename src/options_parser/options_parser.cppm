@@ -83,11 +83,20 @@ program_options_t parse_program_options(int argc, char *argv[])
 }
 
 //---------------------------------------------------------------------------------------------------------------
-} // namespace OptionsParsing
+} /* namespace OptionsParsing */
+//---------------------------------------------------------------------------------------------------------------
+
+enum flag_key
+{
+    help = 'h',
+    version = 'v',
+    undefined_option_key = -1
+};
+
 //---------------------------------------------------------------------------------------------------------------
 
 constexpr option long_options[] = {
-    {"help", no_argument, 0, 'h'}, {"version", no_argument, 0, 'v'}, {"", 0, 0, 0}, /* just for safety */
+    {"help", no_argument, 0, help}, {"version", no_argument, 0, version}, {"", 0, 0, 0}
 };
 
 //---------------------------------------------------------------------------------------------------------------
@@ -102,9 +111,8 @@ constexpr option long_options[] = {
 options_parser::options_parser(int argc, char *argv[]) : program_options_()
 {
     LOGINFO("paracl: options parser: begin parse options");
-    set_program_name(argv[0]);
 
-    static constexpr int undefined_option_key = -1;
+    set_program_name(argv[0]);
 
     for (int options_iterator = 1; options_iterator < argc; options_iterator++)
     {
@@ -112,10 +120,10 @@ options_parser::options_parser(int argc, char *argv[]) : program_options_()
 
         switch (option)
         {
-        case 'h':
+        case help:
             parse_flag_help();
             continue;
-        case 'v':
+        case version:
             parse_flag_version();
             continue;
         case undefined_option_key:
