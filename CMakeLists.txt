@@ -279,6 +279,8 @@ set(RUN_PARACL_SRC
     ${DEBUG_DIR}/ast/ast-graph-dump.cppm    
 )
 target_compile_definitions(${RUN_PARACL_LIB} PRIVATE GRAPHVIZ)
+target_compile_definitions(${OPTIONS_PARSER_LIB} PRIVATE GRAPHVIZ)
+
 endif(GRAPHVIZ)
 
 target_sources(${RUN_PARACL_LIB}

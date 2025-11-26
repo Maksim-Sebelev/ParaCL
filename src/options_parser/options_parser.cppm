@@ -38,8 +38,12 @@ export namespace OptionsParsing
 
 struct program_options_t
 {
-    std::string program_name = "";
+    std::string program_name;
     std::vector<std::string> sources;
+    ON_GRAPHVIZ(
+    bool ast_dump : 1 = false;
+    std::string dot_file;
+    )
 };
 
 //---------------------------------------------------------------------------------------------------------------
@@ -64,6 +68,10 @@ class options_parser
     [[noreturn]]
     void parse_flag_version() const;
 
+    ON_GRAPHVIZ(
+    void parse_flag_ast_dump();
+    ) /* ON_GRAPHVIZ */
+
     void parse_not_a_flag(const char *argument);
 
     [[noreturn]]
@@ -78,7 +86,6 @@ export namespace OptionsParsing
 
 program_options_t parse_program_options(int argc, char *argv[])
 {
-    options_parser result = options_parser(argc, argv);
     return options_parser(argc, argv).get_program_options();
 }
 
@@ -90,13 +97,16 @@ enum flag_key
 {
     help = 'h',
     version = 'v',
+    ON_GRAPHVIZ(
+    ast_dump = 'd',
+    )
     undefined_option_key = -1
 };
 
 //---------------------------------------------------------------------------------------------------------------
 
 constexpr option long_options[] = {
-    {"help", no_argument, 0, help}, {"version", no_argument, 0, version}, {"", 0, 0, 0}
+    {"help", no_argument, 0, help}, {"version", no_argument, 0, version} ON_GRAPHVIZ(, {"ast-dump", required_argument, 0, ast_dump}), {"", 0, 0, 0}
 };
 
 //---------------------------------------------------------------------------------------------------------------
@@ -116,7 +126,7 @@ options_parser::options_parser(int argc, char *argv[]) : program_options_()
 
     for (int options_iterator = 1; options_iterator < argc; options_iterator++)
     {
-        int option = getopt_long(argc, argv, "hv", long_options, nullptr);
+        int option = getopt_long(argc, argv, "hvd:", long_options, nullptr);
 
         switch (option)
         {
@@ -126,9 +136,16 @@ options_parser::options_parser(int argc, char *argv[]) : program_options_()
         case version:
             parse_flag_version();
             continue;
+
+        ON_GRAPHVIZ(
+        case ast_dump:
+            parse_flag_ast_dump();
+            continue;
+        )
         case undefined_option_key:
             parse_not_a_flag(argv[options_iterator]);
             continue;
+            
         default:
             undefined_option(argv[options_iterator]);
             continue;
@@ -219,9 +236,23 @@ void options_parser::parse_flag_version() const
 
 //---------------------------------------------------------------------------------------------------------------
 
+ON_GRAPHVIZ(
+void options_parser::parse_flag_ast_dump()
+{
+    LOGERR("paracl: options parser: --ast-dump={}", optarg);
+
+    msg_assert(optarg, "nullptr is no expect here");
+
+    program_options_.ast_dump = true;
+    program_options_.dot_file = optarg;
+}
+) /* ON_GRAPHVIZ */
+
+//---------------------------------------------------------------------------------------------------------------
+
 void options_parser::parse_not_a_flag(const char *argument)
 {
-    msg_assert(argument, "nullptr s no expect here");
+    msg_assert(argument, "nullptr is no expect here");
 
     LOGINFO("paracl: options parser: parse not a flag: \"{}\"", argument);
 

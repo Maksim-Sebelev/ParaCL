@@ -2,6 +2,7 @@ module;
 
 #include "global/global.hpp"
 #include "parser/parser.hpp"
+
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -24,9 +25,8 @@ void dump_body(std::ostream &out, const void *node, const BlockStmt *body);
 void dumpExpr(std::ostream &out, const ParaCL::Expression *expr);
 void dumpStmt(std::ostream &out, const ParaCL::Statement *stmt);
 
-export void ast_dump(const ProgramAST &progAST, const std::string &filename = "dot-out/ast.dot")
+export void ast_dump(const ProgramAST &progAST, const std::string &filename)
 {
-    std::filesystem::create_directories("dot-out");
     std::ofstream out(filename);
     if (out.fail())
         throw std::runtime_error("failed open " + filename);

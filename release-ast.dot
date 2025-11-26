@@ -1,0 +1,22 @@
+digraph AST {
+  node [shape=box];
+  "0x635d948323c0" [label="Program"];
+  "0x635db6ffe670" [label="Assign: fst ", style=filled, fillcolor="lightblue"];
+  "0x635db6ffe650" [label="Num: 131"];
+  "0x635db6ffe670" -> "0x635db6ffe650";
+  "0x635d948323c0" -> "0x635db6ffe670";
+  "0x635db6ffe7a0" [label="Assign: snd ", style=filled, fillcolor="lightblue"];
+  "0x635db6ffe780" [label="Num: 1"];
+  "0x635db6ffe7a0" -> "0x635db6ffe780";
+  "0x635d948323c0" -> "0x635db6ffe7a0";
+  "0x635db6ffe920" [label="Print"];
+  "0x635db6ffe840" [label="STRING: \"sum = \""];
+  "0x635db6ffe920" -> "0x635db6ffe840";
+  "0x635db6ffe8d0" [label="+", style=filled, fillcolor="lightyellow"];
+  "0x635db6ffe870" [label="Var: fst"];
+  "0x635db6ffe8d0" -> "0x635db6ffe870";
+  "0x635db6ffe8a0" [label="Var: snd"];
+  "0x635db6ffe8d0" -> "0x635db6ffe8a0";
+  "0x635db6ffe920" -> "0x635db6ffe8d0";
+  "0x635d948323c0" -> "0x635db6ffe920";
+}

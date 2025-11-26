@@ -32,8 +32,8 @@ import paracl_interpreter;
 
 namespace ParaCL
 {
-void no_sources_action();
-void one_source_action(const std::string &source);
+void no_sources_action(const OptionsParsing::program_options_t &program_options);
+void one_source_action(const OptionsParsing::program_options_t &program_options);
 
 export void run_paracl(const OptionsParsing::program_options_t &program_options)
 {
@@ -43,15 +43,15 @@ export void run_paracl(const OptionsParsing::program_options_t &program_options)
     msg_bad_exit(sources_quantity <= 1, "now we work only with 1 input file :(");
 
     if (sources_quantity == 0)
-        return no_sources_action();
+        return no_sources_action(program_options);
 
     else if (sources_quantity == 1)
-        return one_source_action(sources[0]);
+        return one_source_action(program_options);
 
     builtin_unreachable_wrapper("now we dont parse any situations");
 }
 
-void no_sources_action()
+void no_sources_action(const OptionsParsing::program_options_t &program_options)
 {
     set_current_paracl_file("stdin");
     yyin = stdin;
@@ -61,27 +61,30 @@ void no_sources_action()
 
     if (result != EXIT_SUCCESS)
         throw std::runtime_error("Parsing failed");
-
-#if defined(GRAPHVIZ)
-    try
+ON_GRAPHVIZ(
+    if (program_options.ast_dump)
     {
-        ast_dump(program);
+        try
+        {
+            ast_dump(program, program_options.dot_file);
+        }
+        catch (const std::runtime_error &e)
+        {
+            std::cerr << ERROR_MSG("graphviz ast dump failed:\n") << e.what() << "\n";
+        }
+        catch (...)
+        {
+            std::cerr << ERROR_MSG("graphviz ast dump failed with unknow exception!\n");
+        }
     }
-    catch (const std::runtime_error &e)
-    {
-        std::cerr << ERROR_MSG("Dump failed:\n") << e.what() << "\n";
-    }
-    catch (...)
-    {
-        std::cerr << "Dump failed!\n";
-    }
-#endif /* defined(GRAPHVIZ) */
+) /* ON_GRAPHVIZ */
 
     interpret(program);
 }
 
-void one_source_action(const std::string &source)
+void one_source_action(const OptionsParsing::program_options_t &program_options)
 {
+    const std::string& source = program_options.sources[0]; 
     set_current_paracl_file(source);
 
     FILE *input_file = fopen(source.c_str(), "rb");
@@ -99,20 +102,23 @@ void one_source_action(const std::string &source)
     if (result != EXIT_SUCCESS)
         throw std::runtime_error("parsing failed");
 
-#if defined(GRAPHVIZ)
-    try
+ON_GRAPHVIZ(
+    if (program_options.ast_dump)
     {
-        ast_dump(program);
+        try
+        {
+            ast_dump(program, program_options.dot_file);
+        }
+        catch (const std::runtime_error &e)
+        {
+            std::cerr << ERROR_MSG("graphviz ast dump failed:\n") << e.what() << "\n";
+        }
+        catch (...)
+        {
+            std::cerr << ERROR_MSG("graphviz ast dump failed with unknow exception!\n");
+        }
     }
-    catch (const std::runtime_error &e)
-    {
-        std::cerr << ERROR_MSG("graphviz ast dump failed:\n") << e.what() << "\n";
-    }
-    catch (...)
-    {
-        std::cerr << ERROR_MSG("graphviz ast dump failed with unknow exception!\n");
-    }
-#endif /* defined(GRAPHVIZ) */
+) /* ON_GRAPHVIZ */
 
     interpret(program);
 }
