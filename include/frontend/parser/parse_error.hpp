@@ -1,8 +1,8 @@
 #pragma once
 
 #include <exception>
-#include <string>
 #include <stdexcept>
+#include <string>
 
 #include "parser.tab.hpp"
 

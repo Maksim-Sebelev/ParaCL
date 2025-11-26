@@ -1,9 +1,9 @@
 module;
 
+#include "parser/parse_error.hpp"
+#include "parser/parser_exceptions.hpp"
 #include <iostream>
 #include <stdexcept>
-#include "parser/parser_exceptions.hpp"
-#include "parser/parse_error.hpp"
 
 #include "global/custom_console_output.hpp"
 
@@ -26,13 +26,13 @@ export void runtime_error(const std::runtime_error &e)
     std::cerr << "runtime error: " << e.what() << "\n";
 }
 
-export void parse_grammar_error(const ErrorHandler::parse_grammar_error& e)
+export void parse_grammar_error(const ErrorHandler::parse_grammar_error &e)
 {
     paracl_error_msg_begin();
     std::cerr << "syntax error: " << e.what() << "\n";
 }
 
-export void undeclarated_variable_error(const ErrorHandler::undeclarated_variable_error& e)
+export void undeclarated_variable_error(const ErrorHandler::undeclarated_variable_error &e)
 {
     paracl_error_msg_begin();
     std::cerr << "use undeclareted variable: " << e.what() << "\n";

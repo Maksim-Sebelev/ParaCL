@@ -1,29 +1,29 @@
 #pragma once
 
-#include <string>
 #include <stdexcept>
+#include <string>
 
 namespace ErrorHandler
 {
 
 class parse_grammar_error : public std::exception
 {
-private:
+  private:
     std::string msg_;
 
-public:
-    parse_grammar_error(const std::string& msg);
-    const char* what() const noexcept override;
+  public:
+    parse_grammar_error(const std::string &msg);
+    const char *what() const noexcept override;
 };
 
 class undeclarated_variable_error : public std::exception
 {
-private:
+  private:
     std::string msg_;
 
-public:
-    undeclarated_variable_error(const std::string& msg);
-    const char* what() const noexcept override;
+  public:
+    undeclarated_variable_error(const std::string &msg);
+    const char *what() const noexcept override;
 };
 
-} /* namespace ParaCL */
+} // namespace ErrorHandler

@@ -65,7 +65,8 @@ void NameTable::leave()
 {
     LOGINFO("paracl: interpreter: nametable: exiting scope");
 
-    if (scopes_.empty()) return;
+    if (scopes_.empty())
+        return;
 
     scopes_.pop_back();
 }

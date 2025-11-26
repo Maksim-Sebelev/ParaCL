@@ -24,7 +24,7 @@ void NameTable::leave_scope()
     scopes_.pop_back();
 }
 
-bool NameTable::is_declare(const std::string& variable) const
+bool NameTable::is_declare(const std::string &variable) const
 {
     LOGINFO("paracl: parser: nametable: check declaration of: \"{}\"", variable);
 
@@ -44,12 +44,12 @@ bool NameTable::is_declare(const std::string& variable) const
     return false;
 }
 
-bool NameTable::is_not_declare(const std::string& variable) const
+bool NameTable::is_not_declare(const std::string &variable) const
 {
     return (not is_declare(variable));
 }
 
-void NameTable::declare_or_do_nothing_if_already_declared(const std::string& variable)
+void NameTable::declare_or_do_nothing_if_already_declared(const std::string &variable)
 {
     LOGINFO("paracl: parser: nametable: try to declare variable: \"{}\"", variable);
 
@@ -60,7 +60,7 @@ void NameTable::declare_or_do_nothing_if_already_declared(const std::string& var
     }
 
     LOGINFO("paracl: parser: nametable: declare new variable \"{}\"", variable);
-    (void) scopes_.back().insert(variable);
+    (void)scopes_.back().insert(variable);
 }
 
 } /* namespace ParaCL */

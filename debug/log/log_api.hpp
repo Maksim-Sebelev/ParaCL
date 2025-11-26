@@ -16,10 +16,10 @@ import pineaplog;
 //---------------------------------------------------------------------------------------------------------------
 
 #define HTMLCOLLOG(color, ...) PineapLog::glog.logc(color, __VA_ARGS__)
-#define HTMLLOG(          ...) PineapLog::glog.log (       __VA_ARGS__)
+#define HTMLLOG(...) PineapLog::glog.log(__VA_ARGS__)
 
-#define LOGINFO(...) SPDLOG_INFO (__VA_ARGS__)
-#define LOGERR( ...) SPDLOG_ERROR(__VA_ARGS__)
+#define LOGINFO(...) SPDLOG_INFO(__VA_ARGS__)
+#define LOGERR(...) SPDLOG_ERROR(__VA_ARGS__)
 
 //---------------------------------------------------------------------------------------------------------------
 

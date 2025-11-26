@@ -1,8 +1,8 @@
 #include <cstdlib>
 #include <stdexcept>
 
-#include "parser/parser_exceptions.hpp"
 #include "log/log_api.hpp"
+#include "parser/parser_exceptions.hpp"
 
 import options_parser;
 import run_paracl;
@@ -36,14 +36,14 @@ catch (const std::runtime_error &e)
     return EXIT_FAILURE;
 }
 /* FIXME: add throw for ErrorHandler::parse_grammar_error */
-catch (const ErrorHandler::parse_grammar_error& e)
+catch (const ErrorHandler::parse_grammar_error &e)
 {
     LOGERR("paracl: exit failure: parse grammar error");
     ParaCL::parse_grammar_error(e);
     return EXIT_FAILURE;
 }
 /* FIXME: add throw for ErrorHandler::undeclareted_variale_error */
-catch (const ErrorHandler::undeclarated_variable_error& e)
+catch (const ErrorHandler::undeclarated_variable_error &e)
 {
     LOGERR("paracl: exit failure: parse grammar error");
     ParaCL::undeclarated_variable_error(e);

@@ -61,9 +61,7 @@ void no_sources_action(const OptionsParsing::program_options_t &program_options)
 
     if (result != EXIT_SUCCESS)
         throw std::runtime_error("Parsing failed");
-ON_GRAPHVIZ(
-    if (program_options.ast_dump)
-    {
+    ON_GRAPHVIZ(if (program_options.ast_dump) {
         try
         {
             ast_dump(program, program_options.dot_file);
@@ -76,15 +74,14 @@ ON_GRAPHVIZ(
         {
             std::cerr << ERROR_MSG("graphviz ast dump failed with unknow exception!\n");
         }
-    }
-) /* ON_GRAPHVIZ */
+    }) /* ON_GRAPHVIZ */
 
     interpret(program);
 }
 
 void one_source_action(const OptionsParsing::program_options_t &program_options)
 {
-    const std::string& source = program_options.sources[0]; 
+    const std::string &source = program_options.sources[0];
     set_current_paracl_file(source);
 
     FILE *input_file = fopen(source.c_str(), "rb");
@@ -102,9 +99,7 @@ void one_source_action(const OptionsParsing::program_options_t &program_options)
     if (result != EXIT_SUCCESS)
         throw std::runtime_error("parsing failed");
 
-ON_GRAPHVIZ(
-    if (program_options.ast_dump)
-    {
+    ON_GRAPHVIZ(if (program_options.ast_dump) {
         try
         {
             ast_dump(program, program_options.dot_file);
@@ -117,8 +112,7 @@ ON_GRAPHVIZ(
         {
             std::cerr << ERROR_MSG("graphviz ast dump failed with unknow exception!\n");
         }
-    }
-) /* ON_GRAPHVIZ */
+    }) /* ON_GRAPHVIZ */
 
     interpret(program);
 }

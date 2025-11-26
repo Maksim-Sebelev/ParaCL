@@ -71,6 +71,14 @@ cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++
 ./paracl -v
 ```
 
+Если вы собрали `ParaCL` в опцией cmake `GRAPHVIZ=ON`, то тогда доступен флаг `--ast-dump` и его короткая версия `-d`:
+```bash
+./paracl --ast-dump=ast.dot ...
+./paracl -dast.dot ...
+```
+Будет создан файл `ast.dot`, с дампом ast для вашей программы. Подробнее про [graphviz](https://graphviz.org/).
+
+
 **ВАЖНО: `ParaCL`, как уважающий себя язык имеет собственно расширение: `.cl`. Файл с другим расширением программой на `ParaCL` являться НЕ может!**
 
 # Что поддерживает язык:

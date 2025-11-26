@@ -24,7 +24,7 @@ void dump_body(std::ostream &out, const void *node, const BlockStmt *body);
 
 void dumpExpr(std::ostream &out, const ParaCL::Expression *expr);
 void dumpStmt(std::ostream &out, const ParaCL::Statement *stmt);
-void dumpBlock(std::ostream& out, const ParaCL::BlockStmt* block);
+void dumpBlock(std::ostream &out, const ParaCL::BlockStmt *block);
 
 export void ast_dump(const ProgramAST &progAST, const std::string &filename)
 {
@@ -303,7 +303,7 @@ void dumpStmt(std::ostream &out, const Statement *stmt)
     builtin_unreachable_wrapper("we must return in some else-if");
 }
 
-void dumpBlock(std::ostream& out, const ParaCL::BlockStmt* block)
+void dumpBlock(std::ostream &out, const ParaCL::BlockStmt *block)
 {
     std::string label = "Block";
     create_node(out, block, label);
@@ -314,7 +314,6 @@ void dumpBlock(std::ostream& out, const ParaCL::BlockStmt* block)
         link_nodes(out, block, s.get());
     }
 }
-
 
 void link_nodes(std::ostream &out, const void *lhs, const void *rhs)
 {

@@ -40,10 +40,7 @@ struct program_options_t
 {
     std::string program_name;
     std::vector<std::string> sources;
-    ON_GRAPHVIZ(
-    bool ast_dump : 1 = false;
-    std::string dot_file;
-    )
+    ON_GRAPHVIZ(bool ast_dump : 1 = false; std::string dot_file;)
 };
 
 //---------------------------------------------------------------------------------------------------------------
@@ -68,9 +65,7 @@ class options_parser
     [[noreturn]]
     void parse_flag_version() const;
 
-    ON_GRAPHVIZ(
-    void parse_flag_ast_dump();
-    ) /* ON_GRAPHVIZ */
+    ON_GRAPHVIZ(void parse_flag_ast_dump();) /* ON_GRAPHVIZ */
 
     void parse_not_a_flag(const char *argument);
 
@@ -97,17 +92,15 @@ enum flag_key
 {
     help = 'h',
     version = 'v',
-    ON_GRAPHVIZ(
-    ast_dump = 'd',
-    )
-    undefined_option_key = -1
+    ON_GRAPHVIZ(ast_dump = 'd', ) undefined_option_key = -1
 };
 
 //---------------------------------------------------------------------------------------------------------------
 
 constexpr option long_options[] = {
-    {"help", no_argument, 0, help}, {"version", no_argument, 0, version} ON_GRAPHVIZ(, {"ast-dump", required_argument, 0, ast_dump}), {"", 0, 0, 0}
-};
+    {"help", no_argument, 0, help},
+    {"version", no_argument, 0, version} ON_GRAPHVIZ(, {"ast-dump", required_argument, 0, ast_dump}),
+    {"", 0, 0, 0}};
 
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
@@ -137,15 +130,11 @@ options_parser::options_parser(int argc, char *argv[]) : program_options_()
             parse_flag_version();
             continue;
 
-        ON_GRAPHVIZ(
-        case ast_dump:
-            parse_flag_ast_dump();
-            continue;
-        )
+            ON_GRAPHVIZ(case ast_dump : parse_flag_ast_dump(); continue;)
         case undefined_option_key:
             parse_not_a_flag(argv[options_iterator]);
             continue;
-            
+
         default:
             undefined_option(argv[options_iterator]);
             continue;
@@ -185,7 +174,7 @@ void options_parser::parse_flag_help() const
     std::cout << BOLD "There are all flags and parametrs:" RESET_CONSOLE_OUT << R"(
     -h --help
     -v --version
-
+    -d --ast-dump=
         *.cl
             to give source file, just write *.cl file in command.
 
@@ -194,7 +183,19 @@ void options_parser::parse_flag_help() const
     
         -v, --version
             use it to show paracl version, that installed on your device
-    
+
+        -d --ast-dump=
+            use it, if you want to see ast for your paracl program.
+            example: 
+            paracl --ast-dump ast.dot a.cl
+            paracl -dast.dot a.cl
+
+                will be created ast.dot file in current directrory.
+                this flag dont make .png or .svg files, only .dot.
+                to compile .dot file in image use graphviz yourself
+                example of graphviz usage:
+                    dot -Tpng ast.dot -o ast.png
+
     So, that was all, what I know about flags in this program.
     Good luck, I love you )"
               << HEART << std::endl;
@@ -236,17 +237,14 @@ void options_parser::parse_flag_version() const
 
 //---------------------------------------------------------------------------------------------------------------
 
-ON_GRAPHVIZ(
-void options_parser::parse_flag_ast_dump()
-{
+ON_GRAPHVIZ(void options_parser::parse_flag_ast_dump() {
     LOGERR("paracl: options parser: --ast-dump={}", optarg);
 
     msg_assert(optarg, "nullptr is no expect here");
 
     program_options_.ast_dump = true;
     program_options_.dot_file = optarg;
-}
-) /* ON_GRAPHVIZ */
+}) /* ON_GRAPHVIZ */
 
 //---------------------------------------------------------------------------------------------------------------
 
