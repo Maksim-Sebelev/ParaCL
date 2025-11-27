@@ -14,10 +14,13 @@ module;
 
 export module paracl_interpreter;
 
+import basic_name_table;
 import interpreter_name_table;
 
 namespace ParaCL
 {
+
+using NameTable = BasicNameTable<NameValue>;
 
 /* Statement execution functions */
 void execute_statement(const Statement *stmt, NameTable &table);
@@ -41,6 +44,7 @@ int execute_combined_assign_expression(const CombinedAssingExpr *combinedAssingE
 int execute_binary_operation(int lhs, int rhs, token_t binary_operator);
 int execute_combined_assign(int rhs, int value, token_t combined_assign);
 int execute_unary_operation(int rhs, token_t unary_operator);
+
 
 export void interpret(const ProgramAST &progAST)
 {
