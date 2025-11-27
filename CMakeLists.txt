@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 project(paraCL
-    LANGUAGES CXX
+    LANGUAGES C CXX
     VERSION 1.6
 )
 
@@ -94,6 +94,8 @@ target_sources(${PARACL_INFO_LIB}
             ${PARACL_INFO_BUILD_SRC}
 )
 
+target_hard_debug_options(${PARACL_INFO_LIB})
+
 # =================================================================================================
 # set some bison and flex variables
 
@@ -149,6 +151,7 @@ target_include_directories(${PARSER_LIB}
 )
 
 target_debug_definitions(${PARSER_LIB})
+target_hard_debug_sanitizers(${PARSER_LIB})
 target_add_logger(${PARSER_LIB})
 
 # =================================================================================================
@@ -186,7 +189,7 @@ target_include_directories(${LEXER_LIB}
 )
 
 target_debug_definitions(${LEXER_LIB})
-
+target_hard_debug_sanitizers(${LEXER_LIB})
 target_add_logger(${LEXER_LIB})
 
 # =================================================================================================
@@ -227,8 +230,37 @@ target_compile_definitions(${OPTIONS_PARSER_LIB}
         PARACL_VERSION="${PROJECT_VERSION}"
 )
 
-add_target_debug_options(${OPTIONS_PARSER_LIB} hard)
+target_hard_debug_options(${OPTIONS_PARSER_LIB})
 target_add_logger(${OPTIONS_PARSER_LIB})
+
+# =================================================================================================
+# basic nametable
+
+set(BASIC_NAMETABLE_LIB basic_nametable)
+add_library(${BASIC_NAMETABLE_LIB})
+
+
+set(BASIC_NAMETABLE_SRC_DIR ${BACKEND_SRC_DIR}/basic_name_table)
+set(BASIC_NAMETABLE_SRC
+    ${BASIC_NAMETABLE_SRC_DIR}/basic_name_table.cppm
+)
+
+target_sources(${BASIC_NAMETABLE_LIB}
+    PUBLIC
+        FILE_SET CXX_MODULES
+        TYPE CXX_MODULES
+        FILES
+            ${BASIC_NAMETABLE_SRC}
+)
+
+target_include_directories(${BASIC_NAMETABLE_LIB}
+    PRIVATE
+        ${INC_DIR}
+        ${DEBUG_DIR}
+)
+
+target_add_logger(${BASIC_NAMETABLE_LIB})
+target_hard_debug_options(${BASIC_NAMETABLE_LIB})
 
 # =================================================================================================
 # paracl intepretor
@@ -248,8 +280,6 @@ target_sources(${PARACL_INTERPRETOR_LIB}
         TYPE CXX_MODULES
         FILES
             ${PARACL_INTERPRETOR_SRC}
-    PRIVATE
-        
 )
 
 target_include_directories(${PARACL_INTERPRETOR_LIB}
@@ -258,8 +288,58 @@ target_include_directories(${PARACL_INTERPRETOR_LIB}
         ${FRONTEND_INC_DIR}
 )
 
-add_target_debug_options(${PARACL_INTERPRETOR_LIB} hard)
+target_link_libraries(${PARACL_INTERPRETOR_LIB}
+    PRIVATE
+        ${BASIC_NAMETABLE_LIB}
+)
+
+target_hard_debug_options(${PARACL_INTERPRETOR_LIB})
 target_add_logger(${PARACL_INTERPRETOR_LIB})
+
+# =================================================================================================
+# paracl llvm ir translator
+
+find_package(LLVM REQUIRED CONFIG)
+
+set(PARACL_LLVM_IR_TRANSLATOR_LIB llvm_ir_translator)
+add_library(${PARACL_LLVM_IR_TRANSLATOR_LIB})
+
+set(PARACL_LLVM_IR_TRANSLATOR_SRC_DIR ${BACKEND_SRC_DIR}/llvm_ir_translator)
+set(PARACL_LLVM_IR_TRANSLATOR_SRC
+    ${PARACL_LLVM_IR_TRANSLATOR_SRC_DIR}/translate_to_llvm_ir.cppm
+    ${PARACL_LLVM_IR_TRANSLATOR_SRC_DIR}/name_table.cppm
+)
+
+target_sources(${PARACL_LLVM_IR_TRANSLATOR_LIB}
+    PUBLIC
+        FILE_SET CXX_MODULES
+        TYPE CXX_MODULES
+        FILES
+            ${PARACL_LLVM_IR_TRANSLATOR_SRC}
+)
+
+target_include_directories(${PARACL_LLVM_IR_TRANSLATOR_LIB}
+    PRIVATE
+        ${LLVM_INCLUDE_DIRS}
+        ${INC_DIR}
+        ${FRONTEND_INC_DIR}
+        ${DEBUG_DIR}
+)
+
+target_link_directories(${PARACL_LLVM_IR_TRANSLATOR_LIB}
+    PRIVATE
+        ${LLVM_LIBRARY_DIRS}
+)
+
+target_link_libraries(${PARACL_LLVM_IR_TRANSLATOR_LIB}
+    PRIVATE
+        LLVM
+        ${BASIC_NAMETABLE_LIB}
+)
+
+target_add_logger(${PARACL_LLVM_IR_TRANSLATOR_LIB})
+target_debug_definitions(${PARACL_LLVM_IR_TRANSLATOR_LIB})
+target_hard_debug_sanitizers(${PARACL_LLVM_IR_TRANSLATOR_LIB})
 
 # =================================================================================================
 # run paracl library
@@ -305,12 +385,13 @@ target_include_directories(${RUN_PARACL_LIB}
 target_link_libraries(${RUN_PARACL_LIB}
     PRIVATE
         ${PARACL_INTERPRETOR_LIB}
+        ${PARACL_LLVM_IR_TRANSLATOR_LIB}
         ${OPTIONS_PARSER_LIB}
         ${PARSER_LIB}
         ${LEXER_LIB}
 )
 
-add_target_debug_options(${RUN_PARACL_LIB} hard)
+target_hard_debug_options(${RUN_PARACL_LIB})
 target_add_logger(${RUN_PARACL_LIB})
 
 # =================================================================================================
@@ -337,7 +418,7 @@ target_include_directories(${PARACL_EXE}
         ${BACKEND_INC_DIR}
 )
 
-add_target_debug_options(${PARACL_EXE} hard)
+target_hard_debug_options(${PARACL_EXE})
 target_add_logger(${PARACL_EXE})
 
 # =================================================================================================

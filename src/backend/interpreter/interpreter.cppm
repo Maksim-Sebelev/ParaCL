@@ -14,7 +14,7 @@ module;
 
 export module paracl_interpreter;
 
-import name_table;
+import interpreter_name_table;
 
 namespace ParaCL
 {
@@ -48,12 +48,12 @@ export void interpret(const ProgramAST &progAST)
 
     NameTable table;
 
-    table.enter(); // global scope
+    table.new_scope(); // global scope
 
     for (auto &stmt : progAST.statements)
         execute_statement(stmt.get(), table);
 
-    table.leave();
+    table.leave_scope();
 
     LOGINFO("paracl: interpreter: interpret completed");
 }
@@ -119,7 +119,7 @@ void execute_while_statement(const WhileStmt *while_stmt, NameTable &table)
             execute_statement(s.get(), table);
     }
 
-    LOGINFO("paracl: interpreter: leave WHILE statement");
+    LOGINFO("paracl: interpreter: leave_scope WHILE statement");
 }
 
 void execute_block_statement(const BlockStmt *block, NameTable &table)
@@ -131,13 +131,13 @@ void execute_block_statement(const BlockStmt *block, NameTable &table)
     bool blockIsEmpty = blockStmts.empty();
 
     if (not blockIsEmpty)
-        table.enter();
+        table.new_scope();
 
     for (auto &s : block->statements)
         execute_statement(s.get(), table);
 
     if (not blockIsEmpty)
-        table.leave();
+        table.leave_scope();
 }
 
 void execute_condition_statement(const ConditionStatement *condition, NameTable &table)
@@ -212,9 +212,9 @@ int execute_variable_expression(const VarExpr *var, NameTable &table)
     if (not varValue.has_value())
         throw std::runtime_error("'" + var->name + "' was not declared in this scope\n");
 
-    LOGINFO("paracl: interpreter: get variable value: \"{}\" = {}", var->name, varValue.value().value);
+    LOGINFO("paracl: interpreter: get variable value: \"{}\" = {}", var->name, varValue.value().value());
 
-    return varValue.value().value;
+    return varValue.value().value();
 }
 
 int execute_input_expression([[maybe_unused]] const InputExpr *in, [[maybe_unused]] NameTable &table)
@@ -242,7 +242,7 @@ int execute_assign_expression(const AssignExpr *assignExpr, NameTable &table)
 int execute_combined_assign_expression(const CombinedAssingExpr *combinedAssingExpr, NameTable &table)
 {
     std::optional<NameValue> varValue = table.get_variable_value(combinedAssingExpr->name);
-    int value = varValue.value().value;
+    int value = varValue.value().value();
     if (not varValue.has_value())
         throw std::runtime_error("error: '" + combinedAssingExpr->name + "' was not declared in this scope\n");
 
@@ -351,7 +351,7 @@ void execute_assign_statement(const AssignStmt *assign, NameTable &table)
 void execute_combined_assign_statement(const CombinedAssingStmt *combined_assign_statement, NameTable &table)
 {
     std::optional<NameValue> varValue = table.get_variable_value(combined_assign_statement->name);
-    int value = varValue.value().value;
+    int value = varValue.value().value();
     if (not varValue.has_value())
         throw std::runtime_error("error: '" + combined_assign_statement->name +
                                  "' was not declared in this scope\n"

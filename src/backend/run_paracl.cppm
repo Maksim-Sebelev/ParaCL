@@ -30,6 +30,8 @@ import paracl_extension;
 import options_parser;
 import paracl_interpreter;
 
+import llvm_ir_translator;
+
 namespace ParaCL
 {
 void no_sources_action(const OptionsParsing::program_options_t &program_options);

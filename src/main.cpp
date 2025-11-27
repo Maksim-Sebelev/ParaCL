@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <istream>
 #include <stdexcept>
 
 #include "log/log_api.hpp"
@@ -7,6 +8,8 @@
 import options_parser;
 import run_paracl;
 import parse_paracl_exceptions;
+
+import llvm_ir_translator;
 
 #if defined(LOGGER)
 import spdlog_init;
@@ -17,6 +20,7 @@ try
 {
     ON_LOGGER(spdlog::init_spdlogger();)
     LOGINFO("paracl: start");
+
     const OptionsParsing::program_options_t program_options = OptionsParsing::parse_program_options(argc, argv);
     LOGINFO("paracl: run");
     ParaCL::run_paracl(program_options);
