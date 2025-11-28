@@ -11,6 +11,7 @@ module;
 #include <string>
 #include <unistd.h>
 #include <vector>
+#include <filesystem>
 
 #include "global/custom_console_output.hpp"
 #include "global/global.hpp"
@@ -23,7 +24,6 @@ export module options_parser;
 
 //---------------------------------------------------------------------------------------------------------------
 
-import paracl_extension;
 import paracl_info;
 
 //---------------------------------------------------------------------------------------------------------------
@@ -39,11 +39,20 @@ export namespace OptionsParsing
 struct program_options_t
 {
     std::string program_name;
-    std::vector<std::string> sources;
+    std::vector<std::filesystem::path> sources;
 
-    std::string executable_file = "a.out";
+    std::filesystem::path executable_file = "a.out";
+    std::vector<std::filesystem::path> llvm_ir_files;
+    std::vector<std::filesystem::path> object_files;
+
+    ON_GRAPHVIZ(
+    std::filesystem::path dot_file;
+    ) /* ON_GRAPHVIZ */
+
     bool compile : 1 = false;
-    ON_GRAPHVIZ(bool ast_dump : 1 = false; std::string dot_file;)
+    ON_GRAPHVIZ(
+    bool ast_dump : 1 = false;
+    ) /* ON_GRAPHVIZ */
 };
 
 //---------------------------------------------------------------------------------------------------------------
@@ -73,10 +82,12 @@ class options_parser
     void parse_flag_compile();
     void parse_flag_output();
 
-    void parse_not_a_flag(const char *argument);
+    void parse_not_a_flag(const char* arg);
 
     [[noreturn]]
-    void undefined_option(const char *argument) const;
+    void undefined_option(const char* option) const;
+
+    void set_out_files();
 };
 
 //---------------------------------------------------------------------------------------------------------------
@@ -100,7 +111,9 @@ enum flag_key
     version = 'v',
     compile = 'c',
     output = 'o',
-    ON_GRAPHVIZ(ast_dump = 'd', ) undefined_option_key = -1
+    ON_GRAPHVIZ(ast_dump = 'd', )
+    undefined_option_key = '?',
+    end_of_parsing = -1
 };
 
 //---------------------------------------------------------------------------------------------------------------
@@ -110,7 +123,8 @@ constexpr option long_options[] = {
     {"version", no_argument, 0, version} ON_GRAPHVIZ(, {"ast-dump", required_argument, 0, ast_dump}),
     {"compile", no_argument, 0, compile},
     {"output", required_argument, 0, output},
-    {"", 0, 0, 0}};
+    {0, 0, 0, 0}  // Важно: завершающий элемент
+};
 
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
@@ -127,39 +141,44 @@ options_parser::options_parser(int argc, char *argv[]) : program_options_()
 
     set_program_name(argv[0]);
 
-    for (int options_iterator = 1; options_iterator < argc; options_iterator++)
+    int option;
+    while ((option = getopt_long(argc, argv, "hvd:co:", long_options, nullptr)) != -1)
     {
-        int option = getopt_long(argc, argv, "hvd:co:", long_options, nullptr);
-
+        LOGINFO("paracl: options parser: processing option '{}', optarg = '{}'", 
+                static_cast<char>(option), optarg ? optarg : "NULL");
+    
         switch (option)
         {
         case help:
             parse_flag_help();
-            continue;
+            break;
         case version:
             parse_flag_version();
-            continue;
-
+            break;
         case compile:
             parse_flag_compile();
-            continue;
-
+            break;
         case output:
             parse_flag_output();
-            continue;
-
-            ON_GRAPHVIZ(case ast_dump : parse_flag_ast_dump(); continue;)
+            break;
+        ON_GRAPHVIZ(case ast_dump:
+            parse_flag_ast_dump();
+            break;)
         case undefined_option_key:
-            parse_not_a_flag(argv[options_iterator]);
-            continue;
-
+            throw std::invalid_argument("invalid option");
         default:
-            undefined_option(argv[options_iterator]);
-            continue;
+            undefined_option(argv[optind - 1]);
+            break;
         }
     }
 
-    set_getopt_args_default_values();
+    for (int i = optind; i < argc; i++)
+        parse_not_a_flag(argv[i]);
+
+    if (program_options_.sources.empty())
+        throw std::invalid_argument("no source files specified");
+
+    set_out_files();
 
     LOGINFO("paracl: options parser: parse options completed");
 }
@@ -193,33 +212,35 @@ void options_parser::parse_flag_help() const
     -h --help
     -v --version
     -d --ast-dump=
-        *.cl
-            to give source file, just write *.cl file in command.
+    -c --compile
+    -o --output=
 
-        -h, --help
-            these flags show information about all flags and their functions.
-    
-        -v, --version
-            use it to show paracl version, that installed on your device
+    *.cl - source files
 
-        -d --ast-dump=
-            use it, if you want to see ast for your paracl program.
-            example: 
-            paracl --ast-dump ast.dot a.cl
-            paracl -dast.dot a.cl
+    -h, --help
+        Show this help message
 
-                will be created ast.dot file in current directrory.
-                this flag dont make .png or .svg files, only .dot.
-                to compile .dot file in image use graphviz yourself
-                example of graphviz usage:
-                    dot -Tpng ast.dot -o ast.png
+    -v, --version
+        Show version information
 
-    So, that was all, what I know about flags in this program.
-    Good luck, I love you )"
-              << HEART << std::endl;
+    -c, --compile
+        Compile to executable
+
+    -o, --output=FILE
+        Specify output filename
+
+    -d, --ast-dump=FILE
+        Dump AST to .dot file for Graphviz
+
+    Examples:
+        paracl -c -o program source.cl
+        paracl --ast-dump=ast.dot source.cl
+        paracl -d ast.dot -c -o program source.cl
+)"
+              << std::endl;
 
     LOGINFO("paracl: exit success");
-    exit(EXIT_SUCCESS); // good exit :)
+    exit(EXIT_SUCCESS);
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -249,17 +270,15 @@ void options_parser::parse_flag_version() const
               << ParaCL::paracl_info.architecture << std::endl;
 
     LOGINFO("paracl: exit success");
-
-    exit(EXIT_SUCCESS); // good exit :)
+    exit(EXIT_SUCCESS);
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-ON_GRAPHVIZ(void options_parser::parse_flag_ast_dump() {
+ON_GRAPHVIZ(
+void options_parser::parse_flag_ast_dump() {
     LOGINFO("paracl: options parser: --ast-dump={}", optarg);
-
-    msg_assert(optarg, "nullptr is no expect here");
-
+    msg_assert(optarg, "Expected filename for --ast-dump");
     program_options_.ast_dump = true;
     program_options_.dot_file = optarg;
 }) /* ON_GRAPHVIZ */
@@ -276,50 +295,83 @@ void options_parser::parse_flag_compile()
 
 void options_parser::parse_flag_output()
 {
-    msg_assert(optarg, "nullprt is no expect here");
+    msg_assert(optarg, "Expected filename for --output");
     LOGINFO("paracl: options parser: --output={}", optarg);
     program_options_.executable_file = optarg;
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-void options_parser::parse_not_a_flag(const char *argument)
+void options_parser::parse_not_a_flag(const char* arg)
 {
-    msg_assert(argument, "nullptr is no expect here");
+    LOGINFO("paracl: options parser: parse not a flag: \"{}\"", arg);
 
-    LOGINFO("paracl: options parser: parse not a flag: \"{}\"", argument);
+    std::filesystem::path file(arg);
+    std::string extension(file.extension().string());
 
-    if (not ParaCL::is_paracl_file_name(argument))
+    if (extension == ".cl")
     {
-        LOGERR("paracl: options parser: unexpected file: \"{}\"", argument);
-        throw std::invalid_argument("bad source file: unexpected extentsion: '" WHITE + std::string(argument) +
-                                    RESET_CONSOLE_OUT "', expect " + ParaCL::paracl_extension);
+        LOGINFO("paracl: options parser: find source file: \"{}\"", arg);
+        program_options_.sources.push_back(std::string(arg));
+        return;
     }
 
-    LOGINFO("paracl: options parser: find source file: \"{}\"", argument);
+    if (extension == ".o" or extension == ".obj") 
+    {
+        LOGINFO("paracl: options parser: find source file: \"{}\"", arg);
+        program_options_.object_files.push_back(file);
+        return;
+    }
 
-    program_options_.sources.push_back(std::string(argument));
+    LOGERR("paracl: options parser: unexpected file: \"{}\"", arg);
+    throw std::invalid_argument("bad source file: unexpected extension: '" + 
+                                std::string(arg) + "', expected '.cl' - for paracl src, '.ll' - for llvm ir, or '.o' - for object file");
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
 [[noreturn]]
-void options_parser::undefined_option(const char *argument) const
+void options_parser::undefined_option(const char* option) const
 {
-    msg_assert(argument, "nullptr is no expect here");
-    LOGERR("paracl: options parser: undefined option \"{}\"", argument);
-
-    throw std::invalid_argument("Undefined option: '" + std::string(argument) + "'");
+    LOGERR("paracl: options parser: undefined option \"{}\"", option);
+    throw std::invalid_argument("Undefined option: '" + std::string(option) + "'");
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-void set_getopt_args_default_values()
+void options_parser::set_out_files()
 {
-    LOGINFO("paracl: options parser: set getopt arg default values");
+    LOGINFO("paracl: options parser: set llvm ir and obj files correct value");
 
-    optarg = nullptr;
-    optind = 1;
+    const size_t sources_size      = program_options_.sources.size     ();
+    const size_t object_files_size = program_options_.object_files.size();
+
+    if (object_files_size > sources_size)
+        throw std::invalid_argument("there are more llvm ir files, then sources files");
+
+    program_options_.object_files.resize(sources_size);
+
+    for (size_t it = 0, ite = sources_size; it < ite; ++it)
+    {
+        std::filesystem::path& object_file = program_options_.object_files[it];
+
+        if (object_file.string() != "")
+            continue;
+
+        object_file = program_options_.sources[it];
+        object_file.replace_extension(".o");
+    }
+
+    program_options_.llvm_ir_files.resize(sources_size);
+
+    for (size_t it = 0, ite = sources_size; it < ite; ++it)
+    {
+              std::filesystem::path& llvm_ir_file = program_options_.llvm_ir_files[it];
+        const std::filesystem::path& object_file  = program_options_.object_files [it];
+
+        llvm_ir_file = object_file;
+        llvm_ir_file.replace_extension(".ll");
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------

@@ -14,13 +14,10 @@ module;
 
 export module paracl_interpreter;
 
-import basic_name_table;
-import interpreter_name_table;
+import name_table;
 
 namespace ParaCL
 {
-
-using NameTable = BasicNameTable<NameValue>;
 
 /* Statement execution functions */
 void execute_statement(const Statement *stmt, NameTable &table);

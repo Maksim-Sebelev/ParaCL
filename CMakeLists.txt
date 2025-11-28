@@ -201,7 +201,6 @@ add_library(${OPTIONS_PARSER_LIB})
 set(OPTIONS_PARSER_SRC_DIR ${SRC_DIR}/options_parser)
 set(OPTIONS_PARSER_SRC
     ${OPTIONS_PARSER_SRC_DIR}/options_parser.cppm
-    ${OPTIONS_PARSER_SRC_DIR}/paracl_extension.cppm
 )
 
 target_sources(${OPTIONS_PARSER_LIB}
@@ -234,35 +233,6 @@ target_hard_debug_options(${OPTIONS_PARSER_LIB})
 target_add_logger(${OPTIONS_PARSER_LIB})
 
 # =================================================================================================
-# basic nametable
-
-set(BASIC_NAMETABLE_LIB basic_nametable)
-add_library(${BASIC_NAMETABLE_LIB})
-
-
-set(BASIC_NAMETABLE_SRC_DIR ${BACKEND_SRC_DIR}/basic_name_table)
-set(BASIC_NAMETABLE_SRC
-    ${BASIC_NAMETABLE_SRC_DIR}/basic_name_table.cppm
-)
-
-target_sources(${BASIC_NAMETABLE_LIB}
-    PUBLIC
-        FILE_SET CXX_MODULES
-        TYPE CXX_MODULES
-        FILES
-            ${BASIC_NAMETABLE_SRC}
-)
-
-target_include_directories(${BASIC_NAMETABLE_LIB}
-    PRIVATE
-        ${INC_DIR}
-        ${DEBUG_DIR}
-)
-
-target_add_logger(${BASIC_NAMETABLE_LIB})
-target_hard_debug_options(${BASIC_NAMETABLE_LIB})
-
-# =================================================================================================
 # paracl intepretor
 
 set(PARACL_INTERPRETOR_LIB interpreter)
@@ -271,7 +241,7 @@ add_library(${PARACL_INTERPRETOR_LIB})
 set(PARACL_INTERPRETOR_SRC_DIR ${BACKEND_SRC_DIR}/interpreter)
 set(PARACL_INTERPRETOR_SRC
     ${PARACL_INTERPRETOR_SRC_DIR}/interpreter.cppm
-    ${PARACL_INTERPRETOR_SRC_DIR}/name_table.cppm
+    ${BACKEND_SRC_DIR}/name_table/name_table.cppm
 )
 
 target_sources(${PARACL_INTERPRETOR_LIB}
@@ -288,37 +258,38 @@ target_include_directories(${PARACL_INTERPRETOR_LIB}
         ${FRONTEND_INC_DIR}
 )
 
-target_link_libraries(${PARACL_INTERPRETOR_LIB}
-    PRIVATE
-        ${BASIC_NAMETABLE_LIB}
-)
-
 target_hard_debug_options(${PARACL_INTERPRETOR_LIB})
 target_add_logger(${PARACL_INTERPRETOR_LIB})
 
 # =================================================================================================
+# set come compiler lib vairbles
+
+set(COMPILER_SRC_DIR ${BACKEND_SRC_DIR}/compiler)
+
+# =================================================================================================
+
 # paracl llvm ir translator
 
 find_package(LLVM REQUIRED CONFIG)
 
-set(PARACL_LLVM_IR_TRANSLATOR_LIB llvm_ir_translator)
-add_library(${PARACL_LLVM_IR_TRANSLATOR_LIB})
+set(PARACL_LLVM_TRANSLATOR_LIB llvm_ir_translator)
+add_library(${PARACL_LLVM_TRANSLATOR_LIB})
 
-set(PARACL_LLVM_IR_TRANSLATOR_SRC_DIR ${BACKEND_SRC_DIR}/llvm_ir_translator)
-set(PARACL_LLVM_IR_TRANSLATOR_SRC
-    ${PARACL_LLVM_IR_TRANSLATOR_SRC_DIR}/translate_to_llvm_ir.cppm
-    ${PARACL_LLVM_IR_TRANSLATOR_SRC_DIR}/name_table.cppm
+set(PARACL_LLVM_TRANSLATOR_SRC_DIR ${COMPILER_SRC_DIR}/llvm_ir_translator)
+set(PARACL_LLVM_TRANSLATOR_SRC
+    ${PARACL_LLVM_TRANSLATOR_SRC_DIR}/translate_to_llvm_ir.cppm
+    ${BACKEND_SRC_DIR}/name_table/name_table.cppm
 )
 
-target_sources(${PARACL_LLVM_IR_TRANSLATOR_LIB}
+target_sources(${PARACL_LLVM_TRANSLATOR_LIB}
     PUBLIC
         FILE_SET CXX_MODULES
         TYPE CXX_MODULES
         FILES
-            ${PARACL_LLVM_IR_TRANSLATOR_SRC}
+            ${PARACL_LLVM_TRANSLATOR_SRC}
 )
 
-target_include_directories(${PARACL_LLVM_IR_TRANSLATOR_LIB}
+target_include_directories(${PARACL_LLVM_TRANSLATOR_LIB}
     PRIVATE
         ${LLVM_INCLUDE_DIRS}
         ${INC_DIR}
@@ -326,20 +297,92 @@ target_include_directories(${PARACL_LLVM_IR_TRANSLATOR_LIB}
         ${DEBUG_DIR}
 )
 
-target_link_directories(${PARACL_LLVM_IR_TRANSLATOR_LIB}
+target_link_libraries(${PARACL_LLVM_TRANSLATOR_LIB}
+    PUBLIC
+        ${OPTIONS_PARSER_LIB}
     PRIVATE
-        ${LLVM_LIBRARY_DIRS}
+        ${PARACL_LLVM_TRAN}
 )
 
-target_link_libraries(${PARACL_LLVM_IR_TRANSLATOR_LIB}
+target_add_logger(${PARACL_LLVM_TRANSLATOR_LIB})
+target_debug_definitions(${PARACL_LLVM_TRANSLATOR_LIB})
+target_hard_debug_sanitizers(${PARACL_LLVM_TRANSLATOR_LIB})
+
+# =================================================================================================
+# linker lib
+
+set(PARACL_LINKER_LIB linker)
+add_library(${PARACL_LINKER_LIB})
+
+set(PARACL_LINKER_LIB_SRC_DIR ${COMPILER_SRC_DIR}/linker)
+set(PARACL_LINKER_LIB_SRC
+    ${PARACL_LINKER_LIB_SRC_DIR}/linker.cppm
+)
+
+target_sources(${PARACL_LINKER_LIB}
+    PUBLIC
+        FILE_SET CXX_MODULES
+        TYPE CXX_MODULES
+        FILES
+            ${PARACL_LINKER_LIB_SRC}
+)
+
+target_include_directories(${PARACL_LINKER_LIB}
     PRIVATE
+        ${INC_DIR}
+        ${DEBUG_DIR}
+)
+
+target_link_libraries(${PARACL_LINKER_LIB}
+    PUBLIC
         LLVM
-        ${BASIC_NAMETABLE_LIB}
+        ${OPTIONS_PARSER_LIB}
 )
 
-target_add_logger(${PARACL_LLVM_IR_TRANSLATOR_LIB})
-target_debug_definitions(${PARACL_LLVM_IR_TRANSLATOR_LIB})
-target_hard_debug_sanitizers(${PARACL_LLVM_IR_TRANSLATOR_LIB})
+target_add_logger(${PARACL_LINKER_LIB})
+target_debug_definitions(${PARACL_LINKER_LIB})
+target_hard_debug_sanitizers(${PARACL_LINKER_LIB})
+
+# =================================================================================================
+# toolchain lib
+
+
+set(PARACL_TOOLCHAIN_LIB toolchain)
+add_library(${PARACL_TOOLCHAIN_LIB})
+
+set(PARACL_TOOLCHAIN_LIB_SRC_DIR ${COMPILER_SRC_DIR})
+set(PARACL_TOOLCHAIN_LIB_SRC
+    ${PARACL_TOOLCHAIN_LIB_SRC_DIR}/toolchain.cppm
+)
+
+target_sources(${PARACL_TOOLCHAIN_LIB}
+    PUBLIC
+        FILE_SET CXX_MODULES
+        TYPE CXX_MODULES
+        FILES
+            ${PARACL_TOOLCHAIN_LIB_SRC}
+)
+
+target_include_directories(${PARACL_TOOLCHAIN_LIB}
+    PRIVATE
+        ${INC_DIR}
+        ${DEBUG_DIR}
+    PUBLIC
+        ${FRONTEND_INC_DIR}
+)
+
+target_link_libraries(${PARACL_TOOLCHAIN_LIB}
+    PUBLIC
+        ${OPTIONS_PARSER_LIB}
+
+    PRIVATE
+        ${PARACL_LLVM_TRANSLATOR_LIB}
+        ${PARACL_LINKER_LIB}
+)
+
+target_add_logger(${PARACL_TOOLCHAIN_LIB})
+target_debug_definitions(${PARACL_TOOLCHAIN_LIB})
+target_hard_debug_sanitizers(${PARACL_TOOLCHAIN_LIB})
 
 # =================================================================================================
 # run paracl library
@@ -385,7 +428,7 @@ target_include_directories(${RUN_PARACL_LIB}
 target_link_libraries(${RUN_PARACL_LIB}
     PRIVATE
         ${PARACL_INTERPRETOR_LIB}
-        ${PARACL_LLVM_IR_TRANSLATOR_LIB}
+        ${PARACL_TOOLCHAIN_LIB}
         ${OPTIONS_PARSER_LIB}
         ${PARSER_LIB}
         ${LEXER_LIB}
