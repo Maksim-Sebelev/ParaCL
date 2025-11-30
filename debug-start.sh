@@ -128,3 +128,5 @@ if [ $relative_build_dir == "./build" ]; then
 fi
 
 custom_echo "${CONSOLE_COLOR_WHITE}" "" "cd ${relative_build_dir}/"
+
+mkdir  ${build_dir}/paracl_build

@@ -81,6 +81,8 @@ void Toolchain::create_objects_files() const
 {
     for (size_t it = 0, ite = program_options_.sources.size(); it != ite; ++it)
     {
+        read_ast(it);
+
         LLVMIRBuilder llvm_builder(program_options_, it);
         llvm_builder.generate_ir(ast_);
         llvm_builder.compile_ir();
@@ -109,7 +111,7 @@ void Toolchain::read_ast(size_t source_num) const
     int result = parser.parse();
 
     if (result != EXIT_SUCCESS)
-        throw std::runtime_error("failed parsie '" + source + "' with exit code: " + std::to_string(result));
+        throw std::runtime_error("failed parse '" + source + "' with exit code: " + std::to_string(result));
 
     /* program - is a global variable */
     ast_ = std::move(program);

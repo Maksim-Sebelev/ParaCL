@@ -14,7 +14,7 @@ module;
 
 export module paracl_interpreter;
 
-import name_table;
+import interpreter_name_table;
 
 namespace ParaCL
 {
@@ -23,7 +23,7 @@ export class Interpreter
 {
   private:
     const ProgramAST &ast_;
-    NameTable nametable_;
+    InterpreterNameTable nametable_;
 
     /* Statement execution functions */
     void execute_statement(const Statement *stmt);

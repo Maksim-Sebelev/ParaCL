@@ -37,7 +37,7 @@ extern std::string current_var_value;
 
 ParaCL::ProgramAST program;
 
-ParaCL::NameTable name_table;
+ParaCL::ParserNameTable name_table;
 
 int yylex(yy::parser::semantic_type* yylval, yy::parser::location_type* yylloc);
 } /* %code */

@@ -7,13 +7,13 @@
 namespace ParaCL
 {
 
-struct NameTable
+struct ParserNameTable
 {
   private:
     std::vector<std::unordered_set<std::string>> scopes_;
 
   public:
-    NameTable() = default;
+    ParserNameTable() = default;
     void new_scope();
     void leave_scope();
     bool is_not_declare(const std::string &variable) const;

@@ -2,6 +2,13 @@ module;
 
 //---------------------------------------------------------------------------------------------------------------
 
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Verifier.h>
+#include <llvm/Support/FileSystem.h>
+#include <llvm/Support/ToolOutputFile.h>
+
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -13,7 +20,7 @@ module;
 
 //---------------------------------------------------------------------------------------------------------------
 
-export module name_table;
+export module compiler_name_table;
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -22,55 +29,46 @@ export namespace ParaCL
 
 //---------------------------------------------------------------------------------------------------------------
 
-struct NameValue
+class CompilerNameTable
 {
   private:
-    int value_;
+    llvm::Module &module_;
+    llvm::IRBuilder<> &builder_;
+
+    std::vector<std::unordered_map<std::string, llvm::AllocaInst *>> scopes_;
+    llvm::AllocaInst *lookup(const std::string &name);
+    void declare(const std::string &name, llvm::Value * = nullptr);
 
   public:
-    NameValue() = default;
-    explicit NameValue(int value);
-    int value() const
-    {
-        return value_;
-    }
+    CompilerNameTable(llvm::Module &module, llvm::IRBuilder<> &builder);
+    void new_scope();
+    void leave_scope();
+    llvm::AllocaInst *get_variable(const std::string &name);
+    llvm::Value *get_variable_value(const std::string &name);
+
+    void set_value(const std::string &name, llvm::Value *value);
 };
 
 //---------------------------------------------------------------------------------------------------------------
 
-NameValue::NameValue(int value) : value_(value)
+CompilerNameTable::CompilerNameTable(llvm::Module &module, llvm::IRBuilder<> &builder)
+    : module_(module), builder_(builder)
 {
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-class NameTable
+void CompilerNameTable::new_scope()
 {
-  private:
-    std::vector<std::unordered_map<std::string, NameValue>> scopes_;
-    NameValue *lookup(const std::string &name);
-    void declare(const std::string &name, int value);
-
-  public:
-    void new_scope();
-    void leave_scope();
-    std::optional<NameValue> get_variable_value(const std::string &name) const;
-    void set_value(const std::string &name, const NameValue &value);
-};
-
-//---------------------------------------------------------------------------------------------------------------
-
-void NameTable::new_scope()
-{
-    LOGINFO("paracl: interpreter: nametable: create next scope");
+    LOGINFO("paracl: compiler: nametable: create next scope");
     scopes_.emplace_back();
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-void NameTable::leave_scope()
+void CompilerNameTable::leave_scope()
 {
-    LOGINFO("paracl: interpreter: nametable: exiting scope");
+    LOGINFO("paracl: compiler: nametable: exiting scope");
 
     if (scopes_.empty())
         return;
@@ -80,9 +78,9 @@ void NameTable::leave_scope()
 
 //---------------------------------------------------------------------------------------------------------------
 
-std::optional<NameValue> NameTable::get_variable_value(const std::string &name) const
+llvm::AllocaInst *CompilerNameTable::get_variable(const std::string &name)
 {
-    LOGINFO("paracl: interpreter: nametable: searching variable: \"{}\"", name);
+    LOGINFO("paracl: compiler: nametable: searching variable: \"{}\"", name);
 
     for (auto it = scopes_.rbegin(); it != scopes_.rend(); ++it)
     {
@@ -91,30 +89,41 @@ std::optional<NameValue> NameTable::get_variable_value(const std::string &name) 
         if (found == it->end())
             continue;
 
-        LOGINFO("paracl: interpreter: nametable: variable found: \"{}\" = {}", name, found->second.value());
+        LOGINFO("paracl: compiler: nametable: variable found: \"{}\"", name);
         return found->second;
     }
 
-    LOGINFO("paracl: interpreter: nametable: variable NOT found: \"{}\"", name);
-    return std::nullopt;
+    LOGINFO("paracl: compiler: nametable: variable NOT found: \"{}\"", name);
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-void NameTable::set_value(const std::string &name, const NameValue &value)
+llvm::Value *CompilerNameTable::get_variable_value(const std::string &name)
 {
-    LOGINFO("paracl: interpreter: nametable: set {} to \"{}\"", value.value(), name);
+    llvm::AllocaInst *var = get_variable(name);
+    if (not var)
+        return nullptr;
+
+    return builder_.CreateLoad(builder_.getInt32Ty(), var, name);
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+void CompilerNameTable::set_value(const std::string &name, llvm::Value *value)
+{
+    LOGINFO("paracl: compiler: nametable: set \"{}\"", name);
 
     if (scopes_.empty())
         throw std::runtime_error("cannot set_value variable: no active scopes");
 
-    NameValue *name_ptr = lookup(name);
+    llvm::AllocaInst *var = lookup(name);
 
-    if (not name_ptr)
-        return declare(name, value.value());
+    if (not var)
+        return declare(name, value);
 
-    LOGINFO("paracl: interpreter: nametable: set {} to \"{}\"", value.value(), name);
-    *name_ptr = value;
+    // name_ptr = value;
+    builder_.CreateStore(value, var);
 }
 
 // private
@@ -122,7 +131,7 @@ void NameTable::set_value(const std::string &name, const NameValue &value)
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
-NameValue *NameTable::lookup(const std::string &name)
+llvm::AllocaInst *CompilerNameTable::lookup(const std::string &name)
 {
     for (auto it = scopes_.rbegin(); it != scopes_.rend(); ++it)
     {
@@ -131,7 +140,7 @@ NameValue *NameTable::lookup(const std::string &name)
         if (found == it->end())
             continue;
 
-        return &(found->second);
+        return found->second;
     }
 
     return nullptr;
@@ -139,14 +148,19 @@ NameValue *NameTable::lookup(const std::string &name)
 
 //---------------------------------------------------------------------------------------------------------------
 
-void NameTable::declare(const std::string &name, int value)
+void CompilerNameTable::declare(const std::string &name, llvm::Value *value)
 {
-    LOGINFO("paracl: interpreter: nametable: declate {} = \"{}\"", name, value);
+    LOGINFO("paracl: compiler: nametable: declare \"{}\"", name);
 
     if (scopes_.empty())
         throw std::runtime_error("cannot declare variable: no active scopes");
 
-    scopes_.back()[name] = NameValue{value};
+    llvm::AllocaInst *&var = scopes_.back()[name];
+    var = builder_.CreateAlloca(builder_.getInt32Ty(), nullptr, name);
+
+    if (not value)
+        return;
+    builder_.CreateStore(value, var);
 }
 
 //---------------------------------------------------------------------------------------------------------------
