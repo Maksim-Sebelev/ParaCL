@@ -55,6 +55,8 @@ set(CMAKE_DEPS_DIR ${CMAKE_SETTINGS_DIR}/dep)
 
 include(${CMAKE_DEPS_DIR}/check-flex.cmake)
 include(${CMAKE_DEPS_DIR}/check-bison.cmake)
+include(${CMAKE_DEPS_DIR}/check-optarg.cmake)
+
 
 # =================================================================================================
 # crete paracl info library
@@ -447,6 +449,11 @@ if (BUILD_TESTING)
         ${PARACL_E2E_DAT_DIR}
         ${PARACL_E2E_ANS_DIR}
     )
+
+    set(CMAKE_UNIT_TESTS_SETTING_DIR ${CMAKE_SETTINGS_DIR}/tests/unit)
+
+    include(${CMAKE_UNIT_TESTS_SETTING_DIR}/add-all-unit-tests.cmake)
+
 
 endif()
 

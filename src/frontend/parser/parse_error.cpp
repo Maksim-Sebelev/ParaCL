@@ -11,7 +11,7 @@
 
 extern FILE *yyin;
 
-void yy::parser::error(const location &loc, const std::string& msg)
+void yy::parser::error(const location &loc, const std::string &msg)
 {
     ErrorHandler::throwError(loc, msg, {false, true, false});
 }

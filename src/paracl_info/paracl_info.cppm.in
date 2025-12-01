@@ -25,7 +25,7 @@ namespace ParaCL
         std::string compiler    ;
     };
 
-    const std::string architecture =
+    constexpr const char architecture[] =
 #if defined(__x86_64__) or defined(_M_X64)
     "x86_64";
 #elif defined(__i386__) or defined(_M_IX86)

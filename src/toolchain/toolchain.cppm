@@ -10,7 +10,7 @@ module;
 #include "global/custom_console_output.hpp"
 #include "global/global.hpp"
 
-extern void set_current_paracl_file(std::string_view );
+extern void set_current_paracl_file(std::string_view);
 
 extern FILE *yyin;
 extern ParaCL::ProgramAST program;
@@ -106,13 +106,14 @@ void Toolchain::link_objects_to_executable() const
 
 void Toolchain::read_ast(const std::filesystem::path &source) const
 {
+    /* yyin is global bison variable */
     yyin = fopen(source.string().c_str(), "rb");
 
     if (not yyin)
         throw std::invalid_argument(RED BOLD "no such file: " RESET_CONSOLE_OUT WHITE + source.string());
 
-    yy::parser parser;
-    int result = parser.parse();
+    // yy::parser parser;
+    int result = yy::parser().parse();
 
     if (result != EXIT_SUCCESS)
         throw std::runtime_error("failed parse '" + source.string() + "' with exit code: " + std::to_string(result));

@@ -59,7 +59,7 @@
 //     if (auto bin = dynamic_cast<const BinExpr *>(expr))
 //     {
 //         std::string label;
-//         switch (bin->op)
+//         switch (bin->op())
 //         {
 //         case token_t::ADD:
 //             label = "+";
@@ -116,7 +116,7 @@
 //     else if (auto un = dynamic_cast<const UnExpr *>(expr))
 //     {
 //         std::string label;
-//         switch (un->op)
+//         switch (un->op())
 //         {
 //         case token_t::SUB:
 //             label += "-";
@@ -166,7 +166,7 @@
 //     else if (auto combined_assign = dynamic_cast<const CombinedAssingExpr *>(expr))
 //     {
 //         std::string label = combined_assign->name + " ";
-//         switch (combined_assign->op)
+//         switch (combined_assign->op())
 //         {
 //         case token_t::ADDASGN:
 //             label += "+= :";
@@ -214,7 +214,7 @@
 //     else if (auto combined_assign = dynamic_cast<const CombinedAssingStmt *>(stmt))
 //     {
 //         std::string label = combined_assign->name;
-//         switch (combined_assign->op)
+//         switch (combined_assign->op())
 //         {
 //         case token_t::ADDASGN:
 //             label += " += :";

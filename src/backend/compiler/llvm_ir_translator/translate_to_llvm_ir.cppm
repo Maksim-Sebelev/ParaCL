@@ -409,9 +409,9 @@ void LLVMIRBuilder::generate_combined_assign(const CombinedAssingStmt *asgn)
 
     llvm::Value *expr = generate_expression(asgn->value.get());
 
-    LOGINFO("paracl: ir translator: combined assignment operation type: {}", static_cast<int>(asgn->op));
+    LOGINFO("paracl: ir translator: combined assignment operation type: {}", static_cast<int>(asgn->op()));
 
-    switch (asgn->op)
+    switch (asgn->op())
     {
     case combined_assign_t::ADDASGN:
         expr = builder_.CreateAdd(nametable_.get_variable_value(asgn->name), expr, "__addAsgnResult");
@@ -494,9 +494,9 @@ llvm::Value *LLVMIRBuilder::generate_combined_assign_expression(const CombinedAs
 
     llvm::Value *expr = generate_expression(asgn->value.get());
 
-    LOGINFO("paracl: ir translator: combined assignment expression operation type: {}", static_cast<int>(asgn->op));
+    LOGINFO("paracl: ir translator: combined assignment expression operation type: {}", static_cast<int>(asgn->op()));
 
-    switch (asgn->op)
+    switch (asgn->op())
     {
     case combined_assign_t::ADDASGN:
         expr = builder_.CreateAdd(nametable_.get_variable_value(asgn->name), expr, "__addAsgnResult");
@@ -596,12 +596,12 @@ llvm::Value *LLVMIRBuilder::generate_input_expression(const InputExpr *input)
 
 llvm::Value *LLVMIRBuilder::generate_binary_op_expression(const BinExpr *bin)
 {
-    LOGINFO("paracl: ir translator: generating binary operation: {}", static_cast<int>(bin->op));
+    LOGINFO("paracl: ir translator: generating binary operation: {}", static_cast<int>(bin->op()));
 
     llvm::Value *lhs = generate_expression(bin->left.get());
     llvm::Value *rhs = generate_expression(bin->right.get());
 
-    switch (bin->op)
+    switch (bin->op())
     {
     case binary_op_t::ADD:
         return builder_.CreateAdd(lhs, rhs, "__addResult");
@@ -625,7 +625,7 @@ llvm::Value *LLVMIRBuilder::generate_binary_op_expression(const BinExpr *bin)
     case binary_op_t::ISNE: {
         LOGINFO("paracl: ir translator: binary comparison operation");
         llvm::Value *cmp_result;
-        switch (bin->op)
+        switch (bin->op())
         {
         case binary_op_t::ISAB:
             cmp_result = builder_.CreateICmpSGT(lhs, rhs, "__isAbResult");
@@ -652,7 +652,7 @@ llvm::Value *LLVMIRBuilder::generate_binary_op_expression(const BinExpr *bin)
     }
 
     default:
-        LOGERR("paracl: ir translator: unknown binary operation: {}", static_cast<int>(bin->op));
+        LOGERR("paracl: ir translator: unknown binary operation: {}", static_cast<int>(bin->op()));
         builtin_unreachable_wrapper("here parsing only binary operations");
     }
 }
@@ -661,10 +661,10 @@ llvm::Value *LLVMIRBuilder::generate_binary_op_expression(const BinExpr *bin)
 
 llvm::Value *LLVMIRBuilder::generate_unary_op_expression(const UnExpr *un)
 {
-    LOGINFO("paracl: ir translator: generating unary operation: {}", static_cast<int>(un->op));
+    LOGINFO("paracl: ir translator: generating unary operation: {}", static_cast<int>(un->op()));
 
     llvm::Value *val = generate_expression(un->operand.get());
-    switch (un->op)
+    switch (un->op())
     {
     case unary_op_t::PLUS:
         return val;
@@ -681,7 +681,7 @@ llvm::Value *LLVMIRBuilder::generate_unary_op_expression(const UnExpr *un)
     }
 
     default:
-        LOGERR("paracl: ir translator: unknown unary operation: {}", static_cast<int>(un->op));
+        LOGERR("paracl: ir translator: unknown unary operation: {}", static_cast<int>(un->op()));
         builtin_unreachable_wrapper("here parsing only unary operations");
     }
 }

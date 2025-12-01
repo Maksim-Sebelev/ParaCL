@@ -3,7 +3,6 @@
 namespace ParaCL
 {
 
-
 enum class binary_op_t
 {
     AND,
@@ -29,7 +28,6 @@ enum class unary_op_t
     NOT,
 };
 
-
 enum class combined_assign_t
 {
     ADDASGN, /* += */
@@ -37,8 +35,6 @@ enum class combined_assign_t
     MULASGN, /* *= */
     DIVASGN, /* /= */
     REMASGN, /* %= */
-
 };
-
 
 } /* namespace ParaCL */

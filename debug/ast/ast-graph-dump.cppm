@@ -60,7 +60,7 @@ void dumpExpr(std::ostream &out, const Expression *expr)
     if (auto bin = dynamic_cast<const BinExpr *>(expr))
     {
         std::string label;
-        switch (bin->op)
+        switch (bin->op())
         {
         case binary_op_t::ADD:
             label = "+";
@@ -117,7 +117,7 @@ void dumpExpr(std::ostream &out, const Expression *expr)
     else if (auto un = dynamic_cast<const UnExpr *>(expr))
     {
         std::string label;
-        switch (un->op)
+        switch (un->op())
         {
         case unary_op_t::MINUS:
             label += "-";
@@ -167,7 +167,7 @@ void dumpExpr(std::ostream &out, const Expression *expr)
     else if (auto combined_assign = dynamic_cast<const CombinedAssingExpr *>(expr))
     {
         std::string label = combined_assign->name + " ";
-        switch (combined_assign->op)
+        switch (combined_assign->op())
         {
         case combined_assign_t::ADDASGN:
             label += "+= :";
@@ -215,7 +215,7 @@ void dumpStmt(std::ostream &out, const Statement *stmt)
     else if (auto combined_assign = dynamic_cast<const CombinedAssingStmt *>(stmt))
     {
         std::string label = combined_assign->name;
-        switch (combined_assign->op)
+        switch (combined_assign->op())
         {
         case combined_assign_t::ADDASGN:
             label += " += :";

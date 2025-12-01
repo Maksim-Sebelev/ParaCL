@@ -40,20 +40,37 @@ struct InputExpr : Expression
 
 struct UnExpr : Expression
 {
-    unary_op_t op;
+  private:
+    const unary_op_t op_;
+
+  public:
+    unary_op_t op() const
+    {
+        return op_;
+    }
+
     std::unique_ptr<Expression> operand;
-    UnExpr(unary_op_t op, std::unique_ptr<Expression> v) : op(op), operand(std::move(v))
+    UnExpr(unary_op_t op, std::unique_ptr<Expression> v) : op_(op), operand(std::move(v))
     {
     }
 };
 
 struct BinExpr : Expression
 {
-    binary_op_t op;
+  private:
+    const binary_op_t op_;
+
+  public:
+    binary_op_t op() const
+    {
+        return op_;
+    }
+
     std::unique_ptr<Expression> left;
     std::unique_ptr<Expression> right;
+
     BinExpr(binary_op_t op, std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs)
-        : op(op), left(std::move(lhs)), right(std::move(rhs))
+        : op_(op), left(std::move(lhs)), right(std::move(rhs))
     {
     }
 };
@@ -69,11 +86,18 @@ struct AssignExpr : Expression
 
 struct CombinedAssingExpr : Expression
 {
-    combined_assign_t op;
+  private:
+    const combined_assign_t op_;
+
+  public:
+    combined_assign_t op() const
+    {
+        return op_;
+    }
     std::string name;
     std::unique_ptr<Expression> value;
     CombinedAssingExpr(combined_assign_t op, std::string n, std::unique_ptr<Expression> value)
-        : op(op), name(std::move(n)), value(std::move(value))
+        : op_(op), name(std::move(n)), value(std::move(value))
     {
     }
 };
@@ -94,11 +118,19 @@ struct AssignStmt : Statement
 
 struct CombinedAssingStmt : Statement
 {
-    combined_assign_t op;
+  private:
+    const combined_assign_t op_;
+
+  public:
+    combined_assign_t op() const
+    {
+        return op_;
+    }
+
     std::string name;
     std::unique_ptr<Expression> value;
     CombinedAssingStmt(combined_assign_t op, std::string n, std::unique_ptr<Expression> value)
-        : op(op), name(std::move(n)), value(std::move(value))
+        : op_(op), name(std::move(n)), value(std::move(value))
     {
     }
 };

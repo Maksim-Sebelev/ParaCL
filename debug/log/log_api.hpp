@@ -24,7 +24,7 @@ import pineaplog;
     do                                                                                                                 \
     {                                                                                                                  \
         SPDLOG_INFO(__VA_ARGS__);                                                                                      \
-        ON_DEBUG(LOGFLUSH;)                                                                                            \
+        LOGFLUSH;                                                                                                      \
     } while (0)
 
 #define LOGERR(...)                                                                                                    \

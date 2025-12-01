@@ -1,3 +1,9 @@
+/*
+'optarg' and 'optind' - is a global variables from getopt.h
+their declaration there:
+extern char *optarg;
+extern int optind;
+*/
 module;
 
 //---------------------------------------------------------------------------------------------------------------
@@ -44,10 +50,9 @@ export struct program_options_t
     std::vector<std::filesystem::path> llvm_ir_files;
     std::vector<std::filesystem::path> object_files;
 
-    ON_GRAPHVIZ(std::filesystem::path dot_file;) /* ON_GRAPHVIZ */
+    ON_GRAPHVIZ(std::filesystem::path dot_file; bool ast_dump : 1 = false;) /* ON_GRAPHVIZ */
 
     bool compile : 1 = false;
-    ON_GRAPHVIZ(bool ast_dump : 1 = false;) /* ON_GRAPHVIZ */
 };
 
 //---------------------------------------------------------------------------------------------------------------
@@ -117,10 +122,14 @@ OptionsParser::OptionsParser(int argc, char *argv[]) : program_options_()
 {
     LOGINFO("paracl: options parser: begin parse options");
 
+    LOGINFO("argc = {}", argc);
+    for (int i = 0; i < argc; ++i)
+        LOGINFO("argv[{}] = \"{}\"", i, argv[i] ? argv[i] : "NULL");
+
     set_program_name(argv[0]);
 
     int option;
-    while ((option = getopt_long(argc, argv, "hvd:co:", long_options, nullptr)) != -1)
+    while ((option = getopt_long(argc, argv, "hvd:co:", long_options, nullptr)) != end_of_parsing)
     {
         LOGINFO("paracl: options parser: processing option '{}', optarg = '{}'", static_cast<char>(option),
                 optarg ? optarg : "NULL");
@@ -151,6 +160,8 @@ OptionsParser::OptionsParser(int argc, char *argv[]) : program_options_()
     for (int i = optind; i < argc; i++)
         parse_not_a_flag(argv[i]);
 
+    set_getopt_args_default_values();
+
     if (program_options_.sources.empty())
         throw std::invalid_argument("no source files specified");
 
@@ -174,6 +185,7 @@ Options::program_options_t OptionsParser::get_program_options() const
 void OptionsParser::set_program_name(const char *argv0)
 {
     msg_assert(argv0, "argv[0] is nullptr? are you sure, that you give here arg[0]?");
+    LOGINFO("set current file name: \"{}\"", argv0);
     program_options_.program_name = std::string(argv0);
 }
 
@@ -292,7 +304,7 @@ void OptionsParser::parse_not_a_flag(const char *arg)
 
     if (extension == ".o" or extension == ".obj")
     {
-        LOGINFO("paracl: options parser: find source file: \"{}\"", arg);
+        LOGINFO("paracl: options parser: find object file: \"{}\"", arg);
         program_options_.object_files.push_back(file);
         return;
     }
@@ -345,5 +357,17 @@ void OptionsParser::set_out_files()
 //---------------------------------------------------------------------------------------------------------------
 
 } /* namespace Options */
+
+//---------------------------------------------------------------------------------------------------------------
+
+/*
+this need if more then 1 call of optoins_parser.
+oparg, optind - is extern in getopt.h, so we need to make it dafault with ourself
+*/
+void set_getopt_args_default_values()
+{
+    optarg = nullptr; // no args expect before begin parsing options (no options => no arg :) )
+    optind = 1;       // skip argv[0] (name of executable file)
+}
 
 //---------------------------------------------------------------------------------------------------------------
