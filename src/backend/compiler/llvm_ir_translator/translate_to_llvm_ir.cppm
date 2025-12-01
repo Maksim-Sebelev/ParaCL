@@ -413,19 +413,19 @@ void LLVMIRBuilder::generate_combined_assign(const CombinedAssingStmt *asgn)
 
     switch (asgn->op)
     {
-    case token_t::ADDASGN:
+    case combined_assign_t::ADDASGN:
         expr = builder_.CreateAdd(nametable_.get_variable_value(asgn->name), expr, "__addAsgnResult");
         break;
-    case token_t::SUBASGN:
+    case combined_assign_t::SUBASGN:
         expr = builder_.CreateSub(nametable_.get_variable_value(asgn->name), expr, "__subAsgnResult");
         break;
-    case token_t::MULASGN:
+    case combined_assign_t::MULASGN:
         expr = builder_.CreateMul(nametable_.get_variable_value(asgn->name), expr, "__mulAsgnResult");
         break;
-    case token_t::DIVASGN:
+    case combined_assign_t::DIVASGN:
         expr = builder_.CreateSDiv(nametable_.get_variable_value(asgn->name), expr, "__divAsgnResult");
         break;
-    case token_t::REMASGN:
+    case combined_assign_t::REMASGN:
         expr = builder_.CreateSRem(nametable_.get_variable_value(asgn->name), expr, "__remAsgnResult");
         break;
     default:
@@ -498,19 +498,19 @@ llvm::Value *LLVMIRBuilder::generate_combined_assign_expression(const CombinedAs
 
     switch (asgn->op)
     {
-    case token_t::ADDASGN:
+    case combined_assign_t::ADDASGN:
         expr = builder_.CreateAdd(nametable_.get_variable_value(asgn->name), expr, "__addAsgnResult");
         break;
-    case token_t::SUBASGN:
+    case combined_assign_t::SUBASGN:
         expr = builder_.CreateSub(nametable_.get_variable_value(asgn->name), expr, "__subAsgnResult");
         break;
-    case token_t::MULASGN:
+    case combined_assign_t::MULASGN:
         expr = builder_.CreateMul(nametable_.get_variable_value(asgn->name), expr, "__mulAsgnResult");
         break;
-    case token_t::DIVASGN:
+    case combined_assign_t::DIVASGN:
         expr = builder_.CreateSDiv(nametable_.get_variable_value(asgn->name), expr, "__divAsgnResult");
         break;
-    case token_t::REMASGN:
+    case combined_assign_t::REMASGN:
         expr = builder_.CreateSRem(nametable_.get_variable_value(asgn->name), expr, "__remAsgnResult");
         break;
     default:
@@ -603,46 +603,46 @@ llvm::Value *LLVMIRBuilder::generate_binary_op_expression(const BinExpr *bin)
 
     switch (bin->op)
     {
-    case token_t::ADD:
+    case binary_op_t::ADD:
         return builder_.CreateAdd(lhs, rhs, "__addResult");
-    case token_t::SUB:
+    case binary_op_t::SUB:
         return builder_.CreateSub(lhs, rhs, "__subResult");
-    case token_t::MUL:
+    case binary_op_t::MUL:
         return builder_.CreateMul(lhs, rhs, "__mulResult");
-    case token_t::DIV:
+    case binary_op_t::DIV:
         return builder_.CreateSDiv(lhs, rhs, "__divResult");
-    case token_t::REM:
+    case binary_op_t::REM:
         return builder_.CreateSRem(lhs, rhs, "__remResult");
-    case token_t::AND:
+    case binary_op_t::AND:
         return builder_.CreateAnd(lhs, rhs, "__andResult");
-    case token_t::OR:
+    case binary_op_t::OR:
         return builder_.CreateOr(lhs, rhs, "__orResult");
-    case token_t::ISAB:
-    case token_t::ISABE:
-    case token_t::ISLS:
-    case token_t::ISLSE:
-    case token_t::ISEQ:
-    case token_t::ISNE: {
+    case binary_op_t::ISAB:
+    case binary_op_t::ISABE:
+    case binary_op_t::ISLS:
+    case binary_op_t::ISLSE:
+    case binary_op_t::ISEQ:
+    case binary_op_t::ISNE: {
         LOGINFO("paracl: ir translator: binary comparison operation");
         llvm::Value *cmp_result;
         switch (bin->op)
         {
-        case token_t::ISAB:
+        case binary_op_t::ISAB:
             cmp_result = builder_.CreateICmpSGT(lhs, rhs, "__isAbResult");
             break;
-        case token_t::ISABE:
+        case binary_op_t::ISABE:
             cmp_result = builder_.CreateICmpSGE(lhs, rhs, "__isAbeResult");
             break;
-        case token_t::ISLS:
+        case binary_op_t::ISLS:
             cmp_result = builder_.CreateICmpSLT(lhs, rhs, "__isLsResult");
             break;
-        case token_t::ISLSE:
+        case binary_op_t::ISLSE:
             cmp_result = builder_.CreateICmpSLE(lhs, rhs, "__isLseResult");
             break;
-        case token_t::ISEQ:
+        case binary_op_t::ISEQ:
             cmp_result = builder_.CreateICmpEQ(lhs, rhs, "__isEqResult");
             break;
-        case token_t::ISNE:
+        case binary_op_t::ISNE:
             cmp_result = builder_.CreateICmpNE(lhs, rhs, "__isNeResult");
             break;
         default:
@@ -666,15 +666,15 @@ llvm::Value *LLVMIRBuilder::generate_unary_op_expression(const UnExpr *un)
     llvm::Value *val = generate_expression(un->operand.get());
     switch (un->op)
     {
-    case token_t::ADD:
+    case unary_op_t::PLUS:
         return val;
-    case token_t::NOT: {
+    case unary_op_t::NOT: {
         LOGINFO("paracl: ir translator: generating logical NOT operation");
         llvm::Value *zero = llvm::ConstantInt::get(builder_.getInt32Ty(), 0);
         llvm::Value *cmp_result = builder_.CreateICmpEQ(val, zero);
         return builder_.CreateZExt(cmp_result, builder_.getInt32Ty(), "__notResult");
     }
-    case token_t::SUB: {
+    case unary_op_t::MINUS: {
         LOGINFO("paracl: ir translator: generating unary minus operation");
         llvm::Value *zero = llvm::ConstantInt::get(builder_.getInt32Ty(), 0);
         return builder_.CreateSub(zero, val, "__unminusResult");

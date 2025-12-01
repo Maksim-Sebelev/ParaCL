@@ -44,9 +44,9 @@ export class Interpreter
     int execute_assign_expression(const AssignExpr *assignExpr);
     int execute_combined_assign_expression(const CombinedAssingExpr *combinedAssingExpr);
 
-    int execute_binary_operation(int lhs, int rhs, token_t binary_operator);
-    int execute_combined_assign(int rhs, int value, token_t combined_assign);
-    int execute_unary_operation(int rhs, token_t unary_operator);
+    int execute_binary_operation(int lhs, int rhs, binary_op_t binary_operator);
+    int execute_combined_assign(int rhs, int value, combined_assign_t combined_assign);
+    int execute_unary_operation(int rhs, unary_op_t unary_operator);
 
   public:
     Interpreter(const ProgramAST &ast);
@@ -288,35 +288,35 @@ int Interpreter::execute_combined_assign_expression(const CombinedAssingExpr *co
     return value;
 }
 
-int Interpreter::execute_binary_operation(int lhs, int rhs, token_t binary_operator)
+int Interpreter::execute_binary_operation(int lhs, int rhs, binary_op_t binary_operator)
 {
     switch (binary_operator)
     {
-    case token_t::ADD:
+    case binary_op_t::ADD:
         return lhs + rhs;
-    case token_t::SUB:
+    case binary_op_t::SUB:
         return lhs - rhs;
-    case token_t::MUL:
+    case binary_op_t::MUL:
         return lhs * rhs;
-    case token_t::DIV:
+    case binary_op_t::DIV:
         return lhs / rhs;
-    case token_t::REM:
+    case binary_op_t::REM:
         return lhs % rhs;
-    case token_t::ISAB:
+    case binary_op_t::ISAB:
         return lhs > rhs;
-    case token_t::ISABE:
+    case binary_op_t::ISABE:
         return lhs >= rhs;
-    case token_t::ISLS:
+    case binary_op_t::ISLS:
         return lhs < rhs;
-    case token_t::ISLSE:
+    case binary_op_t::ISLSE:
         return lhs <= rhs;
-    case token_t::ISEQ:
+    case binary_op_t::ISEQ:
         return lhs == rhs;
-    case token_t::ISNE:
+    case binary_op_t::ISNE:
         return lhs != rhs;
-    case token_t::AND:
+    case binary_op_t::AND:
         return lhs && rhs;
-    case token_t::OR:
+    case binary_op_t::OR:
         return lhs || rhs;
     default:
         builtin_unreachable_wrapper("here we parse only binary operation");
@@ -324,15 +324,15 @@ int Interpreter::execute_binary_operation(int lhs, int rhs, token_t binary_opera
     builtin_unreachable_wrapper("we must return in switch");
 }
 
-int Interpreter::execute_unary_operation(int rhs, token_t unary_operator)
+int Interpreter::execute_unary_operation(int rhs, unary_op_t unary_operator)
 {
     switch (unary_operator)
     {
-    case token_t::ADD:
+    case unary_op_t::PLUS:
         return +rhs;
-    case token_t::SUB:
+    case unary_op_t::MINUS:
         return -rhs;
-    case token_t::NOT:
+    case unary_op_t::NOT:
         return not rhs;
     default:
         builtin_unreachable_wrapper("here we parse only unary operation");
@@ -340,23 +340,23 @@ int Interpreter::execute_unary_operation(int rhs, token_t unary_operator)
     builtin_unreachable_wrapper("we must return in switch");
 }
 
-int Interpreter::execute_combined_assign(int rhs, int value, token_t combined_assign)
+int Interpreter::execute_combined_assign(int rhs, int value, combined_assign_t combined_assign)
 {
     switch (combined_assign)
     {
-    case token_t::ADDASGN:
+    case combined_assign_t::ADDASGN:
         rhs += value;
         break;
-    case token_t::SUBASGN:
+    case combined_assign_t::SUBASGN:
         rhs -= value;
         break;
-    case token_t::MULASGN:
+    case combined_assign_t::MULASGN:
         rhs *= value;
         break;
-    case token_t::DIVASGN:
+    case combined_assign_t::DIVASGN:
         rhs /= value;
         break;
-    case token_t::REMASGN:
+    case combined_assign_t::REMASGN:
         rhs %= value;
         break;
     default:

@@ -62,43 +62,43 @@ void dumpExpr(std::ostream &out, const Expression *expr)
         std::string label;
         switch (bin->op)
         {
-        case token_t::ADD:
+        case binary_op_t::ADD:
             label = "+";
             break;
-        case token_t::SUB:
+        case binary_op_t::SUB:
             label = "-";
             break;
-        case token_t::MUL:
+        case binary_op_t::MUL:
             label = "*";
             break;
-        case token_t::DIV:
+        case binary_op_t::DIV:
             label = "/";
             break;
-        case token_t::REM:
+        case binary_op_t::REM:
             label = "%";
             break;
-        case token_t::ISAB:
+        case binary_op_t::ISAB:
             label = ">";
             break;
-        case token_t::ISABE:
+        case binary_op_t::ISABE:
             label = ">=";
             break;
-        case token_t::ISLS:
+        case binary_op_t::ISLS:
             label = "<";
             break;
-        case token_t::ISLSE:
+        case binary_op_t::ISLSE:
             label = "<=";
             break;
-        case token_t::ISEQ:
+        case binary_op_t::ISEQ:
             label = "==";
             break;
-        case token_t::ISNE:
+        case binary_op_t::ISNE:
             label = "!=";
             break;
-        case token_t::AND:
+        case binary_op_t::AND:
             label = "&&";
             break;
-        case token_t::OR:
+        case binary_op_t::OR:
             label = "||";
             break;
 
@@ -119,13 +119,13 @@ void dumpExpr(std::ostream &out, const Expression *expr)
         std::string label;
         switch (un->op)
         {
-        case token_t::SUB:
+        case unary_op_t::MINUS:
             label += "-";
             break;
-        case token_t::ADD:
+        case unary_op_t::PLUS:
             label += "+";
             break;
-        case token_t::NOT:
+        case unary_op_t::NOT:
             label += "not";
             break;
         default:
@@ -169,19 +169,19 @@ void dumpExpr(std::ostream &out, const Expression *expr)
         std::string label = combined_assign->name + " ";
         switch (combined_assign->op)
         {
-        case token_t::ADDASGN:
+        case combined_assign_t::ADDASGN:
             label += "+= :";
             break;
-        case token_t::SUBASGN:
+        case combined_assign_t::SUBASGN:
             label += "-= :";
             break;
-        case token_t::MULASGN:
+        case combined_assign_t::MULASGN:
             label += "*= :";
             break;
-        case token_t::DIVASGN:
+        case combined_assign_t::DIVASGN:
             label += "/= :";
             break;
-        case token_t::REMASGN:
+        case combined_assign_t::REMASGN:
             label += "%= :";
             break;
         default:
@@ -217,19 +217,19 @@ void dumpStmt(std::ostream &out, const Statement *stmt)
         std::string label = combined_assign->name;
         switch (combined_assign->op)
         {
-        case token_t::ADDASGN:
+        case combined_assign_t::ADDASGN:
             label += " += :";
             break;
-        case token_t::SUBASGN:
+        case combined_assign_t::SUBASGN:
             label += " -= :";
             break;
-        case token_t::MULASGN:
+        case combined_assign_t::MULASGN:
             label += " *= :";
             break;
-        case token_t::DIVASGN:
+        case combined_assign_t::DIVASGN:
             label += " /= :";
             break;
-        case token_t::REMASGN:
+        case combined_assign_t::REMASGN:
             label += " %= :";
             break;
         default:

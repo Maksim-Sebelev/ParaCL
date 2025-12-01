@@ -40,19 +40,19 @@ struct InputExpr : Expression
 
 struct UnExpr : Expression
 {
-    token_t op;
+    unary_op_t op;
     std::unique_ptr<Expression> operand;
-    UnExpr(token_t op, std::unique_ptr<Expression> v) : op(op), operand(std::move(v))
+    UnExpr(unary_op_t op, std::unique_ptr<Expression> v) : op(op), operand(std::move(v))
     {
     }
 };
 
 struct BinExpr : Expression
 {
-    token_t op;
+    binary_op_t op;
     std::unique_ptr<Expression> left;
     std::unique_ptr<Expression> right;
-    BinExpr(token_t op, std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs)
+    BinExpr(binary_op_t op, std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs)
         : op(op), left(std::move(lhs)), right(std::move(rhs))
     {
     }
@@ -69,10 +69,10 @@ struct AssignExpr : Expression
 
 struct CombinedAssingExpr : Expression
 {
-    token_t op;
+    combined_assign_t op;
     std::string name;
     std::unique_ptr<Expression> value;
-    CombinedAssingExpr(token_t op, std::string n, std::unique_ptr<Expression> value)
+    CombinedAssingExpr(combined_assign_t op, std::string n, std::unique_ptr<Expression> value)
         : op(op), name(std::move(n)), value(std::move(value))
     {
     }
@@ -94,10 +94,10 @@ struct AssignStmt : Statement
 
 struct CombinedAssingStmt : Statement
 {
-    token_t op;
+    combined_assign_t op;
     std::string name;
     std::unique_ptr<Expression> value;
-    CombinedAssingStmt(token_t op, std::string n, std::unique_ptr<Expression> value)
+    CombinedAssingStmt(combined_assign_t op, std::string n, std::unique_ptr<Expression> value)
         : op(op), name(std::move(n)), value(std::move(value))
     {
     }
