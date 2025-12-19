@@ -127,8 +127,9 @@ OptionsParser::OptionsParser(int argc, char *argv[]) : program_options_()
     LOGINFO("paracl: options parser: begin parse options");
 
     LOGINFO("argc = {}", argc);
-    for (int i = 0; i < argc; ++i)
-        LOGINFO("argv[{}] = \"{}\"", i, argv[i] ? argv[i] : "NULL");
+
+    ON_LOGGER(for (int i = 0; i < argc; ++i))
+    LOGINFO("argv[{}] = \"{}\"", i, argv[i] ? argv[i] : "NULL");
 
     set_program_name();
 
