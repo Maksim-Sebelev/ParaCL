@@ -40,9 +40,6 @@ check_that_exists clang-format
 check_that_exists find
 check_that_exists xargs
 
-find . -type f \( -name "src/*.cpp" -o -name "debug/*.cpp" -o -name "tests/unit/*.cpp" \
-               -o -name "src/*.cppm" -o -name "debug/*.cppm" \
-               -o -name "include/*.hpp" \
-               \) -print0 | xargs -0 clang-format -i
+find . -type f \( -path "./src/*.cpp" -o -path "./debug/*.cpp" -o -path "./tests/unit/*.cpp" -o -path "./src/*.cppm" -o -path "./debug/*.cppm" -o -path "./include/*.hpp" \) -print0 | xargs -0 clang-format -i
 
 custom_echo "${CONSOLE_COLOR_GREEN}" "${CONSOLE_BIND_FONT}" "Formatting completed successfully"
