@@ -4,6 +4,7 @@ module;
 #include <iostream>
 #include <memory>
 #include <stdexcept>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -12,18 +13,35 @@ module;
 
 #include "log/log_api.hpp"
 
-export module paracl_interpreter;
+export module interpreter;
 
 import interpreter_name_table;
+export import interpreter_optoins;
+
+import ast_builder;
 
 namespace ParaCL
 {
+namespace backend
+{
+namespace interpreter
+{
 
-export class Interpreter
+using ParaCL::options::interpreter::InterpreterOptions;
+
+export template <typename Interpreter>
+concept IInterpreter =
+    std::is_consructible<Interpreter, const InterpreterOptions &> && requires(Interpreter interpreter) {
+        { interpreter.interpret() } -> std::same_as<void>;
+    };
+
+export template <nametable::INametable Nametable = nametable::Nametable,
+                 frontend::ast_builder::IASTBuilder ASTBuilder = frontend::ast_builder::ASTBuilder>
+class Interpreter final
 {
   private:
-    const ProgramAST &ast_;
-    InterpreterNameTable nametable_;
+    ProgramAST ast_;
+    Nametable nametable_;
 
     /* Statement execution functions */
     void execute(const Statement *stmt);
@@ -44,25 +62,36 @@ export class Interpreter
     int execute(const AssignExpr *assignExpr);
     int execute(const CombinedAssingExpr *combinedAssingExpr);
 
+    /* helper executers */
     int execute(int lhs, int rhs, binary_op_t binary_operator);
     int execute(int rhs, int value, combined_assign_t combined_assign);
     int execute(int rhs, unary_op_t unary_operator);
 
   public:
-    Interpreter(const ProgramAST &ast);
+    Interpreter(const InterpreterOptions &opt);
 
     void interpret();
 };
 
-Interpreter::Interpreter(const ProgramAST &ast) : ast_(ast), nametable_()
+Interpreter<Nametable, ASTBuilder>::Interpreter(const InterpreterOptions &opt)
 {
     LOGINFO("paracl: interpreter: ctor");
+
+    if (opt.sources.size() == 0)
+        throw std::invalid_argument("no input files given to interpreter");
+
+    if (opt.sources.size() > 1)
+        throw std::invalid_argument("now interpreter supported only one file programs");
+
+    const std::filsystem::path &source = opt.sources[0];
+
+    ast_ = ASTBUilder{source}.ast();
 
     /* create global scope */
     nametable_.new_scope();
 }
 
-void Interpreter::interpret()
+void Interpreter<Nametable, ASTBuilder>::interpret()
 {
     LOGINFO("paracl: interpreter: start interpret");
 
@@ -72,56 +101,56 @@ void Interpreter::interpret()
     LOGINFO("paracl: interpreter: interpret completed");
 }
 
-void Interpreter::execute(const Statement *stmt)
+void Interpreter<Nametable, ASTBuilder>::execute(const Statement *stmt)
 {
-    if (auto assign = dynamic_cast<const AssignStmt *>(stmt))
+    if (auto assign = static_cast<const AssignStmt *>(stmt))
         return execute(assign);
 
-    if (auto combined_assign_statement = dynamic_cast<const CombinedAssingStmt *>(stmt))
+    if (auto combined_assign_statement = static_cast<const CombinedAssingStmt *>(stmt))
         return execute(combined_assign_statement);
 
-    if (auto print_statement = dynamic_cast<const PrintStmt *>(stmt))
+    if (auto print_statement = static_cast<const PrintStmt *>(stmt))
         return execute(print_statement);
 
-    if (auto while_stmt = dynamic_cast<const WhileStmt *>(stmt))
+    if (auto while_stmt = static_cast<const WhileStmt *>(stmt))
         return execute(while_stmt);
 
-    if (auto block = dynamic_cast<const BlockStmt *>(stmt))
+    if (auto block = static_cast<const BlockStmt *>(stmt))
         return execute(block);
 
-    if (auto condition = dynamic_cast<const ConditionStatement *>(stmt))
+    if (auto condition = static_cast<const ConditionStatement *>(stmt))
         return execute(condition);
 
     builtin_unreachable_wrapper("we must return in some else-if");
 }
 
-int Interpreter::execute(const Expression *expr)
+int Interpreter<Nametable, ASTBuilder>::execute(const Expression *expr)
 {
-    if (auto bin = dynamic_cast<const BinExpr *>(expr))
+    if (auto bin = static_cast<const BinExpr *>(expr))
         return execute(bin);
 
-    if (auto un = dynamic_cast<const UnExpr *>(expr))
+    if (auto un = static_cast<const UnExpr *>(expr))
         return execute(un);
 
-    if (auto num = dynamic_cast<const NumExpr *>(expr))
+    if (auto num = static_cast<const NumExpr *>(expr))
         return execute(num);
 
-    if (auto var = dynamic_cast<const VarExpr *>(expr))
+    if (auto var = static_cast<const VarExpr *>(expr))
         return execute(var);
 
-    if (auto in = dynamic_cast<const InputExpr *>(expr))
+    if (auto in = static_cast<const InputExpr *>(expr))
         return execute(in);
 
-    if (auto assignExpr = dynamic_cast<const AssignExpr *>(expr))
+    if (auto assignExpr = static_cast<const AssignExpr *>(expr))
         return execute(assignExpr);
 
-    if (auto combinedAssingExpr = dynamic_cast<const CombinedAssingExpr *>(expr))
+    if (auto combinedAssingExpr = static_cast<const CombinedAssingExpr *>(expr))
         return execute(combinedAssingExpr);
 
     builtin_unreachable_wrapper("we must return in some else-if");
 }
 
-void Interpreter::execute(const WhileStmt *while_stmt)
+void Interpreter<Nametable, ASTBuilder>::execute(const WhileStmt *while_stmt)
 {
     LOGINFO("paracl: interpreter: execute WHILE statement");
 
@@ -136,7 +165,7 @@ void Interpreter::execute(const WhileStmt *while_stmt)
     LOGINFO("paracl: interpreter: leave_scope WHILE statement");
 }
 
-void Interpreter::execute(const BlockStmt *block)
+void Interpreter<Nametable, ASTBuilder>::execute(const BlockStmt *block)
 {
     LOGINFO("paracl: interpreter: execute block statement");
 
@@ -154,7 +183,7 @@ void Interpreter::execute(const BlockStmt *block)
         nametable_.leave_scope();
 }
 
-void Interpreter::execute(const ConditionStatement *condition)
+void Interpreter<Nametable, ASTBuilder>::execute(const ConditionStatement *condition)
 {
     LOGINFO("paracl: interpreter: execute condition statement");
 
@@ -189,10 +218,10 @@ void Interpreter::execute(const ConditionStatement *condition)
     return execute(else_stmt->body.get());
 }
 
-int Interpreter::execute(const BinExpr *bin)
+int Interpreter<Nametable, ASTBuilder>::execute(const BinExpr *bin)
 {
-    auto leftExpr = dynamic_cast<const Expression *>(bin->left.get());
-    auto rightExpr = dynamic_cast<const Expression *>(bin->right.get());
+    auto leftExpr = static_cast<const Expression *>(bin->left.get());
+    auto rightExpr = static_cast<const Expression *>(bin->right.get());
 
     msg_assert(leftExpr, "left bin expr child is not expr");
     msg_assert(rightExpr, "rihgt bin expr child is not expr");
@@ -206,22 +235,22 @@ int Interpreter::execute(const BinExpr *bin)
     return result;
 }
 
-int Interpreter::execute(const UnExpr *un)
+int Interpreter<Nametable, ASTBuilder>::execute(const UnExpr *un)
 {
-    auto child_expr = dynamic_cast<const Expression *>(un->operand.get());
+    auto child_expr = static_cast<const Expression *>(un->operand.get());
     int child_value = execute(child_expr);
     int result = execute(child_value, un->op());
     LOGINFO("paracl: interpreter: execute unary expresion: {}", result);
     return result;
 }
 
-int Interpreter::execute(const NumExpr *num)
+int Interpreter<Nametable, ASTBuilder>::execute(const NumExpr *num)
 {
     LOGINFO("paracl: interpreter: get number value: {}", num->value);
     return num->value;
 }
 
-int Interpreter::execute(const VarExpr *var)
+int Interpreter<Nametable, ASTBuilder>::execute(const VarExpr *var)
 {
     std::optional<int> varValue = nametable_.get_variable_value(var->name);
     if (not varValue.has_value())
@@ -232,16 +261,16 @@ int Interpreter::execute(const VarExpr *var)
     return varValue.value();
 }
 
-int Interpreter::execute([[maybe_unused]] const InputExpr *in)
+int Interpreter<Nametable, ASTBuilder>::execute([[maybe_unused]] const InputExpr *in)
 {
     int value = 0;
     std::cin >> value;
     return value;
 }
 
-int Interpreter::execute(const AssignExpr *assignExpr)
+int Interpreter<Nametable, ASTBuilder>::execute(const AssignExpr *assignExpr)
 {
-    auto e = dynamic_cast<const Expression *>(assignExpr->value.get());
+    auto e = static_cast<const Expression *>(assignExpr->value.get());
     msg_assert(e, "BinExpr children are not Expression");
 
     int result = execute(e);
@@ -253,14 +282,14 @@ int Interpreter::execute(const AssignExpr *assignExpr)
     return result;
 }
 
-int Interpreter::execute(const CombinedAssingExpr *combinedAssingExpr)
+int Interpreter<Nametable, ASTBuilder>::execute(const CombinedAssingExpr *combinedAssingExpr)
 {
     std::optional<int> varValue = nametable_.get_variable_value(combinedAssingExpr->name);
     int value = varValue.value();
     if (not varValue.has_value())
         throw std::runtime_error("error: '" + combinedAssingExpr->name + "' was not declared in this scope\n");
 
-    auto expr = dynamic_cast<const Expression *>(combinedAssingExpr->value.get());
+    auto expr = static_cast<const Expression *>(combinedAssingExpr->value.get());
     msg_assert(expr, "BinExpr children are not Expression");
 
     int result = execute(expr);
@@ -273,7 +302,7 @@ int Interpreter::execute(const CombinedAssingExpr *combinedAssingExpr)
     return value;
 }
 
-int Interpreter::execute(int lhs, int rhs, binary_op_t binary_operator)
+int Interpreter<Nametable, ASTBuilder>::execute(int lhs, int rhs, binary_op_t binary_operator)
 {
     switch (binary_operator)
     {
@@ -309,7 +338,7 @@ int Interpreter::execute(int lhs, int rhs, binary_op_t binary_operator)
     builtin_unreachable_wrapper("we must return in switch");
 }
 
-int Interpreter::execute(int rhs, unary_op_t unary_operator)
+int Interpreter<Nametable, ASTBuilder>::execute(int rhs, unary_op_t unary_operator)
 {
     switch (unary_operator)
     {
@@ -325,7 +354,7 @@ int Interpreter::execute(int rhs, unary_op_t unary_operator)
     builtin_unreachable_wrapper("we must return in switch");
 }
 
-int Interpreter::execute(int rhs, int value, combined_assign_t combined_assign)
+int Interpreter<Nametable, ASTBuilder>::execute(int rhs, int value, combined_assign_t combined_assign)
 {
     switch (combined_assign)
     {
@@ -350,9 +379,9 @@ int Interpreter::execute(int rhs, int value, combined_assign_t combined_assign)
     return rhs;
 }
 
-void Interpreter::execute(const AssignStmt *assign)
+void Interpreter<Nametable, ASTBuilder>::execute(const AssignStmt *assign)
 {
-    auto e = dynamic_cast<const Expression *>(assign->value.get());
+    auto e = static_cast<const Expression *>(assign->value.get());
     msg_assert(e, "BinExpr children are not Expression");
 
     int result = execute(e);
@@ -361,7 +390,7 @@ void Interpreter::execute(const AssignStmt *assign)
     LOGINFO("paracl: interpreter: execute assign statement: \"{}\" = {}", assign->name, result);
 }
 
-void Interpreter::execute(const CombinedAssingStmt *combined_assign_statement)
+void Interpreter<Nametable, ASTBuilder>::execute(const CombinedAssingStmt *combined_assign_statement)
 {
     std::optional<int> varValue = nametable_.get_variable_value(combined_assign_statement->name);
     int value = varValue.value();
@@ -370,7 +399,7 @@ void Interpreter::execute(const CombinedAssingStmt *combined_assign_statement)
                                  "' was not declared in this scope\n"
                                  "paracl: failed with exit code 1");
 
-    auto expr = dynamic_cast<const Expression *>(combined_assign_statement->value.get());
+    auto expr = static_cast<const Expression *>(combined_assign_statement->value.get());
     msg_assert(expr, "BinExpr children are not Expression");
 
     int result = execute(expr);
@@ -382,18 +411,18 @@ void Interpreter::execute(const CombinedAssingStmt *combined_assign_statement)
             value);
 }
 
-void Interpreter::execute(const PrintStmt *print_statement)
+void Interpreter<Nametable, ASTBuilder>::execute(const PrintStmt *print_statement)
 {
     LOGINFO("paracl: interpreter: execute print statement");
 
     for (auto &arg : print_statement->args)
     {
-        if (auto string = dynamic_cast<const StringConstant *>(arg.get()))
+        if (auto string = static_cast<const StringConstant *>(arg.get()))
         {
             std::cout << string->value << std::flush;
             continue;
         }
-        if (auto expr = dynamic_cast<const Expression *>(arg.get()))
+        if (auto expr = static_cast<const Expression *>(arg.get()))
         {
             int result = execute(expr);
             std::cout << result << std::flush;
@@ -406,4 +435,6 @@ void Interpreter::execute(const PrintStmt *print_statement)
     return;
 }
 
+} /* namespace interpreter */
+} /* namespace backend */
 } /* namespace ParaCL */
