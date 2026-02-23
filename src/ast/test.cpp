@@ -8,6 +8,7 @@ import ast;
 import write_ast;
 
 using namespace ::ParaCL::ast::node;
+using namespace ::ParaCL::ast;
 
 namespace ParaCL::ast::node::visit_overload_set
 {
@@ -93,12 +94,8 @@ int main() try
     auto&& n62 = BasicNode::create<Variable, void, int&>(Variable{"some name"});
     print_and_count(n62, i);
 
-    std::filesystem::path p = "test.txt";
-    
-    std::ofstream ofs(p);
-
-    std::cout << "here\n";
-    write::write_node(n62, ofs, 0);
+    auto&& ast = AST{std::move(n62)};
+    write(ast, "ast.txt");
 
     return 0;
 }

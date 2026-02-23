@@ -37,10 +37,13 @@ class AST
 {
 private:
     node::BasicNode root_; /* global scope */
-public:
+public:    
     AST() = default;
-    AST(node::BasicNode&& root) : root_(root)
+
+    AST(node::BasicNode&& root) :
+        root_(root)
     {}
+
     AST(const std::filesystem::path& file);
 
 public:
@@ -59,11 +62,12 @@ AST::AST(const std::filesystem::path& file)
 export
 void write(AST const & ast, std::filesystem::path const &file)
 {
-    std::ofstream ofs (file);
-    node::write(ast.root(), ofs, 0);
+    std::ofstream ofs{file};
+
+    write(ast.root(), ofs, 0);
 }
 
-//--------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------
 
 } /* namespace ParaCL::ast */
 
