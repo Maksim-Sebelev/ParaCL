@@ -36,7 +36,9 @@ extern std::string current_var_value;
 
 #include "parser/check_variables.hpp"
 
-ParaCL::ProgramAST program;
+
+
+ParaCL::ast::AST ast;
 
 ParaCL::ParserNameTable name_table;
 
@@ -81,8 +83,8 @@ int yylex(yy::parser::semantic_type* yylval, yy::parser::location_type* yylloc);
 
 program:
     create_global_scope statements leave_global_scope {
-        LOGINFO("paracl: parser: rule: program -> statements");
-        program.statements = std::move($2);
+        LOGINFO("paracl: parser: rule: ast -> statements");
+        ast.statements = std::move($2);
     }
     ;
 

@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.28)
 # 3.28 need for support of C++ modules (now (9 Janurary 2026) it`s does`t work for Unix Makefiles)
+cmake_minimum_required(VERSION 3.28)
 project(ParaCL
     LANGUAGES C CXX
     VERSION 3.0.0
@@ -16,11 +16,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # in default we build project in release
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
-endif()
-
-# why not?
-if (NOT CMAKE_EXPORT_COMPILE_COMMANDS)
-    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
 option(BUILD_TESTING "Build tests" OFF)
@@ -332,9 +327,67 @@ target_hard_debug_sanitizers(${LEXER_LIB})
 target_add_logger(${LEXER_LIB})
 
 # =================================================================================================
+# node lib (ast = abstract syntax tree)
+
+set(NODES_LIB nodes)
+add_library(${NODES_LIB})
+
+set(NODES_SRC_DIR ${SRC_DIR}/ast)
+set(NODES_SRC
+    ${NODES_SRC_DIR}/nodes.cppm
+    ${NODES_SRC_DIR}/node-type-erasure.cppm
+)
+
+target_sources(${NODES_LIB}
+    PUBLIC
+        FILE_SET CXX_MODULES
+        TYPE CXX_MODULES
+        FILES
+            ${NODES_SRC}
+)
+
+target_hard_debug_options(${NODES_LIB})
+target_hard_debug_sanitizers(${NODES_LIB})
+target_add_logger(${NODES_LIB})
+
+# =================================================================================================
+# ast writer (ast = abstract syntax tree)
+
+set(AST_WRITER_LIB ast-writer)
+add_library(${AST_WRITER_LIB})
+
+set(AST_WRITER_SRC_DIR ${SRC_DIR}/ast)
+set(AST_WRITER_SRC
+    ${AST_WRITER_SRC_DIR}/write.cppm
+)
+
+target_sources(${AST_WRITER_LIB}
+    PUBLIC
+        FILE_SET CXX_MODULES
+        TYPE CXX_MODULES
+        FILES
+            ${AST_WRITER_SRC}
+)
+
+target_link_libraries(${AST_WRITER_LIB}
+    PUBLIC
+        ${NODES_LIB}
+)
+
+
+target_include_directories(${AST_WRITER_LIB}
+    PRIVATE
+        ${AST_WRITER_SRC_DIR}
+)
+
+target_hard_debug_options(${AST_WRITER_LIB})
+target_hard_debug_sanitizers(${AST_WRITER_LIB})
+target_add_logger(${AST_WRITER_LIB})
+
+# =================================================================================================
 # ast lib (ast = abstract syntax tree)
 
-set(AST_LIB abstract_syntax_tree)
+set(AST_LIB ast)
 add_library(${AST_LIB})
 
 set(AST_SRC_DIR ${SRC_DIR}/ast)
@@ -350,9 +403,28 @@ target_sources(${AST_LIB}
             ${AST_SRC}
 )
 
+target_link_libraries(${AST_LIB}
+    PUBLIC
+        ${NODES_LIB}
+        ${AST_WRITER_LIB}
+)
+
 target_hard_debug_options(${AST_LIB})
 target_hard_debug_sanitizers(${AST_LIB})
 target_add_logger(${AST_LIB})
+
+# =================================================================================================
+
+
+add_executable(ast-test
+${AST_SRC_DIR}/test.cpp    
+)
+
+target_link_libraries(ast-test
+PRIVATE
+    ${AST_LIB}
+    # ${AST_WRITER_LIB}
+)
 
 # =================================================================================================
 # ast builder lib
@@ -695,12 +767,12 @@ target_link_libraries(${BACKEND_LIB}
 set(PARACL_RUNNER_LIB runner)
 add_library(${PARACL_RUNNER_LIB})
 
-set(PARACL_RUNNER_SRC_DIR ${SRC_DIR}/runner)
+set(PARACL_RUNNER_SRC_DIR ${SRC_DIR}/paracl_runner)
 set(PARACL_RUNNER_SRC
     ${PARACL_RUNNER_SRC_DIR}/runner.cppm
 
     # TODO:
-    ${PARACL_RUNNER_SRC_DIR}/parse_paracl_exceptions.cppm
+    ${PARACL_RUNNER_SRC_DIR}/parse_exceptions.cppm
     $<$<BOOL:${GRAPHVIZ}>:${DEBUG_DIR}/ast/ast-graph-dump.cppm>
 )
 

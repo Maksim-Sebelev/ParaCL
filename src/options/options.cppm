@@ -57,86 +57,73 @@ export enum class optimize_level_t
     O3,
 };
 
+//---------------------------------------------------------------------------------------------------------------
+
 using file = std::filesystem::path;
 
+//---------------------------------------------------------------------------------------------------------------
+
 export template <typename Options>
-concept IOptions = requires(const Options op, Options &&op, int argc, char *argv[], size_t i) {
-    { Options::init(argc, argv) } -> std::same_as<void>;
-    { Options::queryOptions() } -> std::convertible_to<const Options &>;
+concept IOptions = std::is_constructible_v<Options, int, char* []> and
+    requires(const Options op, /*Options &&op_rref,*/ int argc, char *argv[], size_t i)
+    {
+        { op.optimize_level() } -> std::same_as<optimize_level_t>;
+        { op.compile() } -> std::convertible_to<bool>;
+        { op.input_files_quant() } -> std::convertible_to<size_t>;
+        { op.executable() } -> std::convertible_to<const file &>;
+        // { std::move(op_rref).executable() } -> std::convertible_to<file>; /* dont need in singleton */
+        { op.sources() } -> std::convertible_to<const std::vector<file> &>;
+        // { std::move(op_rref).sources() } -> std::convertible_to<std::vector<file>>; /* dont need in singleton */
 
-    { op.optimize_level() } -> std::same_as<optimize_level_t>;
-    { op.compile() } -> std::convertible_to<bool>;
-    { op.input_files_quant() } -> std::convertible_to<size_t>;
-    { op.executable() } -> std::convertible_to<const file &>;
-    // { std::move(op_rref).executable() } -> std::convertible_to<file>; /* dont need in singleton */
-    { op.sources() } -> std::convertible_to<const std::vector<file> &>;
-    // { std::move(op_rref).sources() } -> std::convertible_to<std::vector<file>>; /* dont need in singleton */
+        { op.i_source(i) } -> std::convertible_to<const file &>;
+        { op.i_source_fast_unsafe(i) } -> std::convertible_to<const file &>;
+        // { std::move(op_rref).i_source(i) } -> std::convertible_to<file>; /* dont need in singleton */
+        // { std::move(op_rref).i_source_fast_unsafe(i) } noexcept -> std::convertible_to<file>; /* dont need in singleton
+        // */
 
-    { op.i_source(i) } -> std::convertible_to<const file &>;
-    { op.i_source_fast_unsafe(i) } -> std::convertible_to<const file &>;
-    // { std::move(op_rref).i_source(i) } -> std::convertible_to<file>; /* dont need in singleton */
-    // { std::move(op_rref).i_source_fast_unsafe(i) } noexcept -> std::convertible_to<file>; /* dont need in singleton
-    // */
+        { op.objects() } -> std::convertible_to<const std::vector<file> &>;
+        // { std::move(op_rref).objects() } -> std::convertible_to<std::vector<file>>; /* dont need in singleton */
+        { op.i_object(i) } -> std::convertible_to<const file &>;
+        { op.i_object_fast_unsafe(i) } -> std::convertible_to<const file &>;
+        // { std::move(op_rref).i_object(i) } -> std::convertible_to<file>; /* dont need in singleton */
+        // { std::move(op_rref).i_object_fast_unsafe(i) } noexcept -> std::convertible_to<file>; /* dont need in singleton
+        // */
 
-    { op.objects() } -> std::convertible_to<const std::vector<file> &>;
-    // { std::move(op_rref).objects() } -> std::convertible_to<std::vector<file>>; /* dont need in singleton */
-    { op.i_object(i) } -> std::convertible_to<const file &>;
-    { op.i_object_fast_unsafe(i) } -> std::convertible_to<const file &>;
-    // { std::move(op_rref).i_object(i) } -> std::convertible_to<file>; /* dont need in singleton */
-    // { std::move(op_rref).i_object_fast_unsafe(i) } noexcept -> std::convertible_to<file>; /* dont need in singleton
-    // */
-
-    ON_GRAPHVIZ(
-        { op.ast_dump() } -> std::convertible_to<bool>; { op.dot_file() } -> std::convertible_to<const file &>;
-        // { std::move(op_rref).dot_file() } -> std::convertible_to<file>;  /* dont need in singleton */
-    )
+        ON_GRAPHVIZ(
+            { op.ast_dump() } -> std::convertible_to<bool>; { op.dot_file() } -> std::convertible_to<const file &>;
+            // { std::move(op_rref).dot_file() } -> std::convertible_to<file>;  /* dont need in singleton */
+        )
 };
 
-/*
-то, что происходит дальше, вероятно, Вас шокирует...
-понятно, что идиологически на всю программу должен существовать один набор опций,
-поэтому логично было бы обернуть этот класс в паттерн singleTon.
 
-так как конструктор не тривиальный (int, char* []) (aka (argc, argv)), то нам нужна функция init,
-которая бы единственный раз инициализировала статическое поле класс, являющееся unique_ptr от самого класса.
-для того, чтобы получить этот объект, существует метод queryOptions, возращающий ссылку на объект (на сам объект, не
-указатель).
-
-функция std::make_unique объявляна другом, потому что в ней должен быть доступен приватный конструктор Options(argc,
-argv). да кринж, зато очень прикольно
-
-нашел на просторах stackoverflow еще прикольный способ:
-делаем init, возвращающей ссылку, а внутри queryOptions возвращаем init(0, std::nullptr).
-думаю по уровню кринжа гораздо ниже, но вызывать функцию с "фейковыми" параметрами мне неприятно
-*/
+//---------------------------------------------------------------------------------------------------------------
 
 export class Options
 {
-  private:
-    friend std::unique_ptr<Options> std::make_unique<Options>(int &, char **&);
+private:
+    std::vector<file> sources_;
+    std::vector<file> objects_;
+    ON_GRAPHVIZ(file dot_file_;)
+    file executable_file_{"a.out"};
+    optimize_level_t optimize_level_ = optimize_level_t::O0;
+    ON_GRAPHVIZ(bool ast_dump_ : 1 = false;)
+    bool compile_ : 1 = false;
 
-  public:
-    static void init(int argc, char *argv[])
-    {
-        if (instance_)
-            throw std::logic_error("try to re-init options, which are sigleton");
+    [[noreturn]]
+    void parse_flag_help() const;
+    [[noreturn]]
+    void parse_flag_version() const;
+    ON_GRAPHVIZ(void parse_flag_ast_dump();)
+    void parse_flag_compile();
+    void parse_flag_output();
+    void parse_flag_optimize();
+    void parse_not_a_flag(const char *arg);
+    [[noreturn]]
+    void undefined_option(const char *option) const;
+    void set_out_files();
 
-        instance_ = std::make_unique<Options>(argc, argv);
-    }
-
-    static const Options &queryOptions()
-    {
-        if (not instance_)
-            throw std::logic_error(
-                "query not initialized options. call 'void options::Options::init(int, char*[])' before.");
-
-        return *instance_;
-    }
-
-    Options(const Options &) = delete;
-    Options(Options &&) = delete;
-    Options &operator=(const Options &) = delete;
-    Options &operator=(Options &&) = delete;
+public:
+    explicit Options(int argc, char *argv[]);
 
     optimize_level_t optimize_level() const
     {
@@ -197,43 +184,9 @@ export class Options
     // std::vector<file> objects() const && { return objects_; } /* dont need in singleton */
 
     ON_GRAPHVIZ(
-        bool ast_dump() const { return ast_dump_; } const file &dot_file() const & { return dot_file_; }
-        // file dot_file() const && { return dotf_file_; }  /* dont need in singleton */
+    bool ast_dump() const { return ast_dump_; } const file &dot_file() const & { return dot_file_; }
+    // file dot_file() const && { return dotf_file_; }  /* dont need in singleton */
     )
-
-  private:
-    using file = file;
-
-    Options() = default;
-    explicit Options(int argc, char *argv[]);
-
-    static std::unique_ptr<Options> instance_;
-
-    std::vector<file> sources_;
-    std::vector<file> objects_;
-    ON_GRAPHVIZ(file dot_file_;)
-    file executable_file_{"a.out"};
-    optimize_level_t optimize_level_ = optimize_level_t::O0;
-    ON_GRAPHVIZ(bool ast_dump_ : 1 = false;)
-    bool compile_ : 1 = false;
-
-    [[noreturn]]
-    void parse_flag_help() const;
-    [[noreturn]]
-    void parse_flag_version() cotnst;
-
-    ON_GRAPHVIZ(void parse_flag_ast_dump();)
-
-    void parse_flag_compile();
-    void parse_flag_output();
-    void parse_flag_optimize();
-
-    void parse_not_a_flag(const char *arg);
-
-    [[noreturn]]
-    void undefined_option(const char *option) const;
-
-    void set_out_files();
 };
 
 //---------------------------------------------------------------------------------------------------------------

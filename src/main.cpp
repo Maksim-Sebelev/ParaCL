@@ -20,7 +20,7 @@ try
 
     LOGINFO("paracl: start");
 
-    ParaCL::options::Optoins::init(argc, argv);
+    ParaCL::options::Options::init(argc, argv);
     ParaCL::runner::Runner{ParaCL::options::Optoins::queryOptions()}.run();
 
     LOGINFO("paracl: exit success");
