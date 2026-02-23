@@ -63,7 +63,6 @@ export
 void write(AST const & ast, std::filesystem::path const &file)
 {
     std::ofstream ofs{file};
-
     write(ast.root(), ofs, 0);
 }
 

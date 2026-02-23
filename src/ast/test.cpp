@@ -94,6 +94,8 @@ int main() try
     auto&& n62 = BasicNode::create<Variable, void, int&>(Variable{"some name"});
     print_and_count(n62, i);
 
+    
+
     auto&& ast = AST{std::move(n62)};
     write(ast, "ast.txt");
 
