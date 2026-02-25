@@ -5,33 +5,55 @@ module;
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <filesystem>
 
 export module write_ast;
 
-export import ast_nodes;
-export import node_type_erasure;
+export import ast;
 
 namespace ParaCL::ast::node
 {
+
+
+
+
+// export
+void write(BasicNode const & node, std::ofstream& os, size_t enclosure)
+{
+    return visit<void, std::ofstream&, size_t>(node, os, enclosure);
+}
+
+export
+using writable = void(std::ofstream&, size_t);
+
+export
+void write(AST const & ast, std::filesystem::path const &file)
+{
+    std::ofstream ofs{file};
+    write(ast.root(), ofs, 0LU);
+}
+
 namespace write_in_file
 {
+
 
 void n_tab(std::ofstream& os, size_t tabs)
 { os << std::string(tabs, '\t'); }
 
 } /* namespace write_in_file */
 
-export
+
+// export
 namespace visit_overload_set
 {
 
 template <>
-void write(Print const& print, std::ofstream& os, size_t enclosure)
+void visit(Print const& print, std::ofstream& os, size_t enclosure)
 {
     write_in_file::n_tab(os, enclosure);
     os << "Print {\n";
 
-    for (const auto& arg: print)
+    for (auto&& arg: print)
         write(arg, os, enclosure + 1);
 
     write_in_file::n_tab(os, enclosure);
@@ -39,19 +61,19 @@ void write(Print const& print, std::ofstream& os, size_t enclosure)
 }
 
 template <>
-void write([[maybe_unused]] Scan const& scan, std::ofstream& os, size_t enclosure)
+void visit([[maybe_unused]] Scan const& scan, std::ofstream& os, size_t enclosure)
 {
     write_in_file::n_tab(os, enclosure);
     os << "Scan {}\n";
 }
 
 template <>
-void write(Scope const& scope, std::ofstream& os, size_t enclosure)
+void visit(Scope const& scope, std::ofstream& os, size_t enclosure)
 {
     write_in_file::n_tab(os, enclosure);
     os << "Scope {\n";
 
-    for (const auto& arg: scope)
+    for (auto&& arg: scope)
         write(arg, os, enclosure + 1);
 
     write_in_file::n_tab(os, enclosure);
@@ -59,7 +81,7 @@ void write(Scope const& scope, std::ofstream& os, size_t enclosure)
 }
 
 template <>
-void write(Variable const& variable, std::ofstream& os, size_t enclosure)
+void visit(Variable const& variable, std::ofstream& os, size_t enclosure)
 {
     write_in_file::n_tab(os, enclosure);
     os << "Variable {\n";
@@ -72,7 +94,7 @@ void write(Variable const& variable, std::ofstream& os, size_t enclosure)
 }
 
 template <>
-void write(NumberLiteral const& number, std::ofstream& os, size_t enclosure)
+void visit(NumberLiteral const& number, std::ofstream& os, size_t enclosure)
 {
     write_in_file::n_tab(os, enclosure);
     os << "NumberLiteral {\n";
@@ -85,7 +107,7 @@ void write(NumberLiteral const& number, std::ofstream& os, size_t enclosure)
 }
 
 template <>
-void write(StringLiteral const& string_lit, std::ofstream& os, size_t enclosure)
+void visit(StringLiteral const& string_lit, std::ofstream& os, size_t enclosure)
 {
     write_in_file::n_tab(os, enclosure);
     os << "StringLiteral {\n";
@@ -98,14 +120,15 @@ void write(StringLiteral const& string_lit, std::ofstream& os, size_t enclosure)
 }
 
 template <>
-void write(UnaryOperator const& unary_op, std::ofstream& os, size_t enclosure)
+void visit(UnaryOperator const& unary_op, std::ofstream& os, size_t enclosure)
 {
     write_in_file::n_tab(os, enclosure);
     os << "UnaryOperator {\n";
     
     write_in_file::n_tab(os, enclosure + 1);
     os << "type: ";
-    switch (unary_op.type()) {
+    switch (unary_op.type())
+    {
         case UnaryOperator::MINUS: os << "MINUS"; break;
         case UnaryOperator::PLUS:  os << "PLUS"; break;
         case UnaryOperator::NOT:   os << "NOT"; break;
@@ -121,7 +144,7 @@ void write(UnaryOperator const& unary_op, std::ofstream& os, size_t enclosure)
 }
 
 template <>
-void write(BinaryOperator const& bin_op, std::ofstream& os, size_t enclosure)
+void visit(BinaryOperator const& bin_op, std::ofstream& os, size_t enclosure)
 {
     write_in_file::n_tab(os, enclosure);
     os << "BinaryOperator {\n";
@@ -165,25 +188,25 @@ void write(BinaryOperator const& bin_op, std::ofstream& os, size_t enclosure)
 }
 
 template <>
-void write(While const& while_node, std::ofstream& os, size_t enclosure)
+void visit(While const& while_node, std::ofstream& os, size_t enclosure)
 {
     write_in_file::n_tab(os, enclosure);
     os << "While {\n";
-    
+
     write_in_file::n_tab(os, enclosure + 1);
     os << "condition:\n";
     write(while_node.condition(), os, enclosure + 2);
-    
+
     write_in_file::n_tab(os, enclosure + 1);
     os << "body:\n";
     write(while_node.body(), os, enclosure + 2);
-    
+
     write_in_file::n_tab(os, enclosure);
     os << "}\n";
 }
 
 template <>
-void write(If const& if_node, std::ofstream& os, size_t enclosure)
+void visit(If const& if_node, std::ofstream& os, size_t enclosure)
 {
     write_in_file::n_tab(os, enclosure);
     os << "If {\n";
@@ -201,34 +224,29 @@ void write(If const& if_node, std::ofstream& os, size_t enclosure)
 }
 
 template <>
-void write(Else const& else_node, std::ofstream& os, size_t enclosure)
+void visit(Else const& else_node, std::ofstream& os, size_t enclosure)
 {
     write_in_file::n_tab(os, enclosure);
     os << "Else {\n";
-    
+
     write_in_file::n_tab(os, enclosure + 1);
     os << "body:\n";
     write(else_node.boby(), os, enclosure + 2);
-    
+
     write_in_file::n_tab(os, enclosure);
     os << "}\n";
 }
 
 template <>
-void write(Condition const& condition, std::ofstream& os, size_t enclosure)
+void visit(Condition const& condition, std::ofstream& os, size_t enclosure)
 {
     write_in_file::n_tab(os, enclosure);
     os << "Condition {\n";
     
-    write_in_file::n_tab(os, enclosure + 1);
-    os << "if:\n";
-    for (const auto& if_node : condition.get_ifs()) {
-        write(if_node, os, enclosure + 2);
-    }
+    for (auto&& if_node : condition.get_ifs())
+        write(if_node, os, enclosure + 1);
 
-    write_in_file::n_tab(os, enclosure + 1);
-    os << "else:\n";
-    write(condition.get_else(), os, enclosure + 2);
+    write(condition.get_else(), os, enclosure + 1);
     
     write_in_file::n_tab(os, enclosure);
     os << "}\n";

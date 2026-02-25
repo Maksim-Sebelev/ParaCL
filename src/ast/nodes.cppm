@@ -5,6 +5,7 @@ module;
 #include <string>
 #include <string_view>
 #include <vector>
+#include <initializer_list>
 
 export module ast_nodes;
 
@@ -24,6 +25,7 @@ class Scope final : private std::vector<BasicNode>
 {
 public:
     using std::vector<BasicNode>::emplace_back;
+    using std::vector<BasicNode>::push_back;
     using std::vector<BasicNode>::begin;
     using std::vector<BasicNode>::end;
     using std::vector<BasicNode>::size;
@@ -32,10 +34,14 @@ public:
     Scope() = default;
     Scope(size_t size) : std::vector<BasicNode>(size)
     {}
-    Scope(BasicNode&& node) : std::vector<BasicNode>(1)
-    { this->emplace_back(node); } 
 
-    Scope(std::vector<BasicNode>&& nodes) : std::vector<BasicNode>(std::move(nodes))
+    Scope(std::vector<BasicNode> nodes) : std::vector<BasicNode>(std::move(nodes))
+    {}
+
+    Scope(std::vector<BasicNode>&& nodes) : std::vector<BasicNode>(nodes)
+    {}
+
+    Scope(std::initializer_list<BasicNode> il) : std::vector<BasicNode>(il)
     {}
 };
 
@@ -47,7 +53,7 @@ class Variable final
 private:
     std::string name_;
 public:
-    Variable(std::string&& name) : name_(std::move(name))
+    Variable(std::string&& name) : name_(std::move(name)) /* variale must own his value */
     {}
 public:
     std::string_view name() const & noexcept
@@ -61,12 +67,17 @@ class Print final : private std::vector<BasicNode>
 {
 public:
     using std::vector<BasicNode>::emplace_back;
+    using std::vector<BasicNode>::push_back;
     using std::vector<BasicNode>::begin;
     using std::vector<BasicNode>::end;
     using std::vector<BasicNode>::size;
 public:
     Print() = default;
-    Print(std::vector<BasicNode>&& args) : std::vector<BasicNode>(std::move(args))
+    Print(std::vector<BasicNode> args) : std::vector<BasicNode>(std::move(args))
+    {}
+    Print(std::vector<BasicNode>&& args) : std::vector<BasicNode>(args)
+    {}
+    Print(std::initializer_list<BasicNode> il) : std::vector<BasicNode>(il)
     {}
 };
 
@@ -91,9 +102,14 @@ private:
     BasicNode arg_;
     UnaryOperatorT type_;
 public:
-    UnaryOperator(UnaryOperatorT type, BasicNode&& arg) :
-    type_(type), arg_(std::move(arg))
+    UnaryOperator(UnaryOperatorT type, BasicNode arg) :
+    arg_(std::move(arg)), type_(type)
     {}
+
+    UnaryOperator(UnaryOperatorT type, BasicNode&& arg) :
+    arg_(arg), type_(type)
+    {}
+
 public:
     UnaryOperatorT type() const noexcept
     { return type_; }
@@ -137,9 +153,14 @@ private:
     BasicNode rarg_;
     BinaryOperatorT type_;
 public:
-    BinaryOperator(BinaryOperatorT type, BasicNode&& larg, BasicNode&& rarg) :
+    BinaryOperator(BinaryOperatorT type, BasicNode larg, BasicNode rarg) :
     larg_(std::move(larg)), rarg_(std::move(rarg)), type_(type)
     {}
+
+    BinaryOperator(BinaryOperatorT type, BasicNode&& larg, BasicNode&& rarg) :
+    larg_(larg), rarg_(rarg), type_(type)
+    {}
+
 public:
     BinaryOperatorT type() const noexcept
     { return type_; }
@@ -172,10 +193,7 @@ class StringLiteral final
 private:
     std::string value_;
 public:
-    StringLiteral(std::string&& value) :
-    value_(std::move(value))
-    {}
-    StringLiteral(std::string_view value) :
+    StringLiteral(std::string&& value) : /* string literal must own his value */
     value_(value)
     {}
 public:
@@ -191,10 +209,14 @@ class ConditionWithBody /* not final */
 private:
     BasicNode condition_;
     BasicNode body_;
-protected:
+public:
     ConditionWithBody() = default;
-    ConditionWithBody(BasicNode&& condition, BasicNode&& body) :
+    ConditionWithBody(BasicNode condition, BasicNode body) :
     condition_(std::move(condition)), body_(std::move(body))
+    {}
+
+    ConditionWithBody(BasicNode&& condition, BasicNode&& body) :
+    condition_(condition), body_(body)
     {}
 public:
     BasicNode const &condition() const & noexcept
@@ -232,7 +254,9 @@ class Else final
 private:
     BasicNode body_;
 public:
-    Else(BasicNode&& body) : body_(std::move(body))
+    Else(BasicNode body) : body_(std::move(body))
+    {}
+    Else(BasicNode&& body) : body_(body)
     {}
 public:
     BasicNode const &boby() const & noexcept
@@ -253,12 +277,18 @@ private:
     BasicNode else_;
 public:
     Condition() = default;
-    Condition(std::vector<BasicNode>&& ifs, BasicNode&& else_а_как_вот_это_назвать) :
+
+    Condition(std::vector<BasicNode> ifs, BasicNode else_а_как_вот_это_назвать) :
        ifs_(std::move(ifs)), else_(std::move(else_а_как_вот_это_назвать))
     {}
+
+    Condition(std::vector<BasicNode>&& ifs, BasicNode&& else_а_как_вот_это_назвать) :
+       ifs_(ifs), else_(else_а_как_вот_это_назвать)
+    {}
+
 public:
     void add_condition(BasicNode&& condition)
-    { ifs_.emplace_back(std::move(condition)); }
+    { ifs_.push_back(condition); }
 
     void set_else(BasicNode&& else_а_как_вот_это_назвать)
     { else_ = std::move(else_а_как_вот_это_назвать); }

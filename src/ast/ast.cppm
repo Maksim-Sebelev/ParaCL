@@ -21,8 +21,7 @@ export module ast;
 //--------------------------------------------------------------------------------------------------------------------------------------
 
 export import node_type_erasure;
-import ast_nodes;
-import write_ast;
+export import ast_nodes;
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
@@ -38,13 +37,11 @@ class AST
 private:
     node::BasicNode root_; /* global scope */
 public:    
-    AST() = default;
-
     AST(node::BasicNode&& root) :
         root_(root)
     {}
 
-    AST(const std::filesystem::path& file);
+    AST(std::filesystem::path const & file);
 
 public:
     node::BasicNode const &root() const noexcept
@@ -53,21 +50,10 @@ public:
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-AST::AST(const std::filesystem::path& file)
+AST::AST(std::filesystem::path const & file)
 {
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------------
-
-export
-void write(AST const & ast, std::filesystem::path const &file)
-{
-    std::ofstream ofs{file};
-    write(ast.root(), ofs, 0);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------
-
 } /* namespace ParaCL::ast */
-
 //--------------------------------------------------------------------------------------------------------------------------------------

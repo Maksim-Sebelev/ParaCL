@@ -33,6 +33,7 @@ export module objects_builder;
 import compiler_options;
 import compiler_nametable;
 import libc_standart_functions;
+import ast;
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -48,24 +49,107 @@ namespace compiler
 //---------------------------------------------------------------------------------------------------------------
 
 using file = std::filesystem::path;
+using namespace ParaCL::ast;
 
 //---------------------------------------------------------------------------------------------------------------
 
-export template <typename ASTTranslator>
-concept IASTTranslator = std::is_constructible<IRBuilder, const ProgramAST &,
-                                               const options::compiler::CompilerOptoins &, const file & object> &&
-                         requires(ASTTranslator at) {
-                             { at.create_object() } -> std::same_as<void>;
-                         };
+struct IrBuilderData
+{
+    llvm::LLVMContext context_;
+    llvm::Module module_;
+    llvm::IRBuilder<> builder_;
+    Nametable_t nametable_;
+    LibcStandartFunctions_t libc_standart_functions_;
+
+    IRBuilder(std::filesystem::path const &source)
+};
+
+//---------------------------------------------------------------------------------------------------------------
+
+namespace visit_overload_set
+{
+template <>
+void visit(node::Scope const & scope, IrBuilderData& data, llvm::Value* return_value)
+{
+    LOGINFO("paracl: ir translator: generating scope");
+
+    llvm::Function *current_block = data.builder_.GetInsertBlock()->getParent();
+
+    llvm::BasicBlock *scope_block = llvm::BasicBlock::Create(data.context_, "new_scope", current_block);
+    llvm::BasicBlock *after_scope = llvm::BasicBlock::Create(data.context_, "end_scope", current_block);
+
+    LOGINFO("paracl: ir translator: creating branch to scope: '{}'", "new_scope");
+    data.builder_.CreateBr(scope_block);
+    data.builder_.SetInsertPoint(scope_block);
+
+    generate_body(scope);
+
+    LOGINFO("paracl: ir translator: creating branch to after scope: '{}'", "end_scope");
+    data.builder_.CreateBr(after_scope);
+    data.builder_.SetInsertPoint(after_scope);
+
+    return_value = nullptr;
+}
+
+template <>
+void visit(node::Print const & print, IrBuilderData& data, llvm::Value* return_value)
+{
+    LOGINFO("paracl: ir translator: generating print statement");
+
+    auto&& fmt = std::ostringstream{};
+    auto&& printf_args = std::vector<llvm::Value *>{};
+
+    for (auto&& arg : print)
+    {
+        if (const StringConstant *str = static_cast<const StringConstant *>(arg.get()))
+        {
+            LOGINFO("paracl: ir translator: print string constant: '{}'", str->value);
+            fmt << str->value;
+        }
+        else if (const NumExpr *num = static_cast<const NumExpr *>(arg.get()))
+        {
+            LOGINFO("paracl: ir translator: print number constant: {}", num->value);
+            fmt << std::to_string(num->value);
+        }
+        else
+        {
+            LOGINFO("paracl: ir translator: print expression");
+            fmt << "%d";
+            printf_args.push_back(generate(arg.get()));
+        }
+    }
+
+    fmt << "\n";
+
+    printf_args[0] = builder_.CreateGlobalStringPtr(fmt.str(), "__printfFormat");
+
+    builder_.CreateCall(libc_standart_functions_.libc_printf(), printf_args);
+    LOGINFO("paracl: ir translator: print call generated");
+}
+
+} /* namespace visit_overload_set */
+
+//---------------------------------------------------------------------------------------------------------------
+
+export
+void translate_to_ir(std::filesystem const & ast_text_representation, std::filesystem::path const & ir_file)
+{
+    auto&& ast = AST{ast_text_representation};
+    
+
+};
 
 //---------------------------------------------------------------------------------------------------------------
 
 export template <INametable Nametable_t = Nametable,
-                 ILibcStandartFunctions LibcStandartFunctions_t = LibcStandartFunctions>
+                 ILibcStandartFunctions LibcStandartFunctions_t = LibcStandartFunctions
+                 ICompilerOptions
+                 >
 class ObjectsBuilder final
 {
   public:
     ObjectsBuilder(const ProgramAST &ast, const CompilerOptions &compiler_options, const file &object);
+    ObjectsBuilder(std::filesystem::path const ast_text, Com)
 
     void create_object();
 
@@ -405,22 +489,22 @@ void ObjectsBuilder::generate(const AssignStmt *asgn)
 
 void ObjectsBuilder::generate(const BlockStmt *block)
 {
-    LOGINFO("paracl: ir translator: generating block");
+    // LOGINFO("paracl: ir translator: generating block");
 
-    llvm::Function *current_block = builder_.GetInsertBlock()->getParent();
+    // llvm::Function *current_block = builder_.GetInsertBlock()->getParent();
 
-    llvm::BasicBlock *scope_block = llvm::BasicBlock::Create(context_, "new_scope", current_block);
-    llvm::BasicBlock *after_scope = llvm::BasicBlock::Create(context_, "end_scope", current_block);
+    // llvm::BasicBlock *scope_block = llvm::BasicBlock::Create(context_, "new_scope", current_block);
+    // llvm::BasicBlock *after_scope = llvm::BasicBlock::Create(context_, "end_scope", current_block);
 
-    LOGINFO("paracl: ir translator: creating branch to block: '{}'", "new_scope");
-    builder_.CreateBr(scope_block);
-    builder_.SetInsertPoint(scope_block);
+    // LOGINFO("paracl: ir translator: creating branch to block: '{}'", "new_scope");
+    // builder_.CreateBr(scope_block);
+    // builder_.SetInsertPoint(scope_block);
 
-    generate_body(block);
+    // generate_body(block);
 
-    LOGINFO("paracl: ir translator: creating branch to after block: '{}'", "end_scope");
-    builder_.CreateBr(after_scope);
-    builder_.SetInsertPoint(after_scope);
+    // LOGINFO("paracl: ir translator: creating branch to after block: '{}'", "end_scope");
+    // builder_.CreateBr(after_scope);
+    // builder_.SetInsertPoint(after_scope);
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -764,6 +848,7 @@ void ObjectsBuilder::write_ir_in_file()
 
 //---------------------------------------------------------------------------------------------------------------
 
+} /* namespace visit_overload_set */
 } /* namespace compiler */
 } /* namespace toolchain */
 } /* namespace backend */

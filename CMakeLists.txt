@@ -351,40 +351,6 @@ target_hard_debug_sanitizers(${NODES_LIB})
 target_add_logger(${NODES_LIB})
 
 # =================================================================================================
-# ast writer (ast = abstract syntax tree)
-
-set(AST_WRITER_LIB ast-writer)
-add_library(${AST_WRITER_LIB})
-
-set(AST_WRITER_SRC_DIR ${SRC_DIR}/ast)
-set(AST_WRITER_SRC
-    ${AST_WRITER_SRC_DIR}/write.cppm
-)
-
-target_sources(${AST_WRITER_LIB}
-    PUBLIC
-        FILE_SET CXX_MODULES
-        TYPE CXX_MODULES
-        FILES
-            ${AST_WRITER_SRC}
-)
-
-target_link_libraries(${AST_WRITER_LIB}
-    PUBLIC
-        ${NODES_LIB}
-)
-
-
-target_include_directories(${AST_WRITER_LIB}
-    PRIVATE
-        ${AST_WRITER_SRC_DIR}
-)
-
-target_hard_debug_options(${AST_WRITER_LIB})
-target_hard_debug_sanitizers(${AST_WRITER_LIB})
-target_add_logger(${AST_WRITER_LIB})
-
-# =================================================================================================
 # ast lib (ast = abstract syntax tree)
 
 set(AST_LIB ast)
@@ -406,7 +372,6 @@ target_sources(${AST_LIB}
 target_link_libraries(${AST_LIB}
     PUBLIC
         ${NODES_LIB}
-        ${AST_WRITER_LIB}
 )
 
 target_hard_debug_options(${AST_LIB})
@@ -414,7 +379,39 @@ target_hard_debug_sanitizers(${AST_LIB})
 target_add_logger(${AST_LIB})
 
 # =================================================================================================
+# ast writer (ast = abstract syntax tree)
 
+set(AST_WRITER_LIB ast-writer)
+add_library(${AST_WRITER_LIB})
+
+set(AST_WRITER_SRC_DIR ${SRC_DIR}/ast)
+set(AST_WRITER_SRC
+    ${AST_WRITER_SRC_DIR}/write.cppm
+)
+
+target_sources(${AST_WRITER_LIB}
+    PUBLIC
+        FILE_SET CXX_MODULES
+        TYPE CXX_MODULES
+        FILES
+            ${AST_WRITER_SRC}
+)
+
+target_link_libraries(${AST_WRITER_LIB}
+    PUBLIC
+        ${NODES_LIB}
+        ${AST_LIB}
+)
+
+
+target_include_directories(${AST_WRITER_LIB}
+    PRIVATE
+        ${AST_WRITER_SRC_DIR}
+)
+
+target_hard_debug_options(${AST_WRITER_LIB})
+target_hard_debug_sanitizers(${AST_WRITER_LIB})
+target_add_logger(${AST_WRITER_LIB})
 
 add_executable(ast-test
 ${AST_SRC_DIR}/test.cpp    
@@ -423,7 +420,7 @@ ${AST_SRC_DIR}/test.cpp
 target_link_libraries(ast-test
 PRIVATE
     ${AST_LIB}
-    # ${AST_WRITER_LIB}
+    ${AST_WRITER_LIB}
 )
 
 # =================================================================================================
