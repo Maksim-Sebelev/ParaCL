@@ -13,6 +13,8 @@ module;
 #include <memory>
 #include <iostream>
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
@@ -35,25 +37,21 @@ export
 class AST
 {
 private:
-    ParaCL::node::BasicNode root_; /* global scope */
+    node::BasicNode root_; /* global scope */
 
+private:
+
+    
 public:
-    AST(ParaCL::node::BasicNode&& root) :
+    AST(node::BasicNode&& root) :
         root_(root)
     {}
 
-    AST(std::filesystem::path const & file);
-
 public:
-    ParaCL::node::BasicNode const &root() const noexcept
+    node::BasicNode const &root() const noexcept
     { return root_; }
+
 };
-
-//--------------------------------------------------------------------------------------------------------------------------------------
-
-AST::AST(std::filesystem::path const & file)
-{
-}
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 } /* namespace ParaCL::ast */

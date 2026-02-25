@@ -5,12 +5,13 @@
 #include <fstream>
 
 import ast;
-import write_ast;
+import ast_write;
+import ast_read;
 
-using namespace ::ParaCL::node;
+using namespace ::ParaCL::ast::node;
 using namespace ::ParaCL::ast;
 
-namespace ParaCL::node::visit_overload_set
+namespace ParaCL::ast::node::visit_overload_set
 {
 template <>
 void visit([[maybe_unused]] Scan const & scan)
@@ -49,7 +50,7 @@ void visit(Scope const & s)
 { std::cout << "Scope{\n";  for (auto&& m: s) visit<void>(m); std::cout << "}" << std::endl; }
 }
 
-namespace ParaCL::node::visit_overload_set
+namespace ParaCL::ast::node::visit_overload_set
 {
 template <>
 void visit([[maybe_unused]] Scan const & scan, int& i)
@@ -109,8 +110,8 @@ int main() try
 {
     int i = 666;
 
-    auto&& n1 = BasicNode::create<Scope, printable>(Scope{});
-    auto&& n2 = BasicNode::create<Scope, printable_and_countable>(Scope{});
+    auto&& n1 = create(Scope{});
+    auto&& n2 = create(Scope{});
 
     auto&& n6 = create(NumberLiteral{13});
     auto&& n7 = create(StringLiteral{"fuck me please"});

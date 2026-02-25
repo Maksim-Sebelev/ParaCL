@@ -47,6 +47,8 @@ namespace ParaCL
             "Unknown architecture"
         #endif
         ;
+        static constexpr const char ast_text_representation_signature[] = "ParaCL-@PROJECT_VERSION@-node-traits\n\n";
+
 
         static const ParaCLInfo& queryParaCLInfo()
         {
@@ -54,7 +56,7 @@ namespace ParaCL
             return paracl_info; 
         }
 
-        /* not allowed to create copy of this struct, only get reference on the only once instance */
+        /* not allowed to create copy of this struct and move it, only get reference on the only once instance */
         ParaCLInfo(const ParaCLInfo&) = delete;
         ParaCLInfo(ParaCLInfo&&) = delete;
         ParaCLInfo& operator = (const ParaCLInfo&) = delete;

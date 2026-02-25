@@ -9,9 +9,9 @@ module;
 
 export module ast_nodes;
 
-import node_type_erasure;
+export import node_type_erasure;
 
-namespace ParaCL::node
+namespace ParaCL::ast::node
 {
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -255,7 +255,7 @@ public:
     Else(BasicNode&& body) : body_(body)
     {}
 public:
-    BasicNode const &boby() const & noexcept
+    BasicNode const &body() const & noexcept
     { return body_; }
 
     friend class Condition;
@@ -299,5 +299,5 @@ public:
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
-} /* namespace ParaCL::node */
+} /* namespace ParaCL::ast::node */
 //--------------------------------------------------------------------------------------------------------------------------------------

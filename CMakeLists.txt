@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.28)
 project(ParaCL
     LANGUAGES C CXX
-    VERSION 3.0.0
+    VERSION 4.0.0
 )
 
 # =================================================================================================
@@ -338,6 +338,7 @@ set(NODES_SRC_DIR ${SRC_DIR}/ast)
 set(NODES_SRC
     ${NODES_SRC_DIR}/nodes.cppm
     ${NODES_SRC_DIR}/node-type-erasure.cppm
+    ${NODES_SRC_DIR}/note-traits.cppm
 )
 
 target_sources(${NODES_LIB}
@@ -374,6 +375,7 @@ target_sources(${AST_LIB}
 target_link_libraries(${AST_LIB}
     PUBLIC
         ${NODES_LIB}
+        ${PARACL_INFO_LIB}
 )
 
 target_hard_debug_options(${AST_LIB})
@@ -403,17 +405,54 @@ target_link_libraries(${AST_WRITER_LIB}
     PUBLIC
         ${NODES_LIB}
         ${AST_LIB}
+        ${PARACL_INFO_LIB}
 )
 
 
 target_include_directories(${AST_WRITER_LIB}
     PRIVATE
-        ${AST_WRITER_SRC_DIR}
+        ${INC_DIR}
 )
 
 target_hard_debug_options(${AST_WRITER_LIB})
 target_hard_debug_sanitizers(${AST_WRITER_LIB})
 target_add_logger(${AST_WRITER_LIB})
+# =================================================================================================
+# ast writer (ast = abstract syntax tree)
+
+set(AST_READER_LIB ast-writer)
+add_library(${AST_READER_LIB})
+
+set(AST_READER_SRC_DIR ${SRC_DIR}/ast)
+set(AST_READER_SRC
+    ${AST_READER_SRC_DIR}/write.cppm
+    ${AST_READER_SRC_DIR}/node-traits.cppm
+)
+
+target_sources(${AST_READER_LIB}
+    PUBLIC
+        FILE_SET CXX_MODULES
+        TYPE CXX_MODULES
+        FILES
+            ${AST_READER_SRC}
+)
+
+target_link_libraries(${AST_READER_LIB}
+    PUBLIC
+        ${NODES_LIB}
+        ${AST_LIB}
+        ${PARACL_INFO_LIB}
+)
+
+
+target_include_directories(${AST_READER_LIB}
+    PRIVATE
+        ${INC_DIR}
+)
+
+target_hard_debug_options(${AST_READER_LIB})
+target_hard_debug_sanitizers(${AST_READER_LIB})
+target_add_logger(${AST_READER_LIB})
 
 # =================================================================================================
 
