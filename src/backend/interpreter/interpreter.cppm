@@ -20,23 +20,21 @@ export import interpreter_optoins;
 
 import ast_builder;
 
-namespace ParaCL
-{
-namespace backend
-{
-namespace interpreter
+namespace ParaCL::backend::interpreter
 {
 
 using ParaCL::options::interpreter::InterpreterOptions;
 
 export template <typename Interpreter>
-concept IInterpreter =
+concept InterpreterConcept =
     std::is_consructible<Interpreter, const InterpreterOptions &> && requires(Interpreter interpreter) {
         { interpreter.interpret() } -> std::same_as<void>;
     };
 
 export template <nametable::INametable Nametable = nametable::Nametable,
                  frontend::ast_builder::IASTBuilder ASTBuilder = frontend::ast_builder::ASTBuilder>
+
+export void interpret()
 class Interpreter final
 {
   private:
@@ -437,6 +435,4 @@ void Interpreter<Nametable, ASTBuilder>::execute(const PrintStmt *print_statemen
     return;
 }
 
-} /* namespace interpreter */
-} /* namespace backend */
-} /* namespace ParaCL */
+} /* namespace ParaCL::backend::interpreter */

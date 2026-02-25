@@ -11,13 +11,9 @@ export module write_ast;
 
 export import ast;
 
-namespace ParaCL::ast::node
+namespace ParaCL::node
 {
 
-
-
-
-// export
 void write(BasicNode const & node, std::ofstream& os, size_t enclosure)
 {
     return visit<void, std::ofstream&, size_t>(node, os, enclosure);
@@ -25,13 +21,6 @@ void write(BasicNode const & node, std::ofstream& os, size_t enclosure)
 
 export
 using writable = void(std::ofstream&, size_t);
-
-export
-void write(AST const & ast, std::filesystem::path const &file)
-{
-    std::ofstream ofs{file};
-    write(ast.root(), ofs, 0LU);
-}
 
 namespace write_in_file
 {
@@ -42,9 +31,19 @@ void n_tab(std::ofstream& os, size_t tabs)
 
 } /* namespace write_in_file */
 
+}
 
-// export
-namespace visit_overload_set
+export
+namespace ParaCL::ast
+{
+void write(AST const & ast, std::filesystem::path const &file)
+{
+    std::ofstream ofs{file};
+    ParaCL::node::write(ast.root(), ofs, 0LU);
+}
+} /* namespace ParaCL::ast */
+
+namespace ParaCL::node::visit_overload_set
 {
 
 template <>
@@ -252,5 +251,4 @@ void visit(Condition const& condition, std::ofstream& os, size_t enclosure)
     os << "}\n";
 }
 
-} /* namespace node::write_overload_set */
-} /* namespace ParaCL::ast::node */
+} /* namespace ParaCL::node::write_overload_set */

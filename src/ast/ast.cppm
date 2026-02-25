@@ -35,16 +35,17 @@ export
 class AST
 {
 private:
-    node::BasicNode root_; /* global scope */
-public:    
-    AST(node::BasicNode&& root) :
+    ParaCL::node::BasicNode root_; /* global scope */
+
+public:
+    AST(ParaCL::node::BasicNode&& root) :
         root_(root)
     {}
 
     AST(std::filesystem::path const & file);
 
 public:
-    node::BasicNode const &root() const noexcept
+    ParaCL::node::BasicNode const &root() const noexcept
     { return root_; }
 };
 

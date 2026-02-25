@@ -326,6 +326,8 @@ target_debug_definitions(${LEXER_LIB})
 target_hard_debug_sanitizers(${LEXER_LIB})
 target_add_logger(${LEXER_LIB})
 
+set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
+
 # =================================================================================================
 # node lib (ast = abstract syntax tree)
 
@@ -412,6 +414,8 @@ target_include_directories(${AST_WRITER_LIB}
 target_hard_debug_options(${AST_WRITER_LIB})
 target_hard_debug_sanitizers(${AST_WRITER_LIB})
 target_add_logger(${AST_WRITER_LIB})
+
+# =================================================================================================
 
 add_executable(ast-test
 ${AST_SRC_DIR}/test.cpp    
