@@ -17,7 +17,7 @@ template <>
 void visit([[maybe_unused]] Scan const & scan)
 { std::cout << "Scan" << std::endl; }
 
-template <> 
+template <>
 void visit([[maybe_unused]] Print const & print)
 { std::cout << "Print" << std::endl; }
 
@@ -145,9 +145,8 @@ int main() try
 
     auto&& n8 = create_same(BinaryOperator{BinaryOperator::ADD, n6, condition2});
 
-    auto&& n9 = create(Print{});
-
-    print_and_count(n9, i);
+    // auto&& n9 = create(Print{});
+    // print_and_count(n9, i);
 
     print_and_count(n12, i);
     print(n12);
@@ -177,7 +176,7 @@ int main() try
     auto&& nast4 = Scope{nast1, nast2, nast3};
     auto&& nast5 = create_same(Print{n1, n2, n82, n8});
     nast4.push_back(nast5);
-    nast4.push_back(n9);
+    // nast4.push_back(n9);
 
     auto&& root = create_same(std::move(nast4));
 

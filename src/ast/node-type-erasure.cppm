@@ -33,7 +33,7 @@ private:
         virtual ~IBaseNode() = default;
         virtual std::unique_ptr<IBaseNode> clone_() const = 0;
 
-        virtual std::any invoke_(const std::type_info& sig, std::any* args, size_t num_args) const = 0;
+        virtual std::any invoke_(const std::type_info& sig, std::any* args) const = 0;
         virtual bool supports_signature_(const std::type_info& sig) const = 0;
     };
 
@@ -104,14 +104,14 @@ private:
         }
 
         template<size_t... Is>
-        std::any invoke_impl_(const std::type_info& sig, std::any* args, size_t num_args, 
+        std::any invoke_impl_(const std::type_info& sig, std::any* args,
                              std::index_sequence<Is...>) const
         {
             std::any result;
             bool found = false;
 
             ((typeid(Signatures) == sig ? 
-              (found = true, result = invoke_one_<Signatures>(args, num_args)) : 
+              (found = true, result = invoke_one_<Signatures>(args)) : 
               false), ...);
 
             if (found) return result;
@@ -125,11 +125,12 @@ private:
         }
 
         template<typename Signature>
-        std::any invoke_one_(std::any* args, size_t num_args) const
+        std::any invoke_one_(std::any* args) const
         { return Invoker<Signature>::call_(data_, args); }
 
     public:
-        explicit NodeImpl(NodeT node) : data_(std::move(node)) {}
+        explicit NodeImpl(NodeT const & node) : data_(node) {}
+        explicit NodeImpl(NodeT&& node) : data_(node) {}
 
         std::unique_ptr<IBaseNode> clone_() const override
         {
@@ -138,8 +139,8 @@ private:
             );
         }
 
-        std::any invoke_(const std::type_info& sig, std::any* args, size_t num_args) const override
-        { return invoke_impl_(sig, args, num_args, std::index_sequence_for<Signatures...>{}); }
+        std::any invoke_(const std::type_info& sig, std::any* args) const override
+        { return invoke_impl_(sig, args, std::index_sequence_for<Signatures...>{}); }
 
         bool supports_signature_(const std::type_info& sig) const override
         { return supports_signature_impl_(sig, std::index_sequence_for<Signatures...>{}); }
@@ -176,9 +177,17 @@ public:
     */
     template<typename NodeT, typename... Signatures>
     requires ((sizeof...(Signatures) > 0) && (std::is_function_v<Signatures> && ...))
-    static BasicNode create(NodeT node)
+    static BasicNode create(NodeT const & node)
     {
-        auto impl = std::make_unique<NodeImpl<NodeT, Signatures...>>(std::move(node));
+        auto impl = std::make_unique<NodeImpl<NodeT, Signatures...>>(node);
+        return BasicNode(std::unique_ptr<IBaseNode>(impl.release()));
+    }
+
+    template<typename NodeT, typename... Signatures>
+    requires ((sizeof...(Signatures) > 0) && (std::is_function_v<Signatures> && ...))
+    static BasicNode create(NodeT && node)
+    {
+        auto impl = std::make_unique<NodeImpl<NodeT, Signatures...>>(node);
         return BasicNode(std::unique_ptr<IBaseNode>(impl.release()));
     }
 
@@ -187,7 +196,7 @@ public:
     if signature is no supported by the node - function will throw std::runtime_error
     */
     template<typename ReturnT, typename... Args>
-    friend ReturnT visit(BasicNode const& node, Args... args)
+    friend ReturnT visit(BasicNode const & node, Args... args)
     {
         if (not node.self_)
             throw std::runtime_error("visite node, which is not constructible (node.self_ is nullptr)");
@@ -203,9 +212,8 @@ public:
 
         std::any arg_array[] = {pack_arg_(std::forward<Args>(args))...};
         auto result = node.self_->invoke_(
-            typeid(SigType), 
-            arg_array, 
-            sizeof...(Args)
+            typeid(SigType),
+            arg_array
         );
 
         if constexpr (not std::is_void_v<ReturnT>)
