@@ -11,15 +11,16 @@ namespace ParaCL::ast::node
 {
 
 export
-namespace visit_overload_set
+namespace visit_specializations
 {
 template <typename NodeT, typename ReturnT, typename... Args>
-ReturnT visit(NodeT const &node, Args... args)
+ReturnT visit(NodeT const &, Args...)
 {
     static_assert(false, "using not specialized visit function. "
                          "this static_assert help you to not see terribale linker errors :)");
 }
-} /* visit_overload_set */
+} /* visit_specializations */
+
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
@@ -32,8 +33,8 @@ private:
         virtual ~IBaseNode() = default;
         virtual std::unique_ptr<IBaseNode> clone_() const = 0;
 
-        virtual std::any invoke(const std::type_info& sig, std::any* args, size_t num_args) const = 0;
-        virtual bool supports_signature(const std::type_info& sig) const = 0;
+        virtual std::any invoke_(const std::type_info& sig, std::any* args, size_t num_args) const = 0;
+        virtual bool supports_signature_(const std::type_info& sig) const = 0;
     };
 
     template<typename NodeT, typename... Signatures>
@@ -48,8 +49,8 @@ private:
 
         template<typename ReturnT, typename... Args>
         struct Invoker<ReturnT(Args...)> {
-            static std::any call(const NodeT& data, std::any* args) try
-            { return call_impl(data, args, std::index_sequence_for<Args...>{}); }
+            static std::any call_(const NodeT& data, std::any* args) try
+            { return call_impl_(data, args, std::index_sequence_for<Args...>{}); }
             catch (const std::bad_any_cast& e)
             {
                 throw std::runtime_error(
@@ -60,7 +61,7 @@ private:
 
         private:
             template<typename T>
-            static T unwrap_arg(const std::any& arg)
+            static T unwrap_arg_(const std::any& arg)
             {
                 if constexpr (std::is_reference_v<T>)
                 {
@@ -73,21 +74,21 @@ private:
             }
 
             template<size_t... Is>
-            static std::any call_impl(const NodeT& data, std::any* args, std::index_sequence<Is...>)
+            static std::any call_impl_(const NodeT& data, std::any* args, std::index_sequence<Is...>)
             {
                 if constexpr (std::is_void_v<ReturnT>)
                 {
-                    visit_overload_set::template visit<NodeT, ReturnT, Args...>(
+                    visit_specializations::template visit<NodeT, ReturnT, Args...>(
                         data, 
-                        unwrap_arg<Args>(args[Is])...
+                        unwrap_arg_<Args>(args[Is])...
                     );
                     return std::any{};
                 }
                 else
                 {
-                    auto result = visit_overload_set::template visit<NodeT, ReturnT, Args...>(
+                    auto result = visit_specializations::template visit<NodeT, ReturnT, Args...>(
                         data, 
-                        unwrap_arg<Args>(args[Is])...
+                        unwrap_arg_<Args>(args[Is])...
                     );
                     return std::any(std::move(result));
                 }
@@ -95,7 +96,7 @@ private:
         };
 
         template<size_t... Is>
-        bool supports_signature_impl(const std::type_info& sig, std::index_sequence<Is...>) const
+        bool supports_signature_impl_(const std::type_info& sig, std::index_sequence<Is...>) const
         {
             bool supported = false;
             ((typeid(Signatures) == sig ? (supported = true) : false), ...);
@@ -103,14 +104,14 @@ private:
         }
 
         template<size_t... Is>
-        std::any invoke_impl(const std::type_info& sig, std::any* args, size_t num_args, 
+        std::any invoke_impl_(const std::type_info& sig, std::any* args, size_t num_args, 
                              std::index_sequence<Is...>) const
         {
             std::any result;
             bool found = false;
 
             ((typeid(Signatures) == sig ? 
-              (found = true, result = invoke_one<Signatures>(args, num_args)) : 
+              (found = true, result = invoke_one_<Signatures>(args, num_args)) : 
               false), ...);
 
             if (found) return result;
@@ -119,13 +120,13 @@ private:
             ((supported += typeid(Signatures).name(), supported += " "), ...);
             throw std::runtime_error(
                 std::string("Signature ") + sig.name() + 
-                " not supported by this node. Supported: " + supported
+                " was not register for this node. supported:: " + supported
             );
         }
 
         template<typename Signature>
-        std::any invoke_one(std::any* args, size_t num_args) const
-        { return Invoker<Signature>::call(data_, args); }
+        std::any invoke_one_(std::any* args, size_t num_args) const
+        { return Invoker<Signature>::call_(data_, args); }
 
     public:
         explicit NodeImpl(NodeT node) : data_(std::move(node)) {}
@@ -137,11 +138,11 @@ private:
             );
         }
 
-        std::any invoke(const std::type_info& sig, std::any* args, size_t num_args) const override
-        { return invoke_impl(sig, args, num_args, std::index_sequence_for<Signatures...>{}); }
+        std::any invoke_(const std::type_info& sig, std::any* args, size_t num_args) const override
+        { return invoke_impl_(sig, args, num_args, std::index_sequence_for<Signatures...>{}); }
 
-        bool supports_signature(const std::type_info& sig) const override
-        { return supports_signature_impl(sig, std::index_sequence_for<Signatures...>{}); }
+        bool supports_signature_(const std::type_info& sig) const override
+        { return supports_signature_impl_(sig, std::index_sequence_for<Signatures...>{}); }
     };
 
     std::unique_ptr<IBaseNode> self_ = nullptr;
@@ -149,7 +150,7 @@ private:
     explicit BasicNode(std::unique_ptr<IBaseNode> self) : self_(std::move(self)) {}
 
     template<typename T>
-    static std::any pack_arg(T&& arg)
+    static std::any pack_arg_(T&& arg)
     {
         if constexpr (std::is_lvalue_reference_v<T>)
             return std::ref(arg);
@@ -158,66 +159,81 @@ private:
     }
 
 public:
-    BasicNode() = default;
-
     /* check that node support some visit functions */
     template<typename... Signatures>
     requires (std::is_function_v<Signatures> && ...)
     friend bool support(BasicNode const & node)
     {
-        if (!node.self_) return false;
-        return (node.self_->supports_signature(typeid(Signatures)) && ...);
+        return
+            (node.self_) and
+            (node.self_->supports_signature_(typeid(Signatures)) && ...);
     }
 
+    /*
+    why not template ctor?
+    in template ctor we need type deduction,
+    but compiler cannot do this for functions signature, because it`s not using clearly
+    */
     template<typename NodeT, typename... Signatures>
-    requires (std::is_function_v<Signatures> && ...)
+    requires ((sizeof...(Signatures) > 0) && (std::is_function_v<Signatures> && ...))
     static BasicNode create(NodeT node)
     {
-        static_assert(sizeof...(Signatures) > 0, 
-                      "At least one signature must be specified");
         auto impl = std::make_unique<NodeImpl<NodeT, Signatures...>>(std::move(node));
         return BasicNode(std::unique_ptr<IBaseNode>(impl.release()));
     }
 
+    /*
+    fuction for visit basic node.
+    if signature is no supported by the node - function will throw std::runtime_error
+    */
     template<typename ReturnT, typename... Args>
     friend ReturnT visit(BasicNode const& node, Args... args)
     {
-        if (!node.self_) return;
+        if (not node.self_)
+            throw std::runtime_error("visite node, which is not constructible (node.self_ is nullptr)");
 
         using SigType = ReturnT(Args...);
 
-        if (!node.self_->supports_signature(typeid(SigType))) 
+        if (not node.self_->supports_signature_(typeid(SigType))) 
         {
             throw std::runtime_error(
                 std::string("This node dont support this function: ") + typeid(SigType).name()
             );
         }
 
-        std::any arg_array[] = {pack_arg(std::forward<Args>(args))...};
-        auto result = node.self_->invoke(
+        std::any arg_array[] = {pack_arg_(std::forward<Args>(args))...};
+        auto result = node.self_->invoke_(
             typeid(SigType), 
             arg_array, 
             sizeof...(Args)
         );
 
-        if constexpr (!std::is_void_v<ReturnT>)
+        if constexpr (not std::is_void_v<ReturnT>)
         {
-            try
-            {
-                return std::any_cast<ReturnT>(result);
-            }
-            catch (const std::bad_any_cast& e)
-            {
-                throw std::runtime_error(
-                    std::string("Return type mismatch: expected ") + 
-                    typeid(ReturnT).name() + 
-                    " but got " + 
-                    result.type().name()
-                );
-            }
+        try
+        {
+            return std::any_cast<ReturnT>(result);
+        }
+        catch (const std::bad_any_cast& e)
+        {
+            throw std::runtime_error(
+                std::string("Return type mismatch: expected ") + 
+                typeid(ReturnT).name() + 
+                " but got " + 
+                result.type().name()
+            );
+        }
         }
     }
 
+    /*
+    default ctor (need for nodes default ctor)
+    warning: after this constructor visit will throw std::runtime_error
+    self_ is nullptr
+    */
+    BasicNode() = default;
+
+    /* copy ctor/assign */
     BasicNode(BasicNode const& other) 
         : self_(other.self_ ? other.self_->clone_() : nullptr)
     {}
@@ -229,9 +245,41 @@ public:
         return *this;
     }
 
+    /* move ctor/assign*/
     BasicNode(BasicNode&&) = default;
     BasicNode& operator=(BasicNode&&) = default;
 };
+
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+/*
+this function need to create BasicNode by your node.
+in your code, specialize it for every node, you`re using.
+use BasicNode::create() for this.
+*/
+export
+template <typename NodeT>
+BasicNode create(NodeT)
+{
+    /* call BasicNode::create here in specialization */
+    static_assert(false, "using unspecialized create.");
+}
+
+/*
+
+***next functoinally is impossible to realize as library function***
+
+if you dont need specialize 'create' for every node personal:
+
+if you need to have function to create nodes with same visit functions,
+use something like this:
+
+template <typename NodeT>
+BasicNode create_same(NodeT node)
+{
+    return BasicNode::create<NodeT, __your_signatures__>(node);
+}
+*/
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 } /* namespace ParaCL::ast::node */

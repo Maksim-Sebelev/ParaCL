@@ -47,7 +47,7 @@ namespace ParaCL
             "Unknown architecture"
         #endif
         ;
-        static constexpr const char ast_text_representation_signature[] = "ParaCL-@PROJECT_VERSION@-node-traits\n\n";
+        static constexpr const char ast_text_representation_signature[] = "ParaCL-@PROJECT_VERSION@-ast-text-format\n\n";
 
 
         static const ParaCLInfo& queryParaCLInfo()

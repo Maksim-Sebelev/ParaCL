@@ -38,12 +38,14 @@ export
 void write(AST const & ast, std::filesystem::path const &file)
 {
     std::ofstream ofs{file};
+    if (ofs.fail()) throw std::runtime_error("failed open '" + file.string() + "' for write ast.");
+
     ofs << ParaCLInfo::queryParaCLInfo().ast_text_representation_signature;
     ParaCL::ast::node::write(ast.root(), ofs, 0LU);
 }
 } /* namespace ParaCL::ast */
 
-namespace ParaCL::ast::node::visit_overload_set
+namespace ParaCL::ast::node::visit_specializations
 {
 
 template <>

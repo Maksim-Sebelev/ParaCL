@@ -7,6 +7,7 @@ module;
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <filesystem>
 
 #include "global/global.hpp"
 #include "parser/parser.hpp"
@@ -18,23 +19,71 @@ export module interpreter;
 import interpreter_name_table;
 export import interpreter_optoins;
 
-import ast_builder;
+export import ast;
+import ast_read;
+
+namespace ParaCL::ast::node
+{
+
+enum FromPrint {from_print};
+
+using executable_exression = int(backend::interpreter::nametable::Nametable&);
+using executable_statement = void(backend::interpreter::nametable::Nametable&);
+using printable = void(backend::interpreter::nametable::Nametable&, FromPrint);
+
+template <typename NodeT>
+BasicNode create(NodeT node)
+{
+    static_assert(false, "using unspecialized create.");
+}
+
+
+namespace visit_specializations
+{
+
+template <>
+void visit(Print const & print, backend::interpreter::nametable::Nametable& nametable)
+{
+    for (auto&& arg: print)
+        visit(arg, nametable, from_print);
+}
+
+template <>
+int visit([[maybe_unused]] Scan const & scan, backend::interpreter::nametable::Nametable& nametable)
+{
+    int scaned_value;
+    std::cin >> scaned_value;
+    return scaned_value;
+}
+
+
+template <>
+
+
+} /* namespace visit_specializations */
+} /* namespace ParaCL::ast::node */
 
 namespace ParaCL::backend::interpreter
 {
 
-using ParaCL::options::interpreter::InterpreterOptions;
 
-export template <typename Interpreter>
-concept InterpreterConcept =
-    std::is_consructible<Interpreter, const InterpreterOptions &> && requires(Interpreter interpreter) {
-        { interpreter.interpret() } -> std::same_as<void>;
-    };
 
-export template <nametable::INametable Nametable = nametable::Nametable,
-                 frontend::ast_builder::IASTBuilder ASTBuilder = frontend::ast_builder::ASTBuilder>
+export 
+void interpret(std::filesystem::path const & ast_txt)
+{
+    auto&& ast = ast::read(ast_txt);
+}
 
-export void interpret()
+template <typename Nametable>
+concept INametable = std::is_constructible<Nametable> && requires(Nametable nt, std::string_view name, int value) {
+    { nt.new_scope() } -> std::same_as<void>;
+    { nt.leave_scope() } -> std::same_as<void>;
+    { nt.get_variable_value(name) } -> std::same_as<int>;
+    { nt.set_value(name, value) } -> std::same_as<void>;
+};
+
+
+template <INametable Nametable>
 class Interpreter final
 {
   private:
@@ -285,7 +334,6 @@ int Interpreter<Nametable, ASTBuilder>::execute(const AssignExpr *assignExpr)
 int Interpreter<Nametable, ASTBuilder>::execute(const CombinedAssingExpr *combinedAssingExpr)
 {
     std::optional<int> varValue = nametable_.get_variable_value(combinedAssingExpr->name);
-    int value = varValue.value();
     if (not varValue.has_value())
         throw std::runtime_error("error: '" + combinedAssingExpr->name + "' was not declared in this scope\n");
 

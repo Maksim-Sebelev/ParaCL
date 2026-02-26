@@ -66,7 +66,7 @@ struct IrBuilderData
 
 //---------------------------------------------------------------------------------------------------------------
 
-namespace visit_overload_set
+namespace visit_specializations
 {
 template <>
 void visit(node::Scope const & scope, IrBuilderData& data, llvm::Value* return_value)
@@ -127,7 +127,7 @@ void visit(node::Print const & print, IrBuilderData& data, llvm::Value* return_v
     LOGINFO("paracl: ir translator: print call generated");
 }
 
-} /* namespace visit_overload_set */
+} /* namespace visit_specializations */
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -848,7 +848,7 @@ void ObjectsBuilder::write_ir_in_file()
 
 //---------------------------------------------------------------------------------------------------------------
 
-} /* namespace visit_overload_set */
+} /* namespace visit_specializations */
 } /* namespace compiler */
 } /* namespace toolchain */
 } /* namespace backend */

@@ -39,9 +39,6 @@ class AST
 private:
     node::BasicNode root_; /* global scope */
 
-private:
-
-    
 public:
     AST(node::BasicNode&& root) :
         root_(root)

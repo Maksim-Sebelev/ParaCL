@@ -117,7 +117,6 @@ cmake_command="cmake \
 -DCMAKE_CXX_COMPILER=clang++ \
 -DCMAKE_BUILD_TYPE=Release \
 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
-
 if need_test "$@"; then
     cmake_command="$cmake_command -DBUILD_TESTING=ON"
 fi

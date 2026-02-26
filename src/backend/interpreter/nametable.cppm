@@ -19,24 +19,10 @@ export module interpreter_name_table;
 
 //---------------------------------------------------------------------------------------------------------------
 
-namespace ParaCL
-{
-namespace backend
-{
-namespace interpreter
-{
-namespace nametable
+namespace ParaCL::backend::interpreter::nametable
 {
 
 //---------------------------------------------------------------------------------------------------------------
-
-export template <typename Nametable>
-concept INametable = std::is_constructible<Nametable> && requires(Nametable nt, std::string_view name, int value) {
-    { nt.new_scope() } -> std::same_as<void>;
-    { nt.leave_scope() } -> std::same_as<void>;
-    { nt.get_variable_value(name) } -> std::same_as<std::optional<int>>;
-    { nt.set_value(name, value) } -> std::same_as<void>;
-};
 
 class Nametable final
 {
@@ -48,13 +34,9 @@ class Nametable final
   public:
     void new_scope();
     void leave_scope();
-    std::optional<int> get_variable_value(std::string_view name) const;
+    int get_variable_value(std::string_view name) const;
     void set_value(std::string_view name, int value);
 };
-
-static_assert(< INametable<Nametable>, "class Nametable must realized INametable interface,"
-                                       "because now it`s the only one realizatoin of this interaface,"
-                                       "and it`s using in other modules");
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -78,7 +60,7 @@ void Nametable::leave_scope()
 
 //---------------------------------------------------------------------------------------------------------------
 
-std::optional<int> Nametable::get_variable_value(std::string_view name) const
+int Nametable::get_variable_value(std::string_view name) const
 {
     LOGINFO("paracl: interpreter: nametable: searching variable: \"{}\"", name);
 
@@ -94,7 +76,7 @@ std::optional<int> Nametable::get_variable_value(std::string_view name) const
     }
 
     LOGINFO("paracl: interpreter: nametable: variable NOT found: \"{}\"", name);
-    return std::nullopt;
+    throw std::runtime_error(std::string("requests value of not exists variable: ") + std::string(name));
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -148,10 +130,5 @@ void Nametable::declare(std::string_view name, int value)
 }
 
 //---------------------------------------------------------------------------------------------------------------
-
-} /* namespace nametable */
-} /* namespace interpreter */
-} /* namespace backend */
-} /* namespace ParaCL */
-
+} /* namespace ParaCL::backend::interpreter::nametable */
 //---------------------------------------------------------------------------------------------------------------

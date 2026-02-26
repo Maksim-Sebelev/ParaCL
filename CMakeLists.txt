@@ -338,7 +338,7 @@ set(NODES_SRC_DIR ${SRC_DIR}/ast)
 set(NODES_SRC
     ${NODES_SRC_DIR}/nodes.cppm
     ${NODES_SRC_DIR}/node-type-erasure.cppm
-    ${NODES_SRC_DIR}/note-traits.cppm
+    ${NODES_SRC_DIR}/node-traits.cppm
 )
 
 target_sources(${NODES_LIB}
@@ -347,6 +347,11 @@ target_sources(${NODES_LIB}
         TYPE CXX_MODULES
         FILES
             ${NODES_SRC}
+)
+
+target_include_directories(${NODES_LIB}
+    PRIVATE
+        ${INC_DIR}
 )
 
 target_hard_debug_options(${NODES_LIB})
@@ -418,15 +423,14 @@ target_hard_debug_options(${AST_WRITER_LIB})
 target_hard_debug_sanitizers(${AST_WRITER_LIB})
 target_add_logger(${AST_WRITER_LIB})
 # =================================================================================================
-# ast writer (ast = abstract syntax tree)
+# ast reader (ast = abstract syntax tree)
 
-set(AST_READER_LIB ast-writer)
+set(AST_READER_LIB ast-reader)
 add_library(${AST_READER_LIB})
 
 set(AST_READER_SRC_DIR ${SRC_DIR}/ast)
 set(AST_READER_SRC
-    ${AST_READER_SRC_DIR}/write.cppm
-    ${AST_READER_SRC_DIR}/node-traits.cppm
+    ${AST_READER_SRC_DIR}/read.cppm
 )
 
 target_sources(${AST_READER_LIB}
@@ -464,87 +468,8 @@ target_link_libraries(ast-test
 PRIVATE
     ${AST_LIB}
     ${AST_WRITER_LIB}
+    ${AST_READER_LIB}
 )
-
-# =================================================================================================
-# ast builder lib
-
-set(AST_BUILDER_LIB ast_builder)
-add_library(${AST_BUILDER_LIB})
-
-set(AST_BUILDER_SRC_DIR ${FRONTEND_SRC_DIR}/ast_builder)
-set(AST_BUILDER_SRC
-    ${AST_BUILDER_SRC_DIR}/ast_builder.cppm
-)
-
-target_sources(${AST_BUILDER_LIB}
-    PUBLIC
-        FILE_SET CXX_MODULES
-        TYPE CXX_MODULES
-        FILES
-            ${AST_BUILDER_SRC}
-)
-
-target_link_libraries(${AST_BUILDER_LIB}
-    PUBLIC
-        ${AST_LIB}
-)
-
-target_hard_debug_options(${AST_BUILDER_LIB})
-target_hard_debug_sanitizers(${AST_BUILDER_LIB})
-target_add_logger(${AST_BUILDER_LIB})
-
-# # =================================================================================================
-# # hir lib (hir = high-level ir)
-
-# set(HIR_LIB high_level_ir)
-# add_library(${HIR_LIB})
-
-# set(HIR_SRC_DIR ${SRC_DIR}/hir)
-# set(HIR_SRC
-#     ${HIR_SRC_DIR}/hir.cppm
-# )
-
-# target_sources(${HIR_LIB}
-#     PUBLIC
-#         FILE_SET CXX_MODULES
-#         TYPE CXX_MODULES
-#         FILES
-#             ${HIR_SRC}
-# )
-
-# target_hard_debug_options(${HIR_LIB})
-# target_hard_debug_sanitizers(${HIR_LIB})
-# target_add_logger(${HIR_LIB})
-
-# # =================================================================================================
-# # hir builder lib (hir = high-level ir)
-
-# set(HIR_BUILDER_LIB hir_builder)
-# add_library(${HIR_BUILDER_LIB})
-
-# set(HIR_BUILDER_SRC_DIR ${FRONTEND_SRC_DIR}/hir_builder)
-# set(HIR_BUILDER_SRC
-#     ${HIR_BUILDER_SRC_DIR}/hir_builder.cppm
-# )
-
-# target_sources(${HIR_BUILDER_LIB}
-#     PUBLIC
-#         FILE_SET CXX_MODULES
-#         TYPE CXX_MODULES
-#         FILES
-#             ${HIR_BUILDER_SRC}
-# )
-
-# target_link_libraries(${HIR_BUILDER_LIB}
-#     PUBLIC
-#         ${HIR_LIB}
-#         ${AST_LIB}
-# )
-
-# target_hard_debug_options(${HIR_BUILDER_LIB})
-# target_hard_debug_sanitizers(${HIR_BUILDER_LIB})
-# target_add_logger(${HIR_BUILDER_LIB})
 
 # =================================================================================================
 # frontend library

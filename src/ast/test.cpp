@@ -11,7 +11,7 @@ import ast_read;
 using namespace ::ParaCL::ast::node;
 using namespace ::ParaCL::ast;
 
-namespace ParaCL::ast::node::visit_overload_set
+namespace ParaCL::ast::node::visit_specializations
 {
 template <>
 void visit([[maybe_unused]] Scan const & scan)
@@ -48,9 +48,17 @@ void visit([[maybe_unused]] Else const & l)
 template <>
 void visit(Scope const & s)
 { std::cout << "Scope{\n";  for (auto&& m: s) visit<void>(m); std::cout << "}" << std::endl; }
+
+template <>
+void visit([[maybe_unused]] BinaryOperator const & bp)
+{ std::cout << "BinaryOp{}\n";}
+
+template <>
+void visit([[maybe_unused]] UnaryOperator const & uo)
+{ std::cout << "UnaryOp{}\n";}
 }
 
-namespace ParaCL::ast::node::visit_overload_set
+namespace ParaCL::ast::node::visit_specializations
 {
 template <>
 void visit([[maybe_unused]] Scan const & scan, int& i)
@@ -64,15 +72,21 @@ template <>
 void visit([[maybe_unused]] Condition const & print, int& i)
 { std::cout << "Condition " << ++i << std::endl; }
 
+template <> 
+void visit([[maybe_unused]] BinaryOperator const & print, int& i)
+{ std::cout << "BinaryOp " << ++i << std::endl; }
+
+template <>
+void visit([[maybe_unused]] UnaryOperator const & print, int& i)
+{ std::cout << "UnaryOp " << ++i << std::endl; }
+
 template <>
 void visit(Variable const & v, int& i)
 { std::cout << "Variable{" << v.name() << "} " << ++i << std::endl; }
 
-
 template <>
 void visit(If const & v, int& i)
 { std::cout << "If{" << "} " << ++i << std::endl; }
-
 
 template <>
 void visit(Else const & v, int& i)
@@ -103,26 +117,37 @@ using printable = void();
 using printable_and_countable = void(int&);
 
 template <typename NodeT>
-BasicNode create(NodeT node)
+BasicNode create_same(NodeT node)
 { return BasicNode::create<NodeT, printable, printable_and_countable, writable>(node); }
+
+template <>
+BasicNode ParaCL::ast::node::create(Print node)
+{ return BasicNode::create<Print, printable_and_countable>(node); }
 
 int main() try
 {
-    int i = 666;
+    int i = 0;
 
-    auto&& n1 = create(Scope{});
-    auto&& n2 = create(Scope{});
+    auto&& n1 = create_same(Scope{});
+    auto&& n2 = create_same(Scope{});
 
-    auto&& n6 = create(NumberLiteral{13});
-    auto&& n7 = create(StringLiteral{"fuck me please"});
+    auto&& n6 = create_same(NumberLiteral{13});
+    auto&& n7 = create_same(StringLiteral{"fuck me please"});
 
-    auto&& n12 = create(Scan{});
-    auto&& n22 = create(Print{});
-    auto&& n72 = create(If{{n6}, n22});
-    auto&& n82 = create(Else{n12});
+    auto&& n12 = create_same(Scan{});
+    auto&& n22 = create_same(Print{});
+    auto&& n72 = create_same(If{{n6}, n22});
+    auto&& n82 = create_same(Else{n12});
 
     auto&& condition = Condition{{n72}, n82};
-    auto&& n32 = create(std::move(condition));
+    auto&& n32 = create_same(std::move(condition));
+    auto&& condition2 = n32;
+
+    auto&& n8 = create_same(BinaryOperator{BinaryOperator::ADD, n6, condition2});
+
+    auto&& n9 = create(Print{});
+
+    print_and_count(n9, i);
 
     print_and_count(n12, i);
     print(n12);
@@ -141,19 +166,20 @@ int main() try
     print_and_count(n52, i);
     print(n52);
 
-    auto&& n62 = create(Variable{"some name"});
+    auto&& n62 = create_same(Variable{"some name"});
     print_and_count(n62, i);
     print(n62);
 
 
-    auto&& nast1 = create(Print{n62, n6, n7});
+    auto&& nast1 = create_same(Print{n62, n6, n7});
     auto&& nast2 = n6;
     auto&& nast3 = n32;
     auto&& nast4 = Scope{nast1, nast2, nast3};
-    auto&& nast5 = create(Print{n1, n2, n82});
+    auto&& nast5 = create_same(Print{n1, n2, n82, n8});
     nast4.push_back(nast5);
+    nast4.push_back(n9);
 
-    auto&& root = create(std::move(nast4));
+    auto&& root = create_same(std::move(nast4));
 
     auto&& ast = AST{std::move(root)};
     write(ast, "ast.txt");

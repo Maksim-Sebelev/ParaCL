@@ -10,18 +10,17 @@ export import ast;
 namespace ParaCL::ast
 {
 
-void check_file_signature()
+
 
 export
 template <typename... Signatures>
-AST read(std::filesystem::path const & ast_txt)
+AST read_ast_txt(std::filesystem::path const & ast_txt)
 {
+    /* must call create_personall */
     auto&& scope = node::Scope{};
 
     auto&& root = node::BasicNode::create<node::Scope, Signatures...>(scope);
     return AST(std::move(root));
 }
-
-
 
 } /* namespace ParaCL::ast */
