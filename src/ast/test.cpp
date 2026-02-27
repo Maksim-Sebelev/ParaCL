@@ -3,10 +3,12 @@
 #include <typeinfo>
 #include <filesystem>
 #include <fstream>
+#include <utility>
 
 import ast;
 import ast_write;
 import ast_read;
+import ast_graph_dump;
 
 using namespace ::ParaCL::ast::node;
 using namespace ::ParaCL::ast;
@@ -117,12 +119,13 @@ using printable = void();
 using printable_and_countable = void(int&);
 
 template <typename NodeT>
-BasicNode create_same(NodeT node)
-{ return BasicNode::create<NodeT, printable, printable_and_countable, writable>(node); }
+BasicNode create_same(NodeT&& node)
+{ return BasicNode::Actions<printable, printable_and_countable, writable, dumpable>::create(std::forward<NodeT>(node)); }
 
-template <>
-BasicNode ParaCL::ast::node::create(Print node)
-{ return BasicNode::create<Print, printable_and_countable>(node); }
+
+// template <>
+// BasicNode ParaCL::ast::node::create(Scan node)
+// { return BasicNode::Actions<printable>::create(std::move(node)); }
 
 int main() try
 {
@@ -130,6 +133,9 @@ int main() try
 
     auto&& n1 = create_same(Scope{});
     auto&& n2 = create_same(Scope{});
+
+    print_and_count(n1, i);
+    print_and_count(n2, i);
 
     auto&& n6 = create_same(NumberLiteral{13});
     auto&& n7 = create_same(StringLiteral{"fuck me please"});
@@ -144,9 +150,6 @@ int main() try
     auto&& condition2 = n32;
 
     auto&& n8 = create_same(BinaryOperator{BinaryOperator::ADD, n6, condition2});
-
-    // auto&& n9 = create(Print{});
-    // print_and_count(n9, i);
 
     print_and_count(n12, i);
     print(n12);
@@ -169,19 +172,17 @@ int main() try
     print_and_count(n62, i);
     print(n62);
 
-
     auto&& nast1 = create_same(Print{n62, n6, n7});
     auto&& nast2 = n6;
     auto&& nast3 = n32;
     auto&& nast4 = Scope{nast1, nast2, nast3};
     auto&& nast5 = create_same(Print{n1, n2, n82, n8});
     nast4.push_back(nast5);
-    // nast4.push_back(n9);
 
     auto&& root = create_same(std::move(nast4));
-
     auto&& ast = AST{std::move(root)};
     write(ast, "ast.txt");
+    dump(ast, "ast.dot", "ast.svg");
 
     return 0;
 }

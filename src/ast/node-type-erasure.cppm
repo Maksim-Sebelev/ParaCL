@@ -1,9 +1,12 @@
 module;
 
+#include <iostream>
+
 #include <memory>
 #include <stdexcept>
 #include <any>
 #include <type_traits>
+#include <utility>
 
 export module node_type_erasure;
 
@@ -20,7 +23,6 @@ ReturnT visit(NodeT const &, Args...)
                          "this static_assert help you to not see terribale linker errors :)");
 }
 } /* visit_specializations */
-
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
@@ -66,7 +68,7 @@ private:
                 if constexpr (std::is_reference_v<T>)
                 {
                     using WrappedType = std::reference_wrapper<std::remove_reference_t<T>>;
-                    auto& wrapper = std::any_cast<WrappedType&>(const_cast<std::any&>(arg));
+                    auto&& wrapper = std::any_cast<WrappedType&>(const_cast<std::any&>(arg));
                     return wrapper.get();
                 }
                 else
@@ -86,7 +88,7 @@ private:
                 }
                 else
                 {
-                    auto result = visit_specializations::template visit<NodeT, ReturnT, Args...>(
+                    auto&& result = visit_specializations::template visit<NodeT, ReturnT, Args...>(
                         data, 
                         unwrap_arg_<Args>(args[Is])...
                     );
@@ -108,7 +110,7 @@ private:
                              std::index_sequence<Is...>) const
         {
             std::any result;
-            bool found = false;
+            auto&& found = false;
 
             ((typeid(Signatures) == sig ? 
               (found = true, result = invoke_one_<Signatures>(args)) : 
@@ -129,8 +131,7 @@ private:
         { return Invoker<Signature>::call_(data_, args); }
 
     public:
-        explicit NodeImpl(NodeT const & node) : data_(node) {}
-        explicit NodeImpl(NodeT&& node) : data_(node) {}
+        explicit NodeImpl(NodeT&& node) : data_(std::forward<NodeT>(node)) {}
 
         std::unique_ptr<IBaseNode> clone_() const override
         {
@@ -175,21 +176,18 @@ public:
     in template ctor we need type deduction,
     but compiler cannot do this for functions signature, because it`s not using clearly
     */
-    template<typename NodeT, typename... Signatures>
-    requires ((sizeof...(Signatures) > 0) && (std::is_function_v<Signatures> && ...))
-    static BasicNode create(NodeT const & node)
-    {
-        auto impl = std::make_unique<NodeImpl<NodeT, Signatures...>>(node);
-        return BasicNode(std::unique_ptr<IBaseNode>(impl.release()));
-    }
 
-    template<typename NodeT, typename... Signatures>
+    template <typename... Signatures>
     requires ((sizeof...(Signatures) > 0) && (std::is_function_v<Signatures> && ...))
-    static BasicNode create(NodeT && node)
+    struct Actions
     {
-        auto impl = std::make_unique<NodeImpl<NodeT, Signatures...>>(node);
-        return BasicNode(std::unique_ptr<IBaseNode>(impl.release()));
-    }
+        template<typename NodeT>
+        static BasicNode create(NodeT&& node)
+        {
+            auto&& impl = std::make_unique<NodeImpl<NodeT, Signatures...>>(std::forward<NodeT>(node));
+            return BasicNode(std::unique_ptr<IBaseNode>(impl.release()));
+        }
+    };
 
     /*
     fuction for visit basic node.
@@ -201,18 +199,18 @@ public:
         if (not node.self_)
             throw std::runtime_error("visite node, which is not constructible (node.self_ is nullptr)");
 
-        using SigType = ReturnT(Args...);
+        using SignatureT = ReturnT(Args...);
 
-        if (not node.self_->supports_signature_(typeid(SigType))) 
+        if (not node.self_->supports_signature_(typeid(SignatureT))) 
         {
             throw std::runtime_error(
-                std::string("This node dont support this function: ") + typeid(SigType).name()
+                std::string("This node dont support this function: ") + typeid(SignatureT).name()
             );
         }
 
         std::any arg_array[] = {pack_arg_(std::forward<Args>(args))...};
-        auto result = node.self_->invoke_(
-            typeid(SigType),
+        auto&& result = node.self_->invoke_(
+            typeid(SignatureT),
             arg_array
         );
 
@@ -254,7 +252,7 @@ public:
     }
 
     /* move ctor/assign*/
-    BasicNode(BasicNode&&) = default;
+    BasicNode(BasicNode&& other) = default;
     BasicNode& operator=(BasicNode&&) = default;
 };
 
@@ -269,9 +267,12 @@ export
 template <typename NodeT>
 BasicNode create(NodeT)
 {
-    /* call BasicNode::create here in specialization */
+    /*
+    use this like:
+    return BasicNode::Actions<__your_signatures__>::create(node)
+    */
     static_assert(false, "using unspecialized create.");
-}
+};
 
 /*
 
@@ -283,9 +284,9 @@ if you need to have function to create nodes with same visit functions,
 use something like this:
 
 template <typename NodeT>
-BasicNode create_same(NodeT node)
+BasicNode create_same(NodeT&& node)
 {
-    return BasicNode::create<NodeT, __your_signatures__>(node);
+    return BasicNode::Actions<__your_signatures__>::create(std::forward<NodeT>(node));
 }
 */
 

@@ -1,393 +1,273 @@
 module;
 
-#include "global/global.hpp"
-#include "parser/parser.hpp"
-
 #include <filesystem>
-#include <fstream>
 #include <iostream>
-#include <memory>
-#include <ostream>
-#include <stdexcept>
 #include <string>
+#include <stdexcept>
+#include <cstdlib>
 
 export module ast_graph_dump;
 
 export import ast;
 
+namespace ParaCL::ast::node
+{
+
+using unique_node_id_t = const void*;
+
+export
+using dumpable = void(unique_node_id_t, std::ofstream&);
+
+namespace graphic_dump
+{
+
+void dump(BasicNode const & node, unique_node_id_t unique_node_id, std::ofstream& os)
+{ return visit<void, unique_node_id_t, std::ofstream&>(node, unique_node_id, os); }
+
+void create_node(std::ofstream& os, unique_node_id_t node_id, std::string_view label, std::string_view more_settings = "")
+{
+    os << "  \"" << node_id << "\" [label=\"" << label << "\"";
+    if (!more_settings.empty())
+        os << ", " << more_settings;
+    os << "];\n";
+}
+
+void link_nodes(std::ofstream& os, unique_node_id_t from, unique_node_id_t to, std::string_view label = "")
+{
+    os << "  \"" << from << "\" -> \"" << to << "\"";
+    if (not label.empty())
+        os << " [label=\"" << label << "\", fontcolor=\"gray50\"]";
+    os << ";\n";
+}
+
+template<typename NodeT>
+unique_node_id_t get_node_unique_id(NodeT const & node)
+{ return static_cast<unique_node_id_t>(std::addressof(node)); }
+
+} /* namespace graphic_dump */
+} /* namespace ParaCL::ast::node */
+
 namespace ParaCL::ast
 {
 
-namespace node
+export
+void dump(AST const & ast, std::filesystem::path const & dot_file, std::filesystem::path const & img_file)
 {
+    constexpr const char dot_extension[] = ".dot";
+    if (dot_file.extension() != dot_extension)
+        throw std::runtime_error("expect .dot (graphiv extension) file as second argument of ' void dump(AST const&, std::filesystem::path const&, std::filesystem::path const&)");
+
+    std::ofstream os(dot_file);
+    if (os.fail())
+        throw std::runtime_error("failed open " + dot_file.string());
+
+    os << "digraph AST {\n";
+    os << "  node [shape=box];\n";
+    os << "  rankdir=TB;\n\n";
+
+    node::graphic_dump::dump(ast.root(), node::graphic_dump::get_node_unique_id(ast.root()), os);
+
+    os << "}\n";
+    os.close();
+
+    std::string dot_cmd = "dot -Tsvg " + dot_file.string() + " -o " + img_file.string();
+    std::system(dot_cmd.c_str());
+}
+
+} /* namespace ParaCL::ast */
+
+namespace ParaCL::ast::node::visit_specializations
+{
+
 template <>
-
-} /* namespace node */
-
-export void dump(std::filesystem::path const & ast_text_representation, std::filesystem::path const & image, std::filesystem::path const & dot)
+void visit(Scope const& node, unique_node_id_t unique_node_id, std::ofstream& os)
 {
-    AST
-}
+    graphic_dump::create_node(os, unique_node_id, "Scope", "style=filled, fillcolor=\"lightgray\"");
 
-export void dump(AST const & ast, std::filesystem::path const & image, std::filesystem::path const & dot)
-{
-
-    std::filesystem::create_directories("../ast-dump");
-    std::string dot_cmd = "dot -Tsvg " + dot.str() + " -o " + image.str();
-    std::system(dot_cmd.c_str());
-}
-
-namespace node
-{
-
-export using dumpable = void(std::ostream&);
-
-template <typename NodeT>
-BasicNode create_same(NodeT node)
-{ return BasicNode::create<NodeT, dumpable>(node); }
-
-
-
-} /* namespace node */
-
-void dump_global_part(AST const & ast, std::filesystem::path const & image, std::filesystem::path const & dot)
-{
-
-};
-
-void link_nodes(std::ostream &out, const void *lhs, const void *rhs);
-void condition_link_type(std::ostream &out, const void *lhs, const void *rhs);
-void body_link_type(std::ostream &out, const void *lhs, const void *rhs);
-void create_node(std::ostream &out, const void *node, std::string_view label, std::string_view more_settings = "");
-void dump_body(std::ostream &out, const void *node, const BlockStmt *body);
-
-void dump(std::ostream &out, const ParaCL::Expression *expr);
-void dump(std::ostream &out, const ParaCL::Statement *stmt);
-void dump(std::ostream &out, const ParaCL::BlockStmt *block);
-
-export void ast_dump(const ProgramAST &progAST, std::string_view filename)
-{
-    const std::string file(filename);
-
-    std::ofstream out(file);
-    if (out.fail())
-        throw std::runtime_error("failed open " + file);
-
-    out << "digraph AST {\n";
-    out << "  node [shape=box];\n";
-
-    const void *rootId = (void *)&progAST; /* just for same code style */
-
-    create_node(out, rootId, "Program");
-
-    for (auto &stmt : progAST.statements)
+    for (auto&& arg: node)
     {
-        dump(out, stmt.get());
-        link_nodes(out, rootId, stmt.get());
-    }
-
-    out << "}\n";
-    out.close();
-
-    std::filesystem::create_directories("../ast-dump");
-    std::string dot_cmd = "dot -Tsvg " + file + " -o ../ast-dump/ast.svg";
-    std::system(dot_cmd.c_str());
-}
-
-void dump(std::ostream &out, const Expression *expr)
-{
-    if (auto bin = static_cast<const BinExpr *>(expr))
-    {
-        std::string label;
-        switch (bin->op())
-        {
-        case binary_op_t::ADD:
-            label = "+";
-            break;
-        case binary_op_t::SUB:
-            label = "-";
-            break;
-        case binary_op_t::MUL:
-            label = "*";
-            break;
-        case binary_op_t::DIV:
-            label = "/";
-            break;
-        case binary_op_t::REM:
-            label = "%";
-            break;
-        case binary_op_t::ISAB:
-            label = ">";
-            break;
-        case binary_op_t::ISABE:
-            label = ">=";
-            break;
-        case binary_op_t::ISLS:
-            label = "<";
-            break;
-        case binary_op_t::ISLSE:
-            label = "<=";
-            break;
-        case binary_op_t::ISEQ:
-            label = "==";
-            break;
-        case binary_op_t::ISNE:
-            label = "!=";
-            break;
-        case binary_op_t::AND:
-            label = "&&";
-            break;
-        case binary_op_t::OR:
-            label = "||";
-            break;
-
-        default:
-            builtin_unreachable_wrapper("here we parse only binary operations");
-        }
-        create_node(out, expr, label, "style=filled, fillcolor=\"lightyellow\"");
-
-        dump(out, bin->left.get());
-        link_nodes(out, expr, bin->left.get());
-
-        dump(out, bin->right.get());
-        link_nodes(out, expr, bin->right.get());
-        return;
-    }
-    else if (auto un = static_cast<const UnExpr *>(expr))
-    {
-        std::string label;
-        switch (un->op())
-        {
-        case unary_op_t::MINUS:
-            label += "-";
-            break;
-        case unary_op_t::PLUS:
-            label += "+";
-            break;
-        case unary_op_t::NOT:
-            label += "not";
-            break;
-        default:
-            builtin_unreachable_wrapper("here we parse onlu unary operation");
-        }
-        create_node(out, expr, label);
-        dump(out, un->operand.get());
-        link_nodes(out, expr, un->operand.get());
-        return;
-    }
-    else if (auto num = static_cast<const NumExpr *>(expr))
-    {
-        std::string label = "Num: " + std::to_string(num->value);
-        create_node(out, expr, label);
-        return;
-    }
-    else if (auto var = static_cast<const VarExpr *>(expr))
-    {
-        std::string label = "Var: " + var->name;
-        create_node(out, expr, label);
-        return;
-    }
-    else if ([[maybe_unused]] auto in = static_cast<const InputExpr *>(expr))
-    {
-        std::string label = "Input";
-        create_node(out, expr, label);
-        return;
-    }
-    else if (auto assign = static_cast<const AssignExpr *>(expr))
-    {
-        std::string label = "Assign expr: " + assign->name;
-        create_node(out, expr, label, "style=filled, fillcolor=\"lightblue\"");
-
-        dump(out, assign->value.get());
-        link_nodes(out, expr, assign->value.get());
-        return;
-    }
-
-    else if (auto combined_assign = static_cast<const CombinedAssingExpr *>(expr))
-    {
-        std::string label = combined_assign->name + " ";
-        switch (combined_assign->op())
-        {
-        case combined_assign_t::ADDASGN:
-            label += "+= :";
-            break;
-        case combined_assign_t::SUBASGN:
-            label += "-= :";
-            break;
-        case combined_assign_t::MULASGN:
-            label += "*= :";
-            break;
-        case combined_assign_t::DIVASGN:
-            label += "/= :";
-            break;
-        case combined_assign_t::REMASGN:
-            label += "%= :";
-            break;
-        default:
-            builtin_unreachable_wrapper("here we parse only combined assign");
-        }
-        create_node(out, expr, label);
-        dump(out, combined_assign->value.get());
-        link_nodes(out, expr, combined_assign->value.get());
-        return;
-    }
-    else if (auto string = static_cast<const StringConstant *>(expr))
-    {
-        create_node(out, expr, "STRING: \\\"" + string->value + "\\\"");
-        return;
-    }
-
-    builtin_unreachable_wrapper("we must return in some else-if");
-}
-
-void dump(std::ostream &out, const Statement *stmt)
-{
-    if (auto assign = static_cast<const AssignStmt *>(stmt))
-    {
-        std::string label = "Assign: " + assign->name + " ";
-        create_node(out, stmt, label, "style=filled, fillcolor=\"lightblue\"");
-
-        dump(out, assign->value.get());
-        link_nodes(out, stmt, assign->value.get());
-        return;
-    }
-    else if (auto combined_assign = static_cast<const CombinedAssingStmt *>(stmt))
-    {
-        std::string label = combined_assign->name;
-        switch (combined_assign->op())
-        {
-        case combined_assign_t::ADDASGN:
-            label += " += :";
-            break;
-        case combined_assign_t::SUBASGN:
-            label += " -= :";
-            break;
-        case combined_assign_t::MULASGN:
-            label += " *= :";
-            break;
-        case combined_assign_t::DIVASGN:
-            label += " /= :";
-            break;
-        case combined_assign_t::REMASGN:
-            label += " %= :";
-            break;
-        default:
-            builtin_unreachable_wrapper("no :)");
-        }
-
-        create_node(out, stmt, label, "style=filled, fillcolor=\"lightblue\"");
-
-        dump(out, combined_assign->value.get());
-        link_nodes(out, stmt, combined_assign->value.get());
-        return;
-    }
-    else if (auto print = static_cast<const PrintStmt *>(stmt))
-    {
-        std::string label = "Print";
-        create_node(out, stmt, label);
-
-        for (auto &arg : print->args)
-        {
-            dump(out, arg.get());
-            link_nodes(out, print, arg.get());
-            continue;
-        }
-        return;
-    }
-    else if (auto whileStmt = static_cast<const WhileStmt *>(stmt))
-    {
-        std::string label = "While";
-        create_node(out, stmt, label);
-
-        dump(out, whileStmt->condition.get());
-        condition_link_type(out, stmt, whileStmt->condition.get());
-        dump_body(out, whileStmt, whileStmt->body.get());
-
-        return;
-    }
-    else if (auto block = static_cast<const BlockStmt *>(stmt))
-    {
-        return dump(out, block);
-    }
-    else if (auto condition = static_cast<const ConditionStatement *>(stmt))
-    {
-        create_node(out, condition, "Condition");
-
-        const auto if_stmt = condition->if_stmt.get();
-        msg_assert(if_stmt, "in condition we always expect if");
-        create_node(out, if_stmt, "IF");
-        link_nodes(out, stmt, if_stmt);
-        dump(out, if_stmt->condition.get());
-        condition_link_type(out, if_stmt, if_stmt->condition.get());
-        dump_body(out, if_stmt, if_stmt->body.get());
-
-        for (auto &elif_stmt : condition->elif_stmts)
-        {
-            create_node(out, elif_stmt.get(), "ELSE IF");
-            link_nodes(out, stmt, elif_stmt.get());
-            dump(out, elif_stmt->condition.get());
-            condition_link_type(out, elif_stmt.get(), elif_stmt->condition.get());
-            dump_body(out, elif_stmt.get(), elif_stmt->body.get());
-        }
-
-        const auto else_stmt = condition->else_stmt.get();
-        if (not else_stmt)
-            return;
-
-        create_node(out, else_stmt, "ELSE");
-        link_nodes(out, stmt, else_stmt);
-        dump_body(out, else_stmt, else_stmt->body.get());
-
-        return;
-    }
-    builtin_unreachable_wrapper("we must return in some else-if");
-}
-
-void dump(std::ostream &out, const ParaCL::BlockStmt *block)
-{
-    std::string label = "Block";
-    create_node(out, block, label);
-
-    for (auto &s : block->statements)
-    {
-        dump(out, s.get());
-        link_nodes(out, block, s.get());
+        graphic_dump::dump(arg, graphic_dump::get_node_unique_id(arg), os);
+        graphic_dump::link_nodes(os, unique_node_id, graphic_dump::get_node_unique_id(arg));
     }
 }
 
-void link_nodes(std::ostream &out, const void *lhs, const void *rhs)
+template <>
+void visit(Print const& node, unique_node_id_t unique_node_id, std::ofstream& os)
 {
-    out << "  \"" << lhs << "\" -> \"" << rhs << "\";\n";
+    graphic_dump::create_node(os, unique_node_id, "Print", "style=filled, fillcolor=\"lightyellow\"");
+
+    for (auto&& arg : node)
+    {
+        graphic_dump::dump(arg, graphic_dump::get_node_unique_id(arg), os);
+        graphic_dump::link_nodes(os, unique_node_id, graphic_dump::get_node_unique_id(arg));
+    }
 }
 
-void create_node(std::ostream &out, const void *node, std::string_view label, std::string_view more_settings)
+template <>
+void visit([[maybe_unused]] Scan const& node, unique_node_id_t unique_node_id, std::ofstream& os)
 {
-    out << "  \"" << node << "\" [label=\"" << label << "\"";
+    graphic_dump::create_node(os, unique_node_id,
+                              "Scan", "style=filled, fillcolor=\"lightgreen\"");
+}
 
-    if (more_settings == "")
+template <>
+void visit(Variable const& node, unique_node_id_t unique_node_id, std::ofstream& os)
+{
+    std::string label = "Variable: " + std::string(node.name());
+    graphic_dump::create_node(os, unique_node_id,
+                              label, "style=filled, fillcolor=\"lightblue\"");
+}
+
+template <>
+void visit(NumberLiteral const& node, unique_node_id_t unique_node_id, std::ofstream& os)
+{
+    std::string label = "Number: " + std::to_string(node.value());
+    graphic_dump::create_node(os, unique_node_id, label);
+}
+
+template <>
+void visit(StringLiteral const& node, unique_node_id_t unique_node_id, std::ofstream& os)
+{
+    std::string label = "String: \\\"" + std::string(node.value()) + "\\\"";
+    graphic_dump::create_node(os, unique_node_id, label);
+}
+
+template <>
+void visit(UnaryOperator const& node, unique_node_id_t unique_node_id, std::ofstream& os)
+{
+    std::string op_name;
+    switch (node.type())
     {
-        out << "];\n";
-        return;
+        case UnaryOperator::MINUS: op_name = "-"; break;
+        case UnaryOperator::PLUS:  op_name = "+"; break;
+        case UnaryOperator::NOT:   op_name = "not"; break;
+    }
+    
+    std::string label = "Unary: " + op_name;
+    graphic_dump::create_node(os, unique_node_id, label, "style=filled, fillcolor=\"lightyellow\"");
+
+    auto&& arg_node = node.arg();
+    graphic_dump::dump(arg_node, graphic_dump::get_node_unique_id(arg_node), os);
+    graphic_dump::link_nodes(os, unique_node_id,
+                             graphic_dump::get_node_unique_id(arg_node),
+                             "arg");
+}
+
+template <>
+void visit(BinaryOperator const& node, unique_node_id_t unique_node_id, std::ofstream& os)
+{
+    std::string label = "Binary: ";
+    switch (node.type())
+    {
+        case BinaryOperator::AND:     label += "&&"; break;
+        case BinaryOperator::OR:      label += "||"; break;
+        case BinaryOperator::ADD:     label += "+"; break;
+        case BinaryOperator::SUB:     label += "-"; break;
+        case BinaryOperator::MUL:     label += "*"; break;
+        case BinaryOperator::DIV:     label += "/"; break;
+        case BinaryOperator::REM:     label += "%"; break;
+        case BinaryOperator::ISAB:    label += ">"; break;
+        case BinaryOperator::ISABE:   label += ">="; break;
+        case BinaryOperator::ISLS:    label += "<"; break;
+        case BinaryOperator::ISLSE:   label += "<="; break;
+        case BinaryOperator::ISEQ:    label += "=="; break;
+        case BinaryOperator::ISNE:    label += "!="; break;
+        case BinaryOperator::ASGN:    label += "="; break;
+        case BinaryOperator::ADDASGN: label += "+="; break;
+        case BinaryOperator::SUBASGN: label += "-="; break;
+        case BinaryOperator::MULASGN: label += "*="; break;
+        case BinaryOperator::DIVASGN: label += "/="; break;
+        case BinaryOperator::REMASGN: label += "%="; break;
+        default:                       label += "??"; break;
     }
 
-    out << ", " << more_settings << "];\n";
+    graphic_dump::create_node(os, unique_node_id, label, "style=filled, fillcolor=\"lightyellow\"");
+
+    auto&& left_node = node.larg();
+    graphic_dump::dump(left_node, graphic_dump::get_node_unique_id(left_node), os);
+    graphic_dump::link_nodes(os, unique_node_id,
+                             graphic_dump::get_node_unique_id(left_node),
+                             "left");
+
+    auto&& right_node = node.rarg();
+    graphic_dump::dump(right_node, graphic_dump::get_node_unique_id(right_node), os);
+    graphic_dump::link_nodes(os, unique_node_id,
+                             graphic_dump::get_node_unique_id(right_node),
+                             "right");
 }
 
-void condition_link_type(std::ostream &out, const void *lhs, const void *rhs)
+template <>
+void visit(While const& node, unique_node_id_t unique_node_id, std::ofstream& os)
 {
-    out << "  \"" << lhs << "\" -> \"" << rhs << "\" [label=\"cond\", fontcolor=\"gray50\"];\n";
+    graphic_dump::create_node(os, unique_node_id, "While", "style=filled, fillcolor=\"lightpink\"");
+
+    auto&& cond_node = node.condition();
+    graphic_dump::dump(cond_node, graphic_dump::get_node_unique_id(cond_node), os);
+    graphic_dump::link_nodes(os, unique_node_id,
+                             graphic_dump::get_node_unique_id(cond_node),
+                             "condition");
+
+    auto&& body_node = node.body();
+    graphic_dump::dump(body_node, graphic_dump::get_node_unique_id(body_node), os);
+    graphic_dump::link_nodes(os, unique_node_id,
+                             graphic_dump::get_node_unique_id(body_node), 
+                             "body");
 }
 
-void body_link_type(std::ostream &out, const void *lhs, const void *rhs)
+template <>
+void visit(If const& node, unique_node_id_t unique_node_id, std::ofstream& os)
 {
-    out << "  \"" << lhs << "\" -> \"" << rhs << "\" [label=\"body\", fontcolor=\"gray50\"];\n";
+    graphic_dump::create_node(os, unique_node_id, "If", "style=filled, fillcolor=\"lightpink\"");
+
+    auto&& cond_node = node.condition();
+    graphic_dump::dump(cond_node, graphic_dump::get_node_unique_id(cond_node), os);
+    graphic_dump::link_nodes(os, unique_node_id,
+                             graphic_dump::get_node_unique_id(cond_node),
+                             "condition");
+
+    auto&& body_node = node.body();
+    graphic_dump::dump(body_node, graphic_dump::get_node_unique_id(body_node), os);
+
+    graphic_dump::link_nodes(os, unique_node_id, 
+                             graphic_dump::get_node_unique_id(body_node), 
+                             "body");
 }
 
-void dump_body(std::ostream &out, const void *node, const BlockStmt *body)
+template <>
+void visit(Else const& else_node, unique_node_id_t unique_node_id, std::ofstream& os)
 {
+    graphic_dump::create_node(os, unique_node_id, "Else", "style=filled, fillcolor=\"lightpink\"");
 
-    dump(out, body);
-    body_link_type(out, node, body);
+    auto&& body_node = else_node.body();
+    graphic_dump::dump(body_node, graphic_dump::get_node_unique_id(body_node), os);
+    graphic_dump::link_nodes(os, unique_node_id,
+                             graphic_dump::get_node_unique_id(body_node),
+                             "body");
 }
 
-} /* namespace ParaCL */
+template <>
+void visit(Condition const& node, unique_node_id_t unique_node_id, std::ofstream& os)
+{
+    graphic_dump::create_node(os, unique_node_id, "Condition", "style=filled, fillcolor=\"lightpink\"");
+
+    auto&& first_if = true;
+    for (auto&& if_node : node.get_ifs())
+    {
+        graphic_dump::dump(if_node, graphic_dump::get_node_unique_id(if_node), os);
+        std::string label = first_if ? "if" : "elif";
+        graphic_dump::link_nodes(os, unique_node_id,
+                                 graphic_dump::get_node_unique_id(if_node),
+                                 label);
+        first_if = false;
+    }
+
+    auto&& else_node = node.get_else();
+    graphic_dump::dump(else_node, graphic_dump::get_node_unique_id(else_node), os);
+    graphic_dump::link_nodes(os, unique_node_id,
+                             graphic_dump::get_node_unique_id(else_node),
+                             "else");
+}
+
+//-----------------------------------------------------------------------------
+} /* namespace ParaCL::ast::node::visit_specializations */
+//-----------------------------------------------------------------------------

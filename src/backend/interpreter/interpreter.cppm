@@ -8,16 +8,13 @@ module;
 #include <unordered_map>
 #include <vector>
 #include <filesystem>
-
-#include "global/global.hpp"
-#include "parser/parser.hpp"
-
+#include <type_traits>
 #include "log/log_api.hpp"
 
 export module interpreter;
 
 import interpreter_name_table;
-export import interpreter_optoins;
+// export import interpreter_optoins;
 
 export import ast;
 import ast_read;
@@ -25,462 +22,315 @@ import ast_read;
 namespace ParaCL::ast::node
 {
 
-enum FromPrint {from_print};
-
-using executable_exression = int(backend::interpreter::nametable::Nametable&);
+using executable_expression = int(backend::interpreter::nametable::Nametable&);
 using executable_statement = void(backend::interpreter::nametable::Nametable&);
-using printable = void(backend::interpreter::nametable::Nametable&, FromPrint);
+using printable_string = std::string_view();
 
-template <typename NodeT>
-BasicNode create(NodeT node)
-{
-    static_assert(false, "using unspecialized create.");
-}
+static_assert(not std::is_same_v<executable_expression, executable_statement>, "visit specializations must be different");
+static_assert(not std::is_same_v<executable_expression, printable_string>    , "visit specializations must be different");
+static_assert(not std::is_same_v<executable_statement, printable_string>     , "visit specializations must be different");
 
+void 
 
-namespace visit_specializations
-{
-
-template <>
-void visit(Print const & print, backend::interpreter::nametable::Nametable& nametable)
-{
-    for (auto&& arg: print)
-        visit(arg, nametable, from_print);
-}
-
-template <>
-int visit([[maybe_unused]] Scan const & scan, backend::interpreter::nametable::Nametable& nametable)
-{
-    int scaned_value;
-    std::cin >> scaned_value;
-    return scaned_value;
-}
-
-
-template <>
-
-
-} /* namespace visit_specializations */
 } /* namespace ParaCL::ast::node */
+
+namespace ParaCL::ast::node::visit_specializations
+{
+
+//-----------------------------------------------------------------------------
+// PRINT
+//-----------------------------------------------------------------------------
+template <>
+void visit(Print const& print, backend::interpreter::nametable::Nametable& nametable)
+{
+    LOGINFO("paracl: interpreter: execute print statement");
+
+    for (auto&& arg : print)
+    {
+        if (support<printable_string>(arg))
+            std::cout << visit<printable_string>(arg);
+        else
+            std::cout << visit<executable_expression>(arg, nametable);
+    }
+
+    std::cout << std::endl;
+}
+
+//-----------------------------------------------------------------------------
+// SCAN
+//-----------------------------------------------------------------------------
+template <>
+int visit(Scan const& scan, backend::interpreter::nametable::Nametable& nametable)
+{
+    int value;
+    std::cin >> value;
+    LOGINFO("paracl: interpreter: scan value: {}", value);
+    return value;
+}
+
+//-----------------------------------------------------------------------------
+// VARIABLE
+//-----------------------------------------------------------------------------
+template <>
+int visit(Variable const& var, backend::interpreter::nametable::Nametable& nametable)
+{
+    auto&& var_name = var.name();
+    auto&& value = nametable.get_variable_value(var_name);
+    
+    LOGINFO("paracl: interpreter: get variable '{}' = {}", var_name, value.value());
+    return value.value();
+}
+
+//-----------------------------------------------------------------------------
+// NUMBER LITERAL
+//-----------------------------------------------------------------------------
+template <>
+int visit(NumberLiteral const& num, backend::interpreter::nametable::Nametable& nametable)
+{
+    LOGINFO("paracl: interpreter: number literal: {}", num.value());
+    return num.value();
+}
+
+//-----------------------------------------------------------------------------
+// STRING LITERAL
+//-----------------------------------------------------------------------------
+template <>
+std::string_view visit(StringLiteral const& str)
+{
+    LOGINFO("paracl: interpreter: string literal: \"{}\"", str.value());
+    return str.value();
+}
+
+//-----------------------------------------------------------------------------
+// UNARY OPERATOR
+//-----------------------------------------------------------------------------
+template <>
+int visit(UnaryOperator const& unary, backend::interpreter::nametable::Nametable& nametable)
+{
+    auto&& arg_value = visit<executable_expression>(unary.arg(), nametable);
+    
+    decltype(arg_value) result;
+    switch (unary.type())
+    {
+        case UnaryOperator::MINUS: result = -arg_value; break;
+        case UnaryOperator::PLUS:  result = +arg_value; break;
+        case UnaryOperator::NOT:   result = !arg_value; break;
+        default: __builtin_unreachable();
+    }
+    
+    LOGINFO("paracl: interpreter: unary operation result: {}", result);
+    return result;
+}
+
+//-----------------------------------------------------------------------------
+// BINARY OPERATOR
+//-----------------------------------------------------------------------------
+template <>
+int visit(BinaryOperator const& bin, backend::interpreter::nametable::Nametable& nametable)
+{
+    auto&& left = visit<executable_expression>(bin.larg(), nametable);
+    auto&& right = visit<executable_expression>(bin.rarg(), nametable);
+
+    decltype(left) result;
+
+    switch (bin.type())
+    {
+        case BinaryOperator::AND:     result = left && right; break;
+        case BinaryOperator::OR:      result = left || right; break;
+        case BinaryOperator::ADD:     result = left + right; break;
+        case BinaryOperator::SUB:     result = left - right; break;
+        case BinaryOperator::MUL:     result = left * right; break;
+        case BinaryOperator::DIV:     result = left / right; break;
+        case BinaryOperator::REM:     result = left % right; break;
+        case BinaryOperator::ISAB:    result = left > right; break;
+        case BinaryOperator::ISABE:   result = left >= right; break;
+        case BinaryOperator::ISLS:    result = left < right; break;
+        case BinaryOperator::ISLSE:   result = left <= right; break;
+        case BinaryOperator::ISEQ:    result = left == right; break;
+        case BinaryOperator::ISNE:    result = left != right; break;
+        case BinaryOperator::ASGN:
+        case BinaryOperator::ADDASGN:
+        case BinaryOperator::SUBASGN:
+        case BinaryOperator::MULASGN:
+        case BinaryOperator::DIVASGN:
+        case BinaryOperator::REMASGN:
+            throw std::runtime_error("Assignment operators should be handled by statement nodes");
+        default: __builtin_unreachable();
+    }
+
+    LOGINFO("paracl: interpreter: binary operation result: {}", result);
+    return result;
+}
+
+//-----------------------------------------------------------------------------
+// WHILE
+//-----------------------------------------------------------------------------
+template <>
+void visit(While const& while_node, backend::interpreter::nametable::Nametable& nametable)
+{
+    LOGINFO("paracl: interpreter: execute WHILE statement");
+    
+    while (visit<executable_expression>(while_node.condition(), nametable))
+        visit<executable_statement>(while_node.body(), nametable);
+}
+
+//-----------------------------------------------------------------------------
+// IF
+//-----------------------------------------------------------------------------
+template <>
+void visit(If const& if_node, backend::interpreter::nametable::Nametable& nametable)
+{
+    LOGINFO("paracl: interpreter: execute IF statement");
+    
+    if (visit<executable_expression>(if_node.condition(), nametable)) return;
+
+    visit<executable_statement>(if_node.body(), nametable);
+}
+
+//-----------------------------------------------------------------------------
+// ELSE
+//-----------------------------------------------------------------------------
+template <>
+void visit(Else const& else_node, backend::interpreter::nametable::Nametable& nametable)
+{
+    LOGINFO("paracl: interpreter: execute ELSE statement");
+    visit<executable_statement>(else_node.body(), nametable);
+}
+
+//-----------------------------------------------------------------------------
+// CONDITION
+//-----------------------------------------------------------------------------
+template <>
+void visit(Condition const& condition, backend::interpreter::nametable::Nametable& nametable)
+{
+    LOGINFO("paracl: interpreter: execute CONDITION statement");
+    
+    // Проверяем все if-ы по порядку
+    for (const auto& if_node : condition.get_ifs())
+    {
+        if (not visit<executable_expression>(if_node.condition(), nametable)) continue;
+
+        return visit<executable_statement>(if_node.body(), nametable);
+    }
+
+    return visit<executable_statement>(condition.get_else(), nametable);
+}
+
+//-----------------------------------------------------------------------------
+// SCOPE
+//-----------------------------------------------------------------------------
+template <>
+void visit(Scope const& scope, backend::interpreter::nametable::Nametable& nametable)
+{
+    LOGINFO("paracl: interpreter: enter scope");
+    nametable.new_scope();
+    
+    for (const auto& stmt : scope)
+        visit<executable_statement>(stmt, nametable);
+    
+    nametable.leave_scope();
+    LOGINFO("paracl: interpreter: leave scope");
+}
+
+} /* namespace ParaCL::ast::node::visit_specializations */
 
 namespace ParaCL::backend::interpreter
 {
 
-
-
-export 
+export
 void interpret(std::filesystem::path const & ast_txt)
 {
+    LOGINFO("paracl: interpreter: start");
+
     auto&& ast = ast::read(ast_txt);
-}
 
-template <typename Nametable>
-concept INametable = std::is_constructible<Nametable> && requires(Nametable nt, std::string_view name, int value) {
-    { nt.new_scope() } -> std::same_as<void>;
-    { nt.leave_scope() } -> std::same_as<void>;
-    { nt.get_variable_value(name) } -> std::same_as<int>;
-    { nt.set_value(name, value) } -> std::same_as<void>;
-};
+    nametable::Nametable nametable;
+    nametable.new_scope(); /* global scope */
 
+    ast::node::visit<node::executable_statement>(ast.root(), nametable);    
 
-template <INametable Nametable>
-class Interpreter final
-{
-  private:
-    ProgramAST ast_;
-    Nametable nametable_;
-
-    /* Statement execution functions */
-    void execute(const Statement *stmt);
-    void execute(const AssignStmt *assign);
-    void execute(const CombinedAssingStmt *combined_assign_statement);
-    void execute(const PrintStmt *print_statement);
-    void execute(const WhileStmt *while_stmt);
-    void execute(const BlockStmt *block);
-    void execute(const ConditionStatement *condition);
-
-    /* Expression execution functions */
-    int execute(const Expression *expr);
-    int execute(const BinExpr *bin);
-    int execute(const UnExpr *un);
-    int execute(const NumExpr *num);
-    int execute(const VarExpr *var);
-    int execute([[maybe_unused]] const InputExpr *in);
-    int execute(const AssignExpr *assignExpr);
-    int execute(const CombinedAssingExpr *combinedAssingExpr);
-
-    /* helper executers */
-    int execute(int lhs, int rhs, binary_op_t binary_operator);
-    int execute(int rhs, int value, combined_assign_t combined_assign);
-    int execute(int rhs, unary_op_t unary_operator);
-
-    std::vector<Executable> nodes_;
-
-  public:
-    Interpreter(const InterpreterOptions &opt);
-
-    void interpret();
-};
-
-Interpreter<Nametable, ASTBuilder>::Interpreter(const InterpreterOptions &opt)
-{
-    LOGINFO("paracl: interpreter: ctor");
-
-    if (opt.sources.size() == 0)
-        throw std::invalid_argument("no input files given to interpreter");
-
-    if (opt.sources.size() > 1)
-        throw std::invalid_argument("now interpreter supported only one file programs");
-
-    const std::filsystem::path &source = opt.sources[0];
-
-    ast_ = ASTBUilder{source}.ast();
-
-    /* create global scope */
-    nametable_.new_scope();
-}
-
-void Interpreter<Nametable, ASTBuilder>::interpret()
-{
-    LOGINFO("paracl: interpreter: start interpret");
-
-    for (const auto &stmt : ast_.statements)
-        execute(stmt.get());
-
-    LOGINFO("paracl: interpreter: interpret completed");
-}
-
-void Interpreter<Nametable, ASTBuilder>::execute(const Statement *stmt)
-{
-    if (auto assign = static_cast<const AssignStmt *>(stmt))
-        return execute(assign);
-
-    if (auto combined_assign_statement = static_cast<const CombinedAssingStmt *>(stmt))
-        return execute(combined_assign_statement);
-
-    if (auto print_statement = static_cast<const PrintStmt *>(stmt))
-        return execute(print_statement);
-
-    if (auto while_stmt = static_cast<const WhileStmt *>(stmt))
-        return execute(while_stmt);
-
-    if (auto block = static_cast<const BlockStmt *>(stmt))
-        return execute(block);
-
-    if (auto condition = static_cast<const ConditionStatement *>(stmt))
-        return execute(condition);
-
-    builtin_unreachable_wrapper("we must return in some else-if");
-}
-
-int Interpreter<Nametable, ASTBuilder>::execute(const Expression *expr)
-{
-    if (auto bin = static_cast<const BinExpr *>(expr))
-        return execute(bin);
-
-    if (auto un = static_cast<const UnExpr *>(expr))
-        return execute(un);
-
-    if (auto num = static_cast<const NumExpr *>(expr))
-        return execute(num);
-
-    if (auto var = static_cast<const VarExpr *>(expr))
-        return execute(var);
-
-    if (auto in = static_cast<const InputExpr *>(expr))
-        return execute(in);
-
-    if (auto assignExpr = static_cast<const AssignExpr *>(expr))
-        return execute(assignExpr);
-
-    if (auto combinedAssingExpr = static_cast<const CombinedAssingExpr *>(expr))
-        return execute(combinedAssingExpr);
-
-    builtin_unreachable_wrapper("we must return in some else-if");
-}
-
-void Interpreter<Nametable, ASTBuilder>::execute(const WhileStmt *while_stmt)
-{
-    LOGINFO("paracl: interpreter: execute WHILE statement");
-
-    const std::vector<std::unique_ptr<Statement>> &bodyStmts = while_stmt->body->statements;
-
-    while (execute(while_stmt->condition.get()))
-    {
-        for (auto &s : bodyStmts)
-            execute(s.get());
-    }
-
-    LOGINFO("paracl: interpreter: leave_scope WHILE statement");
-}
-
-void Interpreter<Nametable, ASTBuilder>::execute(const BlockStmt *block)
-{
-    LOGINFO("paracl: interpreter: execute block statement");
-
-    const std::vector<std::unique_ptr<Statement>> &blockStmts = block->statements;
-
-    bool blockIsEmpty = blockStmts.empty();
-
-    if (not blockIsEmpty)
-        nametable_.new_scope();
-
-    for (auto &s : block->statements)
-        execute(s.get());
-
-    if (not blockIsEmpty)
-        nametable_.leave_scope();
-}
-
-void Interpreter<Nametable, ASTBuilder>::execute(const ConditionStatement *condition)
-{
-    LOGINFO("paracl: interpreter: execute condition statement");
-
-    auto if_stmt = condition->if_stmt.get();
-    msg_assert(if_stmt, "in condition we always expect IF");
-
-    bool flag = execute(if_stmt->condition.get());
-    LOGINFO("paracl: interpreter: condition in IF: {}", flag ? "true" : "false");
-    if (flag)
-        return execute(if_stmt->body.get());
-
-    for (auto &elif_statement : condition->elif_stmts)
-    {
-        flag = execute(elif_statement->condition.get());
-        LOGINFO("paracl: interpreter: condition in ELSE-IF: {}", flag ? "true" : "false");
-
-        if (not flag)
-            continue;
-
-        return execute(elif_statement->body.get());
-    }
-
-    LOGINFO("paracl: interpreter: no ELSE in condition");
-
-    auto *else_stmt = condition->else_stmt.get();
-
-    if (not else_stmt)
-        return; /* no ELSE */
-
-    LOGINFO("paracl: interpreter: condition ELSE");
-
-    return execute(else_stmt->body.get());
-}
-
-int Interpreter<Nametable, ASTBuilder>::execute(const BinExpr *bin)
-{
-    auto leftExpr = static_cast<const Expression *>(bin->left.get());
-    auto rightExpr = static_cast<const Expression *>(bin->right.get());
-
-    msg_assert(leftExpr, "left bin expr child is not expr");
-    msg_assert(rightExpr, "rihgt bin expr child is not expr");
-
-    int leftResult = execute(leftExpr);
-    int rightResult = execute(rightExpr);
-    int result = execute(leftResult, rightResult, bin->op());
-
-    LOGINFO("paracl: interpreter: execute binary expresion: {}", result);
-
-    return result;
-}
-
-int Interpreter<Nametable, ASTBuilder>::execute(const UnExpr *un)
-{
-    auto child_expr = static_cast<const Expression *>(un->operand.get());
-    int child_value = execute(child_expr);
-    int result = execute(child_value, un->op());
-    LOGINFO("paracl: interpreter: execute unary expresion: {}", result);
-    return result;
-}
-
-int Interpreter<Nametable, ASTBuilder>::execute(const NumExpr *num)
-{
-    LOGINFO("paracl: interpreter: get number value: {}", num->value);
-    return num->value;
-}
-
-int Interpreter<Nametable, ASTBuilder>::execute(const VarExpr *var)
-{
-    std::optional<int> varValue = nametable_.get_variable_value(var->name);
-    if (not varValue.has_value())
-        throw std::runtime_error("'" + var->name + "' was not declared in this scope\n");
-
-    LOGINFO("paracl: interpreter: get variable value: \"{}\" = {}", var->name, varValue.value());
-
-    return varValue.value();
-}
-
-int Interpreter<Nametable, ASTBuilder>::execute([[maybe_unused]] const InputExpr *in)
-{
-    int value = 0;
-    std::cin >> value;
-    return value;
-}
-
-int Interpreter<Nametable, ASTBuilder>::execute(const AssignExpr *assignExpr)
-{
-    auto e = static_cast<const Expression *>(assignExpr->value.get());
-    msg_assert(e, "BinExpr children are not Expression");
-
-    int result = execute(e);
-
-    nametable_.set_value(assignExpr->name, result);
-
-    LOGINFO("paracl: interpreter: execute assign expression: \"{}\" = {}", assignExpr->name, result);
-
-    return result;
-}
-
-int Interpreter<Nametable, ASTBuilder>::execute(const CombinedAssingExpr *combinedAssingExpr)
-{
-    std::optional<int> varValue = nametable_.get_variable_value(combinedAssingExpr->name);
-    if (not varValue.has_value())
-        throw std::runtime_error("error: '" + combinedAssingExpr->name + "' was not declared in this scope\n");
-
-    auto expr = static_cast<const Expression *>(combinedAssingExpr->value.get());
-    msg_assert(expr, "BinExpr children are not Expression");
-
-    int result = execute(expr);
-
-    value = execute(value, result, combinedAssingExpr->op());
-    nametable_.set_value(combinedAssingExpr->name, value);
-
-    LOGINFO("paracl: interpreter: execute combined assign expression: \"{}\" = {}", combinedAssingExpr->name, value);
-
-    return value;
-}
-
-int Interpreter<Nametable, ASTBuilder>::execute(int lhs, int rhs, binary_op_t binary_operator)
-{
-    switch (binary_operator)
-    {
-    case binary_op_t::ADD:
-        return lhs + rhs;
-    case binary_op_t::SUB:
-        return lhs - rhs;
-    case binary_op_t::MUL:
-        return lhs * rhs;
-    case binary_op_t::DIV:
-        return lhs / rhs;
-    case binary_op_t::REM:
-        return lhs % rhs;
-    case binary_op_t::ISAB:
-        return lhs > rhs;
-    case binary_op_t::ISABE:
-        return lhs >= rhs;
-    case binary_op_t::ISLS:
-        return lhs < rhs;
-    case binary_op_t::ISLSE:
-        return lhs <= rhs;
-    case binary_op_t::ISEQ:
-        return lhs == rhs;
-    case binary_op_t::ISNE:
-        return lhs != rhs;
-    case binary_op_t::AND:
-        return lhs && rhs;
-    case binary_op_t::OR:
-        return lhs || rhs;
-    default:
-        builtin_unreachable_wrapper("here we parse only binary operation");
-    }
-    builtin_unreachable_wrapper("we must return in switch");
-}
-
-int Interpreter<Nametable, ASTBuilder>::execute(int rhs, unary_op_t unary_operator)
-{
-    switch (unary_operator)
-    {
-    case unary_op_t::PLUS:
-        return +rhs;
-    case unary_op_t::MINUS:
-        return -rhs;
-    case unary_op_t::NOT:
-        return not rhs;
-    default:
-        builtin_unreachable_wrapper("here we parse only unary operation");
-    }
-    builtin_unreachable_wrapper("we must return in switch");
-}
-
-int Interpreter<Nametable, ASTBuilder>::execute(int rhs, int value, combined_assign_t combined_assign)
-{
-    switch (combined_assign)
-    {
-    case combined_assign_t::ADDASGN:
-        rhs += value;
-        break;
-    case combined_assign_t::SUBASGN:
-        rhs -= value;
-        break;
-    case combined_assign_t::MULASGN:
-        rhs *= value;
-        break;
-    case combined_assign_t::DIVASGN:
-        rhs /= value;
-        break;
-    case combined_assign_t::REMASGN:
-        rhs %= value;
-        break;
-    default:
-        builtin_unreachable_wrapper("here we parse only combined assign operations");
-    }
-    return rhs;
-}
-
-void Interpreter<Nametable, ASTBuilder>::execute(const AssignStmt *assign)
-{
-    auto e = static_cast<const Expression *>(assign->value.get());
-    msg_assert(e, "BinExpr children are not Expression");
-
-    int result = execute(e);
-    nametable_.set_value(assign->name, result);
-
-    LOGINFO("paracl: interpreter: execute assign statement: \"{}\" = {}", assign->name, result);
-}
-
-void Interpreter<Nametable, ASTBuilder>::execute(const CombinedAssingStmt *combined_assign_statement)
-{
-    std::optional<int> varValue = nametable_.get_variable_value(combined_assign_statement->name);
-    int value = varValue.value();
-    if (not varValue.has_value())
-        throw std::runtime_error("error: '" + combined_assign_statement->name +
-                                 "' was not declared in this scope\n"
-                                 "paracl: failed with exit code 1");
-
-    auto expr = static_cast<const Expression *>(combined_assign_statement->value.get());
-    msg_assert(expr, "BinExpr children are not Expression");
-
-    int result = execute(expr);
-
-    value = execute(value, result, combined_assign_statement->op());
-    nametable_.set_value(combined_assign_statement->name, value);
-
-    LOGINFO("paracl: interpreter: execute combined assign statement: \"{}\" = {}", combined_assign_statement->name,
-            value);
-}
-
-void Interpreter<Nametable, ASTBuilder>::execute(const PrintStmt *print_statement)
-{
-    LOGINFO("paracl: interpreter: execute print statement");
-
-    for (auto &arg : print_statement->args)
-    {
-        if (auto string = static_cast<const StringConstant *>(arg.get()))
-        {
-            std::cout << string->value << std::flush;
-            continue;
-        }
-        if (auto expr = static_cast<const Expression *>(arg.get()))
-        {
-            int result = execute(expr);
-            std::cout << result << std::flush;
-            continue;
-        }
-        builtin_unreachable_wrapper("bad 'print_statement' args type");
-    }
-
-    std::cout << std::endl;
-    return;
+    LOGINFO("paracl: interpreter: completed");
 }
 
 } /* namespace ParaCL::backend::interpreter */
+
+//-----------------------------------------------------------------------------
+
+namespace ParaCL::ast::node
+{
+
+template <>
+BasicNode create<Print>(Print node)
+{
+    return BasicNode::Actions<executable_statement>::create(std::move(node));
+}
+
+template <>
+BasicNode create<Scan>(Scan node)
+{
+    return BasicNode::Actions<executable_expression, executable_statement>::create(std::move(node));
+}
+
+template <>
+BasicNode create<Variable>(Variable node)
+{
+    return BasicNode::Actions<executable_expression, executable_statement>::create(std::move(node));
+}
+
+template <>
+BasicNode create<NumberLiteral>(NumberLiteral node)
+{
+    return BasicNode::Actions<executable_expression, executable_statement>::create(std::move(node));
+}
+
+template <>
+BasicNode create<StringLiteral>(StringLiteral node)
+{
+    return BasicNode::Actions<printable_string>::create(std::move(node));
+}
+
+template <>
+BasicNode create<UnaryOperator>(UnaryOperator node)
+{
+    return BasicNode::Actions<executable_expression>::create(std::move(node));
+}
+
+template <>
+BasicNode create<BinaryOperator>(BinaryOperator node)
+{
+    return BasicNode::Actions<executable_expression>::create(std::move(node));
+}
+
+template <>
+BasicNode create<While>(While node)
+{
+    return BasicNode::Actions<executable_statement>::create(std::move(node));
+}
+
+template <>
+BasicNode create<If>(If node)
+{
+    return BasicNode::Actions<executable_statement>::create(std::move(node));
+}
+
+template <>
+BasicNode create<Else>(Else node)
+{
+    return BasicNode::Actions<executable_statement>::create(std::move(node));
+}
+
+template <>
+BasicNode create<Condition>(Condition node)
+{
+    return BasicNode::Actions<executable_statement>::create(std::move(node));
+}
+
+template <>
+BasicNode create<Scope>(Scope node)
+{
+    return BasicNode::Actions<executable_statement>::create(std::move(node));
+}
+
+//-----------------------------------------------------------------------------
+} /* namespace ParaCL::ast::node */
+//-----------------------------------------------------------------------------

@@ -140,7 +140,7 @@ STRING      \"[^"]*\"
     ErrorHandler::throwError(*yylloc,
                             "unexpected character '" + std::string(yytext) + "'",
                             {1, 1, 1});
-                        
+
     return yy::parser::token::YYerror;
 }
 

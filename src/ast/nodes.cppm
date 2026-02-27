@@ -6,6 +6,7 @@ module;
 #include <string_view>
 #include <vector>
 #include <initializer_list>
+#include <iostream>
 
 export module ast_nodes;
 
@@ -29,9 +30,6 @@ public:
 public:
     Scope() = default;
     Scope(size_t size) : std::vector<BasicNode>(size)
-    {}
-
-    Scope(std::vector<BasicNode> nodes) : std::vector<BasicNode>(std::move(nodes))
     {}
 
     Scope(std::vector<BasicNode>&& nodes) : std::vector<BasicNode>(nodes)
@@ -67,11 +65,13 @@ public:
     using std::vector<BasicNode>::begin;
     using std::vector<BasicNode>::end;
     using std::vector<BasicNode>::size;
+    using std::vector<BasicNode>::operator[];
+    using std::vector<BasicNode>::iterator;
+    using std::vector<BasicNode>::const_iterator;
+
 public:
     Print() = default;
-    Print(std::vector<BasicNode> args) : std::vector<BasicNode>(std::move(args))
-    {}
-    Print(std::vector<BasicNode>&& args) : std::vector<BasicNode>(args)
+    Print(std::vector<BasicNode>&& args) : std::vector<BasicNode>(std::move(args))
     {}
     Print(std::initializer_list<BasicNode> il) : std::vector<BasicNode>(il)
     {}
@@ -98,12 +98,12 @@ private:
     BasicNode arg_;
     UnaryOperatorT type_;
 public:
-    UnaryOperator(UnaryOperatorT type, BasicNode arg) :
-    arg_(std::move(arg)), type_(type)
+    UnaryOperator(UnaryOperatorT type, BasicNode const &arg) :
+    arg_(arg), type_(type)
     {}
 
     UnaryOperator(UnaryOperatorT type, BasicNode&& arg) :
-    arg_(arg), type_(type)
+    arg_(std::move(arg)), type_(type)
     {}
 
 public:
@@ -148,13 +148,22 @@ private:
     BasicNode larg_;
     BasicNode rarg_;
     BinaryOperatorT type_;
+
 public:
-    BinaryOperator(BinaryOperatorT type, BasicNode larg, BasicNode rarg) :
-    larg_(std::move(larg)), rarg_(std::move(rarg)), type_(type)
+    BinaryOperator(BinaryOperatorT type, BasicNode const &larg, BasicNode const &rarg) :
+    larg_(larg), rarg_(rarg), type_(type)
     {}
 
     BinaryOperator(BinaryOperatorT type, BasicNode&& larg, BasicNode&& rarg) :
-    larg_(larg), rarg_(rarg), type_(type)
+    larg_(std::move(larg)), rarg_(std::move(rarg)), type_(type)
+    {}
+
+    BinaryOperator(BinaryOperatorT type, BasicNode const &larg, BasicNode&& rarg) :
+    larg_(larg), rarg_(std::move(rarg)), type_(type)
+    {}
+
+    BinaryOperator(BinaryOperatorT type, BasicNode&& larg, BasicNode const &rarg) :
+    larg_(std::move(larg)), rarg_(rarg), type_(type)
     {}
 
 public:
@@ -174,7 +183,8 @@ class NumberLiteral final
 private:
     int value_;
 public:
-    explicit NumberLiteral(int value) : value_(value)
+    explicit NumberLiteral(int value) :
+        value_(value)
     {}
 public:
     int value() const noexcept
@@ -207,13 +217,22 @@ private:
     BasicNode body_;
 public:
     ConditionWithBody() = default;
-    ConditionWithBody(BasicNode condition, BasicNode body) :
-    condition_(std::move(condition)), body_(std::move(body))
+    ConditionWithBody(BasicNode const &condition, BasicNode const &body) :
+    condition_(condition), body_(body)
+    {}
+
+    ConditionWithBody(BasicNode const &condition, BasicNode &&body) :
+    condition_(condition), body_(std::move(body))
+    {}
+
+    ConditionWithBody(BasicNode &&condition, BasicNode const &body) :
+    condition_(std::move(condition)), body_(body)
     {}
 
     ConditionWithBody(BasicNode&& condition, BasicNode&& body) :
-    condition_(condition), body_(body)
+    condition_(std::move(condition)), body_(std::move(body))
     {}
+
 public:
     BasicNode const &condition() const & noexcept
     { return condition_; }
@@ -250,9 +269,9 @@ class Else final
 private:
     BasicNode body_;
 public:
-    Else(BasicNode body) : body_(std::move(body))
+    Else(BasicNode const &body) : body_(body)
     {}
-    Else(BasicNode&& body) : body_(body)
+    Else(BasicNode&& body) : body_(std::move(body))
     {}
 public:
     BasicNode const &body() const & noexcept

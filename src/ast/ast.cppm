@@ -27,7 +27,6 @@ export import ast_nodes;
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-
 namespace ParaCL::ast
 {
 
@@ -37,11 +36,15 @@ export
 class AST
 {
 private:
-    node::BasicNode root_; /* global scope */
+    node::BasicNode root_;
 
 public:
-    AST(node::BasicNode&& root) :
+    AST(node::BasicNode const & root) : /* too long, because all tree will copy */
         root_(root)
+    {}
+
+    AST(node::BasicNode&& root) :
+        root_(std::move(root))
     {}
 
 public:

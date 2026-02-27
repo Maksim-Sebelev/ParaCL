@@ -502,7 +502,22 @@ template <>
 struct NodeTraits<Condition, NodeInfo::FIELDS>
 {
     using type = size_t;
-    static constexpr type value = 0;
+    static constexpr type value = 2;
+};
+
+template <>
+struct NodeTraits<Condition, NodeInfo::FIELD, 0>
+{
+    using type = const char*;
+    static constexpr type value = "if";
+};
+
+
+template <>
+struct NodeTraits<Condition, NodeInfo::FIELD, 1>
+{
+    using type = const char*;
+    static constexpr type value = "else";
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------

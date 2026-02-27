@@ -7,6 +7,9 @@ module;
 #include <string>
 #include <filesystem>
 
+#define FIELD_BEGIN(NodeT, os, node_tabs, n) write_in_file::field_begin(os, node_tabs, traits::get_node_info<NodeT, traits::FIELD, n>(), n, false)
+#define FIELD_BEGIN_SELF_ALIGNMENT(NodeT, os, node_tabs, n) write_in_file::field_begin(os, node_tabs, traits::get_node_info<NodeT, traits::FIELD, n>(), n, true)
+
 export module ast_write;
 
 export import ast;
@@ -19,6 +22,10 @@ namespace ParaCL::ast::node
 export
 using writable = void(std::ofstream&, size_t);
 
+
+constexpr const size_t arg_enclosure_aligment = 1;
+constexpr const size_t field_enclosure_alignment = 2;
+
 void write(BasicNode const & node, std::ofstream& os, size_t enclosure)
 { return visit<void, std::ofstream&, size_t>(node, os, enclosure); }
 
@@ -26,7 +33,30 @@ namespace write_in_file
 {
 
 void n_tab(std::ofstream& os, size_t tabs)
-{ os << std::string(tabs, '\t'); }
+{ if (tabs == 0) return; os << std::string(tabs, '\t'); }
+
+void open_bracket(std::ofstream& os, size_t tabs = 0)
+{ n_tab(os, tabs); os << ((tabs == 0) ? " {\n" : "{\n"); }
+
+void close_bracket(std::ofstream& os, size_t tabs = 0)
+{ n_tab(os, tabs); os << "}\n"; }
+
+template <typename NodeT>
+void write_begin(std::ofstream& os, size_t tabs = 0)
+{
+    n_tab(os, tabs);
+    os << traits::get_node_info<NodeT, traits::NAME>();
+    open_bracket(os);
+}
+
+void write_end(std::ofstream& os, size_t tabs = 0)
+{ close_bracket(os, tabs); }
+
+void field_begin(std::ofstream& os, size_t node_tabs, std::string_view field_name, size_t field_num, bool self_alignment)
+{ n_tab(os, node_tabs + 1); os << "field[" << field_num << "]:" << field_name; open_bracket(os); if (self_alignment) return; n_tab(os, node_tabs + field_enclosure_alignment); }
+
+void field_end(std::ofstream& os, size_t node_tabs, bool self_alignment = false)
+{ if (not self_alignment) os << "\n"; close_bracket(os, node_tabs + arg_enclosure_aligment); }
 
 } /* namespace write_in_file */
 } /* namespace ParaCL::ast::node */
@@ -51,84 +81,74 @@ namespace ParaCL::ast::node::visit_specializations
 template <>
 void visit(Print const& print, std::ofstream& os, size_t enclosure)
 {
-    write_in_file::n_tab(os, enclosure);
-    os << traits::get_node_info<Print, traits::NAME>() << " {\n";
+    write_in_file::write_begin<Print>(os, enclosure);
 
     for (auto&& arg: print)
-        write(arg, os, enclosure + 1);
+        write(arg, os, enclosure + arg_enclosure_aligment);
 
-    write_in_file::n_tab(os, enclosure);
-    os << "}\n";
+    write_in_file::write_end(os, enclosure);
 }
 
 template <>
 void visit([[maybe_unused]] Scan const& scan, std::ofstream& os, size_t enclosure)
 {
-    write_in_file::n_tab(os, enclosure);
-    os << traits::get_node_info<Scan, traits::NAME>() << " {}\n";
+    write_in_file::write_begin<Scan>(os, enclosure);
+    write_in_file::write_end(os, enclosure);
 }
 
 template <>
 void visit(Scope const& scope, std::ofstream& os, size_t enclosure)
 {
-    write_in_file::n_tab(os, enclosure);
-    os << traits::get_node_info<Scope, traits::NAME>() << " {\n";
+    write_in_file::write_begin<Scope>(os, enclosure);
 
     for (auto&& arg: scope)
-        write(arg, os, enclosure + 1);
+        write(arg, os, enclosure + arg_enclosure_aligment);
 
-    write_in_file::n_tab(os, enclosure);
-    os << "}\n";
+    write_in_file::write_end(os, enclosure);
 }
 
 template <>
 void visit(Variable const& variable, std::ofstream& os, size_t enclosure)
 {
-    write_in_file::n_tab(os, enclosure);
-    os << traits::get_node_info<Variable, traits::NAME>() << " {\n";
+    write_in_file::write_begin<Variable>(os, enclosure);
 
-    write_in_file::n_tab(os, enclosure + 1);
-    os << traits::get_node_info<Variable, traits::FIELD, 0>() << ": \"" << variable.name() << "\"\n";
+    FIELD_BEGIN(Variable, os, enclosure, 0);
+    os << "\"" << variable.name() << "\"";
+    write_in_file::field_end(os, enclosure);
 
-    write_in_file::n_tab(os, enclosure);
-    os << "}\n";
+    write_in_file::write_end(os, enclosure);
 }
 
 template <>
 void visit(NumberLiteral const& number, std::ofstream& os, size_t enclosure)
 {
-    write_in_file::n_tab(os, enclosure);
-    os << traits::get_node_info<NumberLiteral, traits::NAME>() << " {\n";
+    write_in_file::write_begin<NumberLiteral>(os, enclosure);
 
-    write_in_file::n_tab(os, enclosure + 1);
-    os << traits::get_node_info<NumberLiteral, traits::FIELD, 0>() << ": " << number.value() << "\n";
+    FIELD_BEGIN(NumberLiteral, os, enclosure, 0);
+    os << number.value();
+    write_in_file::field_end(os, enclosure);
 
-    write_in_file::n_tab(os, enclosure);
-    os << "}\n";
+    write_in_file::close_bracket(os, enclosure);
 }
 
 template <>
 void visit(StringLiteral const& string_lit, std::ofstream& os, size_t enclosure)
 {
-    write_in_file::n_tab(os, enclosure);
-    os << traits::get_node_info<StringLiteral, traits::NAME>() << " {\n";
+    write_in_file::write_begin<StringLiteral>(os, enclosure);
 
-    write_in_file::n_tab(os, enclosure + 1);
-    os << traits::get_node_info<StringLiteral, traits::FIELD, 0>() << ": \"" << string_lit.value() << "\"\n";
+    FIELD_BEGIN(StringLiteral, os, enclosure, 0);
+    os << "\"" << string_lit.value() << "\"";
+    write_in_file::field_end(os, enclosure);
 
-    write_in_file::n_tab(os, enclosure);
-    os << "}\n";
+    write_in_file::write_end(os, enclosure);
 }
 
 template <>
 void visit(UnaryOperator const& unary_op, std::ofstream& os, size_t enclosure)
 {
-    write_in_file::n_tab(os, enclosure);
-    os << traits::get_node_info<UnaryOperator, traits::NAME>() << " {\n";
+    write_in_file::write_begin<UnaryOperator>(os, enclosure);
 
-    write_in_file::n_tab(os, enclosure + 1);
-    os << traits::get_node_info<UnaryOperator, traits::FIELD, 0>() << ": ";
-
+    FIELD_BEGIN(UnaryOperator, os, enclosure, 0);
     switch (unary_op.type())
     {
         case UnaryOperator::MINUS: os << traits::get_node_info<UnaryOperator, traits::OPERATOR_NAME, UnaryOperator::MINUS>(); break;
@@ -136,41 +156,37 @@ void visit(UnaryOperator const& unary_op, std::ofstream& os, size_t enclosure)
         case UnaryOperator::NOT:   os << traits::get_node_info<UnaryOperator, traits::OPERATOR_NAME, UnaryOperator::NOT>();   break;
         default: __builtin_unreachable();
     }
-    os << "\n";
+    write_in_file::field_end(os, enclosure);
 
-    write_in_file::n_tab(os, enclosure + 1);
-    os << traits::get_node_info<UnaryOperator, traits::FIELD, 1>() << ":\n";
-    write(unary_op.arg(), os, enclosure + 2);
+    FIELD_BEGIN(UnaryOperator, os, enclosure, arg_enclosure_aligment);
+    write(unary_op.arg(), os, enclosure + field_enclosure_alignment);
+    write_in_file::field_end(os, enclosure);
 
-    write_in_file::n_tab(os, enclosure);
-    os << "}\n";
+    write_in_file::write_end(os, enclosure);
 }
 
 template <>
 void visit(BinaryOperator const& bin_op, std::ofstream& os, size_t enclosure)
 {
-    write_in_file::n_tab(os, enclosure);
-    os << traits::get_node_info<BinaryOperator, traits::NAME>() << " {\n";
+    write_in_file::write_begin<BinaryOperator>(os, enclosure);
 
-    write_in_file::n_tab(os, enclosure + 1);
-    os << traits::get_node_info<BinaryOperator, traits::FIELD, 0>() << ": ";
-
+    FIELD_BEGIN(BinaryOperator, os, enclosure, 0);
     switch (bin_op.type())
     {
-        case BinaryOperator::AND:     os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::AND>(); break;
-        case BinaryOperator::OR:      os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::OR>(); break;
-        case BinaryOperator::ADD:     os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::ADD>(); break;
-        case BinaryOperator::SUB:     os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::SUB>(); break;
-        case BinaryOperator::MUL:     os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::MUL>(); break;
-        case BinaryOperator::DIV:     os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::DIV>(); break;
-        case BinaryOperator::REM:     os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::REM>(); break;
-        case BinaryOperator::ISAB:    os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::ISAB>(); break;
-        case BinaryOperator::ISABE:   os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::ISABE>(); break;
-        case BinaryOperator::ISLS:    os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::ISLS>(); break;
-        case BinaryOperator::ISLSE:   os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::ISLSE>(); break;
-        case BinaryOperator::ISEQ:    os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::ISEQ>(); break;
-        case BinaryOperator::ISNE:    os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::ISNE>(); break;
-        case BinaryOperator::ASGN:    os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::ASGN>(); break;
+        case BinaryOperator::AND:     os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::AND    >(); break;
+        case BinaryOperator::OR:      os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::OR     >(); break;
+        case BinaryOperator::ADD:     os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::ADD    >(); break;
+        case BinaryOperator::SUB:     os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::SUB    >(); break;
+        case BinaryOperator::MUL:     os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::MUL    >(); break;
+        case BinaryOperator::DIV:     os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::DIV    >(); break;
+        case BinaryOperator::REM:     os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::REM    >(); break;
+        case BinaryOperator::ISAB:    os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::ISAB   >(); break;
+        case BinaryOperator::ISABE:   os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::ISABE  >(); break;
+        case BinaryOperator::ISLS:    os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::ISLS   >(); break;
+        case BinaryOperator::ISLSE:   os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::ISLSE  >(); break;
+        case BinaryOperator::ISEQ:    os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::ISEQ   >(); break;
+        case BinaryOperator::ISNE:    os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::ISNE   >(); break;
+        case BinaryOperator::ASGN:    os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::ASGN   >(); break;
         case BinaryOperator::ADDASGN: os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::ADDASGN>(); break;
         case BinaryOperator::SUBASGN: os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::SUBASGN>(); break;
         case BinaryOperator::MULASGN: os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::MULASGN>(); break;
@@ -178,83 +194,79 @@ void visit(BinaryOperator const& bin_op, std::ofstream& os, size_t enclosure)
         case BinaryOperator::REMASGN: os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::REMASGN>(); break;
         default: __builtin_unreachable();
     }
-    os << "\n";
+    write_in_file::field_end(os, enclosure);
 
-    write_in_file::n_tab(os, enclosure + 1);
-    os << traits::get_node_info<BinaryOperator, traits::FIELD, 1>() << ":\n";
-    write(bin_op.larg(), os, enclosure + 2);
 
-    write_in_file::n_tab(os, enclosure + 1);
-    os << traits::get_node_info<BinaryOperator, traits::FIELD, 2>() << ":\n";
-    write(bin_op.rarg(), os, enclosure + 2);
-    
-    write_in_file::n_tab(os, enclosure);
-    os << "}\n";
+    FIELD_BEGIN_SELF_ALIGNMENT(BinaryOperator, os, enclosure, arg_enclosure_aligment);
+    write(bin_op.larg(), os, enclosure + field_enclosure_alignment);
+    write_in_file::field_end(os, enclosure, true);
+
+    FIELD_BEGIN_SELF_ALIGNMENT(BinaryOperator, os, enclosure, field_enclosure_alignment);
+    write(bin_op.rarg(), os, enclosure + field_enclosure_alignment);
+    write_in_file::field_end(os, enclosure, true);
+
+    write_in_file::write_end(os, enclosure);
 }
 
 template <>
 void visit(While const& while_node, std::ofstream& os, size_t enclosure)
 {
-    write_in_file::n_tab(os, enclosure);
-    os << traits::get_node_info<While, traits::NAME>() << " {\n";
+    write_in_file::write_begin<While>(os, enclosure);
 
-    write_in_file::n_tab(os, enclosure + 1);
-    os << traits::get_node_info<While, traits::FIELD, 0>() << ":\n";
-    write(while_node.condition(), os, enclosure + 2);
+    FIELD_BEGIN_SELF_ALIGNMENT(While, os, enclosure, 0);
+    write(while_node.condition(), os, enclosure + field_enclosure_alignment);
+    write_in_file::field_end(os, enclosure, true);
 
-    write_in_file::n_tab(os, enclosure + 1);
-    os << traits::get_node_info<While, traits::FIELD, 1>() << ":\n";
-    write(while_node.body(), os, enclosure + 2);
+    FIELD_BEGIN_SELF_ALIGNMENT(While, os, enclosure, arg_enclosure_aligment);
+    write(while_node.body(), os, enclosure + field_enclosure_alignment);
+    write_in_file::field_end(os, enclosure, true);
 
-    write_in_file::n_tab(os, enclosure);
-    os << "}\n";
+    write_in_file::write_end(os, enclosure);
 }
 
 template <>
 void visit(If const& if_node, std::ofstream& os, size_t enclosure)
 {
-    write_in_file::n_tab(os, enclosure);
-    os << traits::get_node_info<If, traits::NAME>() << " {\n";
-    
-    write_in_file::n_tab(os, enclosure + 1);
-    os << traits::get_node_info<If, traits::FIELD, 0>() << ":\n";
-    write(if_node.condition(), os, enclosure + 2);
-    
-    write_in_file::n_tab(os, enclosure + 1);
-    os << traits::get_node_info<If, traits::FIELD, 1>() << ":\n";
-    write(if_node.body(), os, enclosure + 2);
-    
-    write_in_file::n_tab(os, enclosure);
-    os << "}\n";
+    write_in_file::write_begin<If>(os, enclosure);
+
+    FIELD_BEGIN_SELF_ALIGNMENT(If, os, enclosure, 0);
+    write(if_node.condition(), os, enclosure + field_enclosure_alignment);
+    write_in_file::field_end(os, enclosure, true);
+
+    FIELD_BEGIN_SELF_ALIGNMENT(If, os, enclosure, arg_enclosure_aligment);
+    write(if_node.body(), os, enclosure + field_enclosure_alignment);
+    write_in_file::field_end(os, enclosure, true);
+
+    write_in_file::write_end(os, enclosure);
 }
 
 template <>
 void visit(Else const& else_node, std::ofstream& os, size_t enclosure)
 {
-    write_in_file::n_tab(os, enclosure);
-    os << traits::get_node_info<Else, traits::NAME>() << " {\n";
+    write_in_file::write_begin<Else>(os, enclosure);
 
-    write_in_file::n_tab(os, enclosure + 1);
-    os << traits::get_node_info<Else, traits::FIELD, 0>() << ":\n";
-    write(else_node.body(), os, enclosure + 2);
+    FIELD_BEGIN_SELF_ALIGNMENT(Else, os, enclosure, 0);
+    write(else_node.body(), os, enclosure + field_enclosure_alignment);
+    write_in_file::field_end(os, enclosure, true);
 
-    write_in_file::n_tab(os, enclosure);
-    os << "}\n";
+    write_in_file::write_end(os, enclosure);
 }
 
 template <>
 void visit(Condition const& condition, std::ofstream& os, size_t enclosure)
 {
-    write_in_file::n_tab(os, enclosure);
-    os << traits::get_node_info<Condition, traits::NAME>() << " {\n";
-    
-    for (auto&& if_node : condition.get_ifs())
-        write(if_node, os, enclosure + 1);
+    write_in_file::write_begin<Condition>(os, enclosure);
 
-    write(condition.get_else(), os, enclosure + 1);
+    FIELD_BEGIN_SELF_ALIGNMENT(Condition, os, enclosure, 0);
+    for (auto&& if_node : condition.get_ifs())
+        write(if_node, os, enclosure + field_enclosure_alignment);
+    write_in_file::field_end(os, enclosure, true);
+
+    FIELD_BEGIN_SELF_ALIGNMENT(Condition, os, enclosure, arg_enclosure_aligment);
+    write(condition.get_else(), os, enclosure + field_enclosure_alignment);
+    write_in_file::field_end(os, enclosure, true);
     
-    write_in_file::n_tab(os, enclosure);
-    os << "}\n";
+    write_in_file::write_end(os, enclosure);
 }
 
 } /* namespace ParaCL::ast::node::write_overload_set */

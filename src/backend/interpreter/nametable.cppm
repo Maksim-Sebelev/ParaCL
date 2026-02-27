@@ -24,6 +24,7 @@ namespace ParaCL::backend::interpreter::nametable
 
 //---------------------------------------------------------------------------------------------------------------
 
+export
 class Nametable final
 {
   private:

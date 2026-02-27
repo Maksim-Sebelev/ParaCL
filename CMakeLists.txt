@@ -396,6 +396,7 @@ add_library(${AST_WRITER_LIB})
 set(AST_WRITER_SRC_DIR ${SRC_DIR}/ast)
 set(AST_WRITER_SRC
     ${AST_WRITER_SRC_DIR}/write.cppm
+    ${AST_WRITER_SRC_DIR}/graphic-dump.cppm
 )
 
 target_sources(${AST_WRITER_LIB}
@@ -531,9 +532,10 @@ target_sources(${INTERPRETER_LIB}
 
 target_link_libraries(${INTERPRETER_LIB}
     PUBLIC
-        ${INTERPRETER_OPTIONS_LIB}
+        # ${INTERPRETER_OPTIONS_LIB}
+        ${AST_LIB}
+        ${AST_READER_LIB}
     PRIVATE
-        ${AST_BUILDER_LIB}
         ${INTERPRETOR_NAMETABLE_LIB}
 )
 
