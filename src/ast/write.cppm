@@ -10,6 +10,19 @@ module;
 #define FIELD_BEGIN(NodeT, os, node_tabs, n) write_in_file::field_begin(os, node_tabs, traits::get_node_info<NodeT, traits::FIELD, n>(), n, false)
 #define FIELD_BEGIN_SELF_ALIGNMENT(NodeT, os, node_tabs, n) write_in_file::field_begin(os, node_tabs, traits::get_node_info<NodeT, traits::FIELD, n>(), n, true)
 
+#define FIELD(NodeT, os, node_tabs, n, value) do { \
+    FIELD_BEGIN(NodeT, os, node_tabs, n);          \
+    os << value;                                   \
+    write_in_file::field_end(os, node_tabs);       \
+} while(false)
+
+#define FIELD_SELF_ALIGNMENT(NodeT, os, node_tabs, n, value) do { \
+    FIELD_BEGIN_SELF_ALIGNMENT(NodeT, os, node_tabs, n);          \
+    write(value, os, node_tabs + field_enclosure_alignment);      \
+    write_in_file::field_end(os, node_tabs, true);                \
+} while(false)
+
+
 export module ast_write;
 
 export import ast;
@@ -79,77 +92,65 @@ namespace ParaCL::ast::node::visit_specializations
 {
 
 template <>
-void visit(Print const& print, std::ofstream& os, size_t enclosure)
+void visit(Print const& node, std::ofstream& os, size_t enclosure)
 {
     write_in_file::write_begin<Print>(os, enclosure);
 
-    for (auto&& arg: print)
+    for (auto&& arg: node)
         write(arg, os, enclosure + arg_enclosure_aligment);
 
     write_in_file::write_end(os, enclosure);
 }
 
 template <>
-void visit([[maybe_unused]] Scan const& scan, std::ofstream& os, size_t enclosure)
+void visit([[maybe_unused]] Scan const& node, std::ofstream& os, size_t enclosure)
 {
     write_in_file::write_begin<Scan>(os, enclosure);
     write_in_file::write_end(os, enclosure);
 }
 
 template <>
-void visit(Scope const& scope, std::ofstream& os, size_t enclosure)
+void visit(Scope const& node, std::ofstream& os, size_t enclosure)
 {
     write_in_file::write_begin<Scope>(os, enclosure);
 
-    for (auto&& arg: scope)
+    for (auto&& arg: node)
         write(arg, os, enclosure + arg_enclosure_aligment);
 
     write_in_file::write_end(os, enclosure);
 }
 
 template <>
-void visit(Variable const& variable, std::ofstream& os, size_t enclosure)
+void visit(Variable const& node, std::ofstream& os, size_t enclosure)
 {
     write_in_file::write_begin<Variable>(os, enclosure);
-
-    FIELD_BEGIN(Variable, os, enclosure, 0);
-    os << "\"" << variable.name() << "\"";
-    write_in_file::field_end(os, enclosure);
-
+    FIELD(Variable, os, enclosure, 0, "\"" << node.name() << "\"");
     write_in_file::write_end(os, enclosure);
 }
 
 template <>
-void visit(NumberLiteral const& number, std::ofstream& os, size_t enclosure)
+void visit(NumberLiteral const& node, std::ofstream& os, size_t enclosure)
 {
     write_in_file::write_begin<NumberLiteral>(os, enclosure);
-
-    FIELD_BEGIN(NumberLiteral, os, enclosure, 0);
-    os << number.value();
-    write_in_file::field_end(os, enclosure);
-
-    write_in_file::close_bracket(os, enclosure);
-}
-
-template <>
-void visit(StringLiteral const& string_lit, std::ofstream& os, size_t enclosure)
-{
-    write_in_file::write_begin<StringLiteral>(os, enclosure);
-
-    FIELD_BEGIN(StringLiteral, os, enclosure, 0);
-    os << "\"" << string_lit.value() << "\"";
-    write_in_file::field_end(os, enclosure);
-
+    FIELD(NumberLiteral, os, enclosure, 0, node.value());
     write_in_file::write_end(os, enclosure);
 }
 
 template <>
-void visit(UnaryOperator const& unary_op, std::ofstream& os, size_t enclosure)
+void visit(StringLiteral const& node, std::ofstream& os, size_t enclosure)
+{
+    write_in_file::write_begin<StringLiteral>(os, enclosure);
+    FIELD(StringLiteral, os, enclosure, 0, "\"" << node.value() << "\"");
+    write_in_file::write_end(os, enclosure);
+}
+
+template <>
+void visit(UnaryOperator const& node, std::ofstream& os, size_t enclosure)
 {
     write_in_file::write_begin<UnaryOperator>(os, enclosure);
 
     FIELD_BEGIN(UnaryOperator, os, enclosure, 0);
-    switch (unary_op.type())
+    switch (node.type())
     {
         case UnaryOperator::MINUS: os << traits::get_node_info<UnaryOperator, traits::OPERATOR_NAME, UnaryOperator::MINUS>(); break;
         case UnaryOperator::PLUS:  os << traits::get_node_info<UnaryOperator, traits::OPERATOR_NAME, UnaryOperator::PLUS>();  break;
@@ -158,20 +159,18 @@ void visit(UnaryOperator const& unary_op, std::ofstream& os, size_t enclosure)
     }
     write_in_file::field_end(os, enclosure);
 
-    FIELD_BEGIN(UnaryOperator, os, enclosure, arg_enclosure_aligment);
-    write(unary_op.arg(), os, enclosure + field_enclosure_alignment);
-    write_in_file::field_end(os, enclosure);
+    FIELD_SELF_ALIGNMENT(UnaryOperator, os, enclosure, 1, node.arg());
 
     write_in_file::write_end(os, enclosure);
 }
 
 template <>
-void visit(BinaryOperator const& bin_op, std::ofstream& os, size_t enclosure)
+void visit(BinaryOperator const& node, std::ofstream& os, size_t enclosure)
 {
     write_in_file::write_begin<BinaryOperator>(os, enclosure);
 
     FIELD_BEGIN(BinaryOperator, os, enclosure, 0);
-    switch (bin_op.type())
+    switch (node.type())
     {
         case BinaryOperator::AND:     os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::AND    >(); break;
         case BinaryOperator::OR:      os << traits::get_node_info<BinaryOperator, traits::OPERATOR_NAME, BinaryOperator::OR     >(); break;
@@ -196,76 +195,50 @@ void visit(BinaryOperator const& bin_op, std::ofstream& os, size_t enclosure)
     }
     write_in_file::field_end(os, enclosure);
 
-
-    FIELD_BEGIN_SELF_ALIGNMENT(BinaryOperator, os, enclosure, arg_enclosure_aligment);
-    write(bin_op.larg(), os, enclosure + field_enclosure_alignment);
-    write_in_file::field_end(os, enclosure, true);
-
-    FIELD_BEGIN_SELF_ALIGNMENT(BinaryOperator, os, enclosure, field_enclosure_alignment);
-    write(bin_op.rarg(), os, enclosure + field_enclosure_alignment);
-    write_in_file::field_end(os, enclosure, true);
+    FIELD_SELF_ALIGNMENT(BinaryOperator, os, enclosure, 1, node.larg());
+    FIELD_SELF_ALIGNMENT(BinaryOperator, os, enclosure, 2, node.rarg());
 
     write_in_file::write_end(os, enclosure);
 }
 
 template <>
-void visit(While const& while_node, std::ofstream& os, size_t enclosure)
+void visit(While const& node, std::ofstream& os, size_t enclosure)
 {
     write_in_file::write_begin<While>(os, enclosure);
-
-    FIELD_BEGIN_SELF_ALIGNMENT(While, os, enclosure, 0);
-    write(while_node.condition(), os, enclosure + field_enclosure_alignment);
-    write_in_file::field_end(os, enclosure, true);
-
-    FIELD_BEGIN_SELF_ALIGNMENT(While, os, enclosure, arg_enclosure_aligment);
-    write(while_node.body(), os, enclosure + field_enclosure_alignment);
-    write_in_file::field_end(os, enclosure, true);
-
+    FIELD_SELF_ALIGNMENT(While, os, enclosure, 0, node.condition());
+    FIELD_SELF_ALIGNMENT(While, os, enclosure, 1, node.body());
     write_in_file::write_end(os, enclosure);
 }
 
 template <>
-void visit(If const& if_node, std::ofstream& os, size_t enclosure)
+void visit(If const& node, std::ofstream& os, size_t enclosure)
 {
     write_in_file::write_begin<If>(os, enclosure);
-
-    FIELD_BEGIN_SELF_ALIGNMENT(If, os, enclosure, 0);
-    write(if_node.condition(), os, enclosure + field_enclosure_alignment);
-    write_in_file::field_end(os, enclosure, true);
-
-    FIELD_BEGIN_SELF_ALIGNMENT(If, os, enclosure, arg_enclosure_aligment);
-    write(if_node.body(), os, enclosure + field_enclosure_alignment);
-    write_in_file::field_end(os, enclosure, true);
-
+    FIELD_SELF_ALIGNMENT(If, os, enclosure, 0, node.condition());
+    FIELD_SELF_ALIGNMENT(If, os, enclosure, 1, node.body());
     write_in_file::write_end(os, enclosure);
 }
 
 template <>
-void visit(Else const& else_node, std::ofstream& os, size_t enclosure)
+void visit(Else const& node, std::ofstream& os, size_t enclosure)
 {
     write_in_file::write_begin<Else>(os, enclosure);
-
-    FIELD_BEGIN_SELF_ALIGNMENT(Else, os, enclosure, 0);
-    write(else_node.body(), os, enclosure + field_enclosure_alignment);
-    write_in_file::field_end(os, enclosure, true);
-
+    FIELD_SELF_ALIGNMENT(Else, os, enclosure, 0, node.body());
     write_in_file::write_end(os, enclosure);
 }
 
 template <>
-void visit(Condition const& condition, std::ofstream& os, size_t enclosure)
+void visit(Condition const& node, std::ofstream& os, size_t enclosure)
 {
     write_in_file::write_begin<Condition>(os, enclosure);
 
     FIELD_BEGIN_SELF_ALIGNMENT(Condition, os, enclosure, 0);
-    for (auto&& if_node : condition.get_ifs())
+    for (auto&& if_node : node.get_ifs())
         write(if_node, os, enclosure + field_enclosure_alignment);
     write_in_file::field_end(os, enclosure, true);
 
-    FIELD_BEGIN_SELF_ALIGNMENT(Condition, os, enclosure, arg_enclosure_aligment);
-    write(condition.get_else(), os, enclosure + field_enclosure_alignment);
-    write_in_file::field_end(os, enclosure, true);
-    
+    FIELD_SELF_ALIGNMENT(Condition, os, enclosure, 1, node.get_else());
+
     write_in_file::write_end(os, enclosure);
 }
 

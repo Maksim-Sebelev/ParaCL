@@ -102,7 +102,6 @@ template <>
 void visit(NumberLiteral const & v, int& i)
 { std::cout << "NumberLiteral{" << "} " << ++i << std::endl; }
 
-
 template <>
 void visit(StringLiteral const & v, int& i)
 { std::cout << "StringLiteral{" << "} " << ++i << std::endl; }
@@ -182,7 +181,8 @@ int main() try
     auto&& root = create_same(std::move(nast4));
     auto&& ast = AST{std::move(root)};
     write(ast, "ast.txt");
-    dump(ast, "ast.dot", "ast.svg");
+    // dump(ast, "ast.svg", "ast.dot");
+    dump(ast, "ast.svg");
 
     return 0;
 }

@@ -1,7 +1,5 @@
 module;
 
-#include <iostream>
-
 #include <memory>
 #include <stdexcept>
 #include <any>
@@ -173,7 +171,7 @@ public:
 
     /*
     why not template ctor?
-    in template ctor we need type deduction,
+    in template ctor we need type deduction for all template types,
     but compiler cannot do this for functions signature, because it`s not using clearly
     */
 
@@ -251,9 +249,9 @@ public:
         return *this;
     }
 
-    /* move ctor/assign*/
-    BasicNode(BasicNode&& other) = default;
-    BasicNode& operator=(BasicNode&&) = default;
+    /* move ctor/assign */
+    BasicNode(BasicNode&& other) noexcept = default;
+    BasicNode& operator=(BasicNode&&) noexcept = default;
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------

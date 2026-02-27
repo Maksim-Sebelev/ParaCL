@@ -16,7 +16,7 @@ export
 template <typename... Signatures>
 AST read_ast_txt(std::filesystem::path const & ast_txt)
 {
-    /* must call create_personall */
+    /* must call create */
     auto&& scope = node::Scope{};
 
     auto&& root = node::BasicNode::Actions<Signatures...>::template create<node::Scope>(scope);
