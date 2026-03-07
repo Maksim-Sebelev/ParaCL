@@ -1,0 +1,6 @@
+build/
+.cache/
+.venv/
+tmp/
+*.ast.json
+*.ll
