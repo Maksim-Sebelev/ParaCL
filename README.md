@@ -2,8 +2,10 @@
 
 ## Зависимости
 
-[Boost](https://www.boost.org/)\
-[LLVM](https://www.llvm.org/)
+[Boost-1.70.0+](https://www.boost.org/releases/1.70.0/)\
+[LLVM-17.0.1](https://github.com/llvm/llvm-project/releases/tag/llvmorg-17.0.1)\
+[Bison-3.8.2](https://ftp.gnu.org/gnu/bison/)\
+[Flex-2.6.4](https://sourceforge.net/projects/gnuwin32/files/flex/)
 
 ## Установка
 

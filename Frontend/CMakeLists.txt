@@ -14,6 +14,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 
+find_package(Boost REQUIRED COMPONENTS json)
+# find_package(Boost REQUIRED COMPONENTS json 1.70)
+
 # generate project info
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/projInfo.cmake)
 
@@ -21,7 +24,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/projInfo.cmake)
 
 
 # all dependencies
-find_package(LLVM REQUIRED CONFIG)
+find_package(LLVM REQUIRED CONFIG 17.0.6)
 llvm_map_components_to_libnames(llvm_libs Support)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/deps/check-bison.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/deps/check-flex.cmake)
@@ -117,7 +120,7 @@ add_executable(${PARACL_FRONTEND_EXE} src/main.cpp)
 
 target_link_libraries(${PARACL_FRONTEND_EXE}
     PRIVATE
-        boost_json
+        Boost::json
         lexer
         parser
         ${llvm_libs}

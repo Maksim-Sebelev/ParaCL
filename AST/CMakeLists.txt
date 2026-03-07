@@ -11,6 +11,7 @@ project(TheLast
 
 # need for write/read
 find_package(Boost REQUIRED COMPONENTS json)
+# find_package(Boost REQUIRED COMPONENTS json 1.90)
 
 # =================================================================================================
 
@@ -173,7 +174,6 @@ target_link_libraries(${AST_FUNCTIONAL_LIB}
     ${NODES_LIB}
     ${AST_LIB}
     ${THELAST_INFO_LIB}
-    # boost_json
     Boost::json
 )
 

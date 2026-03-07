@@ -18,7 +18,6 @@ set(PARACL_INTERPRETER_EXE paracli)
 set(PARACL_COMPILER_EXE paraclc)
 set(PARACL_FRONTEND_EXE paraclf)
 
-
 include(ExternalProject)
 
 # build frontend
