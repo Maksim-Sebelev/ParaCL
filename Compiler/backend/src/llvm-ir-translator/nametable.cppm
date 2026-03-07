@@ -33,7 +33,7 @@ export class Nametable final
     llvm::Module &module_;
     llvm::IRBuilder<> &builder_;
 
-    std::vector<std::unordered_map<std::string, llvm::AllocaInst *>> scopes_;
+    std::vector<std::unordered_map<std::string_view, llvm::AllocaInst *>> scopes_;
 
     llvm::AllocaInst *lookup(std::string_view name);
     void declare(std::string_view name, llvm::Value * = nullptr);
@@ -82,7 +82,7 @@ llvm::AllocaInst *Nametable::get_variable(std::string_view name)
 
     for (auto &&scopes_it : scopes_ | std::views::reverse)
     {
-        auto&& found = scopes_it.find(std::string(name));
+        auto&& found = scopes_it.find(name);
         if (found == scopes_it.end()) continue;
         LOGINFO("paracl: compiler: nametable: variable found: \"{}\"", name);
         return found->second;
@@ -128,7 +128,7 @@ llvm::AllocaInst *Nametable::lookup(std::string_view name)
 {
     for (auto &&scopes_it : scopes_ | std::views::reverse)
     {
-        auto&& found = scopes_it.find(std::string(name));
+        auto&& found = scopes_it.find(name);
 
         if (found == scopes_it.end())
             continue;
@@ -148,7 +148,7 @@ void Nametable::declare(std::string_view name, llvm::Value *value)
     if (scopes_.empty())
         throw std::runtime_error("cannot declare variable: no active scopes");
 
-    auto&& var = scopes_.back()[std::string(name)];
+    auto&& var = scopes_.back()[name];
     var = builder_.CreateAlloca(builder_.getInt32Ty(), nullptr, name);
 
     if (not value) return;
