@@ -1,5 +1,17 @@
 # Компилятор и интепретор ParaCL
 
+ААА БАЛЯ КОНАН РАБОТАЕТ
+```shell
+git clone https://github.com/Maksim-Sebelev/ParaCL.git;
+cd ParaCL;
+python3 -m venv .venv && source .venv/bin/activate && pip3 install conan;
+conan install . --output-folder=third-party --build=missing;
+cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=./third-party/conan_toolchain.cmake -DCMAKE_CXX_COMPILER=clang++ -G Ninja;
+cmake --build build;
+ctest --test-dir build;
+build/benchmark;
+```
+
 ## Зависимости
 
 [Boost-1.70.0+](https://www.boost.org/releases/1.70.0/)\
