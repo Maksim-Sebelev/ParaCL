@@ -164,16 +164,6 @@ private:
     }
 
 public:
-    /* check that node support some visit functions */
-    template<typename... Signatures>
-    requires (std::is_function_v<Signatures> && ...)
-    friend bool support(BasicNode const & node)
-    {
-        return
-            (node.self_) and
-            (node.self_->supports_signature_(typeid(Signatures)) && ...);
-    }
-
     /*
     why not template ctor?
     in template ctor we need type deduction for all template types,
@@ -258,12 +248,21 @@ public:
     BasicNode(BasicNode&& other) noexcept = default;
     BasicNode& operator=(BasicNode&&) noexcept = default;
 
+
+    /* check that node support some visit functions */
+    template<typename... Signatures>
+    requires (std::is_function_v<Signatures> && ...)
+    bool support() const
+    {
+        return
+            (self_) and
+            (self_->supports_signature_(typeid(Signatures)) && ...);
+    }
+
     /* check is the real node type T */
     template <typename T>
-    friend bool is_a(BasicNode const & node)
-    { return (typeid(T) == node.self_->type_()); }
-
-
+    bool is_a() const
+    { return (typeid(T) == self_->type_()); }
 
     /* check that self is not nullptr */
     /* implicit */ operator bool() const noexcept
@@ -274,7 +273,7 @@ public:
     requires (not std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, bool>)
     operator const T &() const
     {
-        if (not is_a<T>(*this))
+        if (not is_a<T>())
             throw std::bad_cast{};
 
         return (static_cast<const NodeImpl<T>*>(self_.get()))->data_;
@@ -284,7 +283,7 @@ public:
     requires (not std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, bool>)
     operator T () const
     {
-        if (not is_a<T>(*this))
+        if (not is_a<T>())
             throw std::bad_cast{};
 
         return (static_cast<const NodeImpl<T>*>(self_.get()))->data_;

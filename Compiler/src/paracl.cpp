@@ -16,7 +16,7 @@
 
 int main(int argc, char* argv[]) try
 {
-    if (argc <= 1 || argc == 3 || argc >= 5)
+    if (argc <= 1 or argc == 3 or argc >= 5)
         throw std::invalid_argument("Usage:\n" + std::string(argv[0]) + " <source>.cl [-o executable]");
 
     auto&& executable = (argc == 4) ? std::filesystem::path{argv[3]} : std::filesystem::path{"a.out"};

@@ -203,18 +203,18 @@ llvm::Value* visit(BinaryOperator const& node, llvmIrTranslatorData& data)
         return right;
     }
 
-    auto&& left = generate_expression(node.larg(), data);
+    auto&& left  = generate_expression(node.larg(), data);
     auto&& right = generate_expression(node.rarg(), data);
 
     switch (node.type())
     {
-        case BinaryOperator::ADD: return data.builder.CreateAdd(left, right, "__add");
-        case BinaryOperator::SUB: return data.builder.CreateSub(left, right, "__sub");
-        case BinaryOperator::MUL: return data.builder.CreateMul(left, right, "__mul");
+        case BinaryOperator::ADD: return data.builder.CreateAdd (left, right, "__add");
+        case BinaryOperator::SUB: return data.builder.CreateSub (left, right, "__sub");
+        case BinaryOperator::MUL: return data.builder.CreateMul (left, right, "__mul");
         case BinaryOperator::DIV: return data.builder.CreateSDiv(left, right, "__div");
         case BinaryOperator::REM: return data.builder.CreateSRem(left, right, "__rem");
-        case BinaryOperator::AND: return data.builder.CreateAnd(left, right, "__and");
-        case BinaryOperator::OR:  return data.builder.CreateOr(left, right, "__or");
+        case BinaryOperator::AND: return data.builder.CreateAnd (left, right, "__and");
+        case BinaryOperator::OR:  return data.builder.CreateOr  (left, right, "__or" );
         case BinaryOperator::ISAB:
         {
             auto&& cmp = data.builder.CreateICmpSGT(left, right);
@@ -249,7 +249,7 @@ llvm::Value* visit(BinaryOperator const& node, llvmIrTranslatorData& data)
     }
 
     auto&& variable = static_cast<Variable const &>(node.larg());
-    auto&& name = variable.name();
+    auto&& name  = variable.name();
     auto&& value = data.nametable.get_variable_value(name);
 
     switch(node.type())
@@ -287,7 +287,7 @@ void visit(Print const& node, llvmIrTranslatorData& data)
 
     for (auto&& arg : node)
     {
-        if (is_a<StringLiteral>(arg))
+        if (arg.is_a<StringLiteral>())
             fmt << "%s";
         else /* print expect only string literals, variables and number literals */
             fmt << "%d";

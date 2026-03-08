@@ -207,7 +207,7 @@ int main() try
     write(lastast, "last.ast.json");
     dump(lastast, "ast.json.dot", "ast.json.svg");
 
-    std::cout << std::boolalpha << is_a<StringLiteral>(n7) << "\n" << is_a<NumberLiteral>(n7) << "\n";
+    std::cout << std::boolalpha << n7.is_a<StringLiteral>() << "\n" << n7.is_a<NumberLiteral>() << "\n";
 
     StringLiteral back_n7 = static_cast<StringLiteral>(n7);
     std::cout << "back_n7.value() = " << back_n7.value() << "\n";

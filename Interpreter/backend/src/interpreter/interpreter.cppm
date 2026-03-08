@@ -304,7 +304,7 @@ void visit(Print const& node, interpreter::nametable::Nametable& nametable)
 
     for (auto&& arg : node)
     {
-        if (support<printable_string>(arg))
+        if (arg.support<printable_string>())
             std::cout << print_string(arg);
         else
             std::cout << execute_expsession(arg, nametable);

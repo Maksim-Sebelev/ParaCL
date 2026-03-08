@@ -21,10 +21,8 @@ find_package(Boost REQUIRED COMPONENTS json)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/projInfo.cmake)
 
 
-
-
 # all dependencies
-find_package(LLVM REQUIRED CONFIG 17.0.6)
+find_package(LLVM REQUIRED CONFIG)
 llvm_map_components_to_libnames(llvm_libs Support)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/deps/check-bison.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/deps/check-flex.cmake)
