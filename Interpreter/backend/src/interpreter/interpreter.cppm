@@ -2,24 +2,12 @@ module;
 
 #include <cstdlib>
 #include <iostream>
-#include <memory>
 #include <stdexcept>
 #include <string>
-#include <unordered_map>
-#include <vector>
 #include <filesystem>
-#include <type_traits>
 #include <ostream>
-#include <fstream>
 #include <filesystem>
 #include <utility>
-#include <stdexcept>
-#include <memory>
-#include <string>
-#include <sstream>
-#include <stack>
-#include <vector>
-#include <cassert>
 
 #include <boost/json.hpp>
 
@@ -76,7 +64,8 @@ decltype(auto) execute_if_with_return_codition_status(BasicNode const & node, in
 {
     return visit<bool, interpreter::nametable::Nametable&>(node, nametable);
 }
-} /* namespace */
+
+} /* namespace last::node */
 
 //-----------------------------------------------------------------------------
 
@@ -188,7 +177,7 @@ int visit(BinaryOperator const& node, interpreter::nametable::Nametable& nametab
         return right;
     }
 
-    auto&& left = execute_expsession(node.larg(), nametable);
+    auto&& left  = execute_expsession(node.larg(), nametable);
     auto&& right = execute_expsession(node.rarg(), nametable);
 
     switch (node.type())
@@ -313,7 +302,8 @@ void visit(Print const& node, interpreter::nametable::Nametable& nametable)
 }
 
 //-----------------------------------------------------------------------------
-
+// SCOPE
+//-----------------------------------------------------------------------------
 
 template <>
 void visit(Scope const& node, interpreter::nametable::Nametable& nametable)
@@ -332,19 +322,18 @@ void visit(Scope const& node, interpreter::nametable::Nametable& nametable)
 } /* namespace last::node::visit_specializations */
 //-----------------------------------------------------------------------------
 
-
-SPECIALIZE_CREATE(last::node::Print          , last::node::dumpable, last::node::executable_statement                                                           )
-SPECIALIZE_CREATE(last::node::Scan           , last::node::dumpable, last::node::executable_expression , last::node::executable_statement                       )
-SPECIALIZE_CREATE(last::node::Variable       , last::node::dumpable, last::node::executable_expression , last::node::executable_statement                       )
-SPECIALIZE_CREATE(last::node::NumberLiteral  , last::node::dumpable, last::node::executable_expression , last::node::executable_statement                       )
-SPECIALIZE_CREATE(last::node::StringLiteral  , last::node::dumpable, last::node::printable_string                                                               )
-SPECIALIZE_CREATE(last::node::UnaryOperator  , last::node::dumpable, last::node::executable_statement  , last::node::executable_expression                      )
-SPECIALIZE_CREATE(last::node::BinaryOperator , last::node::dumpable, last::node::executable_statement  , last::node::executable_expression                      )
-SPECIALIZE_CREATE(last::node::While          , last::node::dumpable, last::node::executable_statement                                                           )
-SPECIALIZE_CREATE(last::node::If             , last::node::dumpable, last::node::executable_statement  , last::node::executable_if_with_return_codition_status  )
-SPECIALIZE_CREATE(last::node::Else           , last::node::dumpable, last::node::executable_statement                                                           )
-SPECIALIZE_CREATE(last::node::Condition      , last::node::dumpable, last::node::executable_statement                                                           )
-SPECIALIZE_CREATE(last::node::Scope          , last::node::dumpable, last::node::executable_statement                                                           )
+SPECIALIZE_CREATE(last::node::Scan           , last::node::executable_statement  , last::node::executable_expression                      )
+SPECIALIZE_CREATE(last::node::Variable       , last::node::executable_statement  , last::node::executable_expression                      )
+SPECIALIZE_CREATE(last::node::NumberLiteral  , last::node::executable_statement  , last::node::executable_expression                      )
+SPECIALIZE_CREATE(last::node::UnaryOperator  , last::node::executable_statement  , last::node::executable_expression                      )
+SPECIALIZE_CREATE(last::node::BinaryOperator , last::node::executable_statement  , last::node::executable_expression                      )
+SPECIALIZE_CREATE(last::node::If             , last::node::executable_statement  , last::node::executable_if_with_return_codition_status  )
+SPECIALIZE_CREATE(last::node::Print          , last::node::executable_statement                                                           )
+SPECIALIZE_CREATE(last::node::While          , last::node::executable_statement                                                           )
+SPECIALIZE_CREATE(last::node::Else           , last::node::executable_statement                                                           )
+SPECIALIZE_CREATE(last::node::Condition      , last::node::executable_statement                                                           )
+SPECIALIZE_CREATE(last::node::Scope          , last::node::executable_statement                                                           )
+SPECIALIZE_CREATE(last::node::StringLiteral  , last::node::printable_string                                                               )
 
 //-----------------------------------------------------------------------------
 
