@@ -1,7 +1,0 @@
-[requires]
-boost/1.90.0
-llvm-core/19.1.7
-
-[generators]
-CMakeDeps
-CMakeToolchain
