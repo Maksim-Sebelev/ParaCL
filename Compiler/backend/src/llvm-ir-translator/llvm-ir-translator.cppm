@@ -289,7 +289,7 @@ void visit(Print const& node, llvmIrTranslatorData& data)
     {
         if (arg.is_a<StringLiteral>())
             fmt << "%s";
-        else /* print expect only string literals, variables and number literals */
+        else /* print expect only string literals, variables and number literals, so if not %s, using %d */
             fmt << "%d";
 
         printf_args.push_back(generate_expression(arg, data));
@@ -363,24 +363,24 @@ template <>
 bool visit(If const& node, llvmIrTranslatorData& data)
 {
     LOGINFO("paracl: ir translator: generating if condition with status");
-    
+
     auto&& current_func = data.builder.GetInsertBlock()->getParent();
-    
+
     auto&& cond_val = generate_expression(node.condition(), data);
     auto&& cond_i1 = data.builder.CreateICmpNE(cond_val, 
         llvm::ConstantInt::get(data.builder.getInt32Ty(), 0), "if_cond");
-    
+
     auto&& then_block = llvm::BasicBlock::Create(data.context, "if_then", current_func);
     auto&& end_block = llvm::BasicBlock::Create(data.context, "if_end", current_func);
     
     data.builder.CreateCondBr(cond_i1, then_block, end_block);
-    
+
     data.builder.SetInsertPoint(then_block);
     generate_statement(node.body(), data);
     data.builder.CreateBr(end_block);
-    
+
     data.builder.SetInsertPoint(end_block);
-    
+
     return true;
 }
 
@@ -458,12 +458,12 @@ template <>
 void visit(Scope const& node, llvmIrTranslatorData& data)
 {
     LOGINFO("paracl: ir translator: generating scope");
-    
+
     data.nametable.new_scope();
-    
+
     for (auto&& stmt : node)
         generate_statement(stmt, data);
-    
+
     data.nametable.leave_scope();
 }
 
