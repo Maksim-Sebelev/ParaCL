@@ -73,10 +73,8 @@ def main():
         expect_compilation_death = False
         expected_compile_exit_code = 0
 
-    executable = test_input + ".out"
     compile_result = subprocess.run(
-        [paracl_executable, test_input, " -o " , executable],
-        # [f"{paracl_executable} {test_input} -o {executable}"],
+        [paracl_executable, test_input],
         capture_output=True,
         text=True
     )
@@ -101,18 +99,21 @@ def main():
         print(f"Compiler stderr: {compile_result.stderr}")
         return 1
 
-    if not os.path.exists(executable):
-        color_print(Colors.RED, f"Error: Compiled executable '{executable}' not found")
+    if not os.path.exists("a.out"):
+        color_print(Colors.RED, f"Error: Compiled executable '{"a.out"}' not found")
         return 1
 
     result = subprocess.run(
-        [executable],
+        ["./a.out"],
         capture_output=True,
         text=True
     )
 
-    if os.path.exists(executable):
-        os.remove(executable)
+    if os.path.exists("a.out"):
+        os.remove("a.out")
+
+    if os.path.exists("a.ll"):
+        os.remove("a.ll")
 
     program_stdout = result.stdout
     program_stderr = result.stderr
@@ -128,7 +129,7 @@ def main():
         assert expected_numbers == program_output, f"Expected {expected_numbers}, got {program_output}"
         assert result.returncode == 0, f"Program exited with non-zero code: {result.returncode}"
         
-        color_print(Colors.GREEN, "TEST PASSED - All assertions passed")
+        color_print(Colors.GREEN, "TEST PASSED")
         return 0
         
     except AssertionError as e:

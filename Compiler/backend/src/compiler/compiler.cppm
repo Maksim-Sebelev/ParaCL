@@ -16,6 +16,8 @@ export void compile([[maybe_unused]] std::filesystem::path const & ast_json, std
     auto&& tmp_ir_file = std::filesystem::path{executable};
     tmp_ir_file.replace_extension(".ll");
 
+    std::cout << "tmp ir file: " << tmp_ir_file.string() << std::endl;
+
     llvm_ir_translator::generate_llvm_ir(ast_json, tmp_ir_file);
 
     auto&& compile_commmand = std::ostringstream{};

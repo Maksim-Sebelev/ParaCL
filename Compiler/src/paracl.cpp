@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) try
         throw std::invalid_argument("Usage:\n" + std::string(argv[0]) + " <source>.cl [-o executable]");
 
     auto&& executable = (argc == 4) ? std::filesystem::path{argv[3]} : std::filesystem::path{"a.out"};
-    std::filesystem::path tmp_ast_json = executable;
+    auto&& tmp_ast_json = std::filesystem::path{executable};
     tmp_ast_json.replace_extension(".ast.json");
 
     auto&& source = std::filesystem::path{argv[1]};
