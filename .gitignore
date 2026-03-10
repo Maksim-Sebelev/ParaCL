@@ -5,3 +5,4 @@ tmp/
 third-party/
 *.ast.json
 *.ll
+CMakeUserPresets.json
