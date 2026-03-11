@@ -14,6 +14,10 @@ module;
 #include <filesystem>
 #include <sstream>
 #include <stdexcept>
+#include <cassert>
+
+// TODO: remove iostream
+#include <iostream>
 
 #include "create-basic-node.hpp"
 
@@ -44,14 +48,30 @@ struct llvmIrTranslatorData
     llvm::IRBuilder<> builder;
     nametable::Nametable nametable;
     LibcStandartFunctions libc_standart_functions;
-    llvm::BasicBlock* scanf_failed_parse;
 
     llvmIrTranslatorData(std::filesystem::path const &source) :
         context(), module(source.string(), context), builder(context),
-        nametable(module, builder), libc_standart_functions(module, builder),
-        scanf_failed_parse(llvm::BasicBlock::Create(context, "scanf_failure_parse"))
+        nametable(module, builder), libc_standart_functions(module, builder)
     {}
 };
+
+//---------------------------------------------------------------------------------------------------------------
+
+llvm::Value* convert_to_Int1(llvmIrTranslatorData& data, llvm::Value *value)
+{
+    assert(value);
+    LOGINFO("paracl: ir translator: converting value to i1 type");
+    auto&& value_type = value->getType();
+    auto&& zero = llvm::ConstantInt::get(value_type, 0);
+    return data.builder.CreateICmpNE(value, zero, "__toBool");
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+llvm::Value* convert_Int1_to_Int32(llvmIrTranslatorData& data, llvm::Value* value, std::string_view description = "__convertToI1")
+{
+    return data.builder.CreateZExt(value, data.builder.getInt32Ty(), description);
+}
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -145,13 +165,7 @@ llvm::Value* visit(Scan const& node, llvmIrTranslatorData& data)
 
     data.builder.CreateCall(data.libc_standart_functions.libc_scanf(), scanf_args, "__scanf_exit_code");
 
-    auto&& scanf_exit_code = data.builder.CreateLoad(data.builder.getInt32Ty(), temp_var, "__scanf_result");
-
-    // auto&& scanf_success = data.builder.CreateICmpEQ(scanf_exit_code, llvmm::ConstantInt::get(data.builder.getInt32Ty(), 1));
-    // data.builder.CreateCondBr(scanf_success, data.builder.GetInsertBlock(), data.scanf_failed_parse);
-    // auto&& current_block_
-
-    return scanf_exit_code;
+    return data.builder.CreateLoad(data.builder.getInt32Ty(), temp_var, "__scanf_result");
 }
 
 template <>
@@ -176,14 +190,14 @@ llvm::Value* visit(UnaryOperator const& node, llvmIrTranslatorData& data)
             return arg;
         case UnaryOperator::MINUS:
         {
-            auto&& zero = llvm::ConstantInt::get(data.builder.getInt32Ty(), 0);
+            auto&& zero = llvm::ConstantInt::get(data.builder.getInt32Ty(), 0, "__0");
             return data.builder.CreateSub(zero, arg, "__unaryMinus");
         }
         case UnaryOperator::NOT:
         {
-            auto&& zero = llvm::ConstantInt::get(data.builder.getInt32Ty(), 0);
-            auto&& cmp = data.builder.CreateICmpEQ(arg, zero);
-            return data.builder.CreateZExt(cmp, data.builder.getInt32Ty(), "__unaryNot");
+            auto&& zero = llvm::ConstantInt::get(data.builder.getInt32Ty(), 0, "__0");
+            auto&& cmp = data.builder.CreateICmpEQ(arg, zero, "__tmpUnaryNotValue");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__unaryNot");
         }
         default:
             __builtin_unreachable();
@@ -223,37 +237,51 @@ llvm::Value* visit(BinaryOperator const& node, llvmIrTranslatorData& data)
         case BinaryOperator::MUL: return data.builder.CreateMul (left, right, "__mul");
         case BinaryOperator::DIV: return data.builder.CreateSDiv(left, right, "__div");
         case BinaryOperator::REM: return data.builder.CreateSRem(left, right, "__rem");
-        case BinaryOperator::AND: return data.builder.CreateAnd (left, right, "__and");
-        case BinaryOperator::OR:  return data.builder.CreateOr  (left, right, "__or" );
+        case BinaryOperator::AND:
+        {
+            auto&&  left_Int1 = compiler::llvm_ir_translator::convert_to_Int1(data, left);
+            auto&& right_Int1 = compiler::llvm_ir_translator::convert_to_Int1(data, right);
+
+            auto&& and_result = data.builder.CreateAnd(left_Int1, right_Int1, "__andBool");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, and_result, "__and");
+        }
+        case BinaryOperator::OR:
+        {
+            auto&&  left_Int1 = compiler::llvm_ir_translator::convert_to_Int1(data, left);
+            auto&& right_Int1 = compiler::llvm_ir_translator::convert_to_Int1(data, right);
+
+            auto&& or_result = data.builder.CreateOr(left_Int1, right_Int1, "__orBool");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, or_result, "__or");
+        }
         case BinaryOperator::ISAB:
         {
             auto&& cmp = data.builder.CreateICmpSGT(left, right);
-            return data.builder.CreateZExt(cmp, data.builder.getInt32Ty(), "__cmp_ab");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_ab");
         }
         case BinaryOperator::ISABE:
         {
             auto&& cmp = data.builder.CreateICmpSGE(left, right);
-            return data.builder.CreateZExt(cmp, data.builder.getInt32Ty(), "__cmp_abe");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_abe");
         }
         case BinaryOperator::ISLS:
         {
             auto&& cmp = data.builder.CreateICmpSLT(left, right);
-            return data.builder.CreateZExt(cmp, data.builder.getInt32Ty(), "__cmp_ls");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_ls");
         }
         case BinaryOperator::ISLSE:
         {
             auto&& cmp = data.builder.CreateICmpSLE(left, right);
-            return data.builder.CreateZExt(cmp, data.builder.getInt32Ty(), "__cmp_lse");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_lse");
         }
         case BinaryOperator::ISEQ:
         {
             auto&& cmp = data.builder.CreateICmpEQ(left, right);
-            return data.builder.CreateZExt(cmp, data.builder.getInt32Ty(), "__cmp_eq");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_eq");
         }
         case BinaryOperator::ISNE:
         {
             auto&& cmp = data.builder.CreateICmpNE(left, right);
-            return data.builder.CreateZExt(cmp, data.builder.getInt32Ty(), "__cmp_ne");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_ne");
         }
         default: break;
     }
@@ -503,8 +531,6 @@ void generate_llvm_ir(std::filesystem::path const & ast_text_representation,
     data.nametable.leave_scope();
 
     data.builder.CreateRet(llvm::ConstantInt::get(data.builder.getInt32Ty(), 0));
-
-    data.builder.SetInsertPoint(data.scanf_failed_parse);
 
     if (llvm::verifyModule(data.module, &llvm::errs()))
     {
