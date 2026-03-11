@@ -2,6 +2,7 @@
 
 import sys
 import subprocess
+import os
 
 class Colors:
     RED       = '\033[91m'
@@ -35,6 +36,15 @@ def main():
 
     executable, test_input, test_answer = sys.argv[1:4]
 
+    # Проверяем существование файла с расширением .in вместо .cl
+    stdin_data = None
+    if test_input.endswith('.cl'):
+        potential_in_file = test_input[:-3] + '.in'
+        if os.path.exists(potential_in_file):
+            with open(potential_in_file, 'r') as f:
+                stdin_data = f.read()
+            color_print(Colors.YELLOW, f"Using stdin from file: {potential_in_file}")
+
     expect_death = False
     exit_code = 0
 
@@ -57,11 +67,20 @@ def main():
         color_print(Colors.RED, f"Error reading file: {e}")
         sys.exit(1)
 
-    result = subprocess.run(
-        [executable, test_input],
-        capture_output=True,
-        text=True
-    )
+    # Запускаем процесс с передачей stdin если есть данные
+    if stdin_data is not None:
+        result = subprocess.run(
+            [executable, test_input],
+            input=stdin_data,
+            capture_output=True,
+            text=True
+        )
+    else:
+        result = subprocess.run(
+            [executable, test_input],
+            capture_output=True,
+            text=True
+        )
 
 
     if expect_death and result.returncode == exit_code:

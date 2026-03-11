@@ -44,10 +44,12 @@ struct llvmIrTranslatorData
     llvm::IRBuilder<> builder;
     nametable::Nametable nametable;
     LibcStandartFunctions libc_standart_functions;
+    llvm::BasicBlock* scanf_failed_parse;
 
     llvmIrTranslatorData(std::filesystem::path const &source) :
         context(), module(source.string(), context), builder(context),
-        nametable(module, builder), libc_standart_functions(module, builder)
+        nametable(module, builder), libc_standart_functions(module, builder),
+        scanf_failed_parse(llvm::BasicBlock::Create(context, "scanf_failure_parse"))
     {}
 };
 
@@ -143,7 +145,13 @@ llvm::Value* visit(Scan const& node, llvmIrTranslatorData& data)
 
     data.builder.CreateCall(data.libc_standart_functions.libc_scanf(), scanf_args, "__scanf_exit_code");
 
-    return data.builder.CreateLoad(data.builder.getInt32Ty(), temp_var, "__scan_result");
+    auto&& scanf_exit_code = data.builder.CreateLoad(data.builder.getInt32Ty(), temp_var, "__scanf_result");
+
+    // auto&& scanf_success = data.builder.CreateICmpEQ(scanf_exit_code, llvmm::ConstantInt::get(data.builder.getInt32Ty(), 1));
+    // data.builder.CreateCondBr(scanf_success, data.builder.GetInsertBlock(), data.scanf_failed_parse);
+    // auto&& current_block_
+
+    return scanf_exit_code;
 }
 
 template <>
@@ -495,6 +503,8 @@ void generate_llvm_ir(std::filesystem::path const & ast_text_representation,
     data.nametable.leave_scope();
 
     data.builder.CreateRet(llvm::ConstantInt::get(data.builder.getInt32Ty(), 0));
+
+    data.builder.SetInsertPoint(data.scanf_failed_parse);
 
     if (llvm::verifyModule(data.module, &llvm::errs()))
     {

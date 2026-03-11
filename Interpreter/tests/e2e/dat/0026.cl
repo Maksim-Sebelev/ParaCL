@@ -17,3 +17,4 @@ if (a != b)
 }
 
 if (a == b) print 1000;
+

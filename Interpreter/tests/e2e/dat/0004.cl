@@ -1,7 +1,6 @@
 a = 0;
 b = 5;
-while (b > 0)
-{
+while (b > 0) {
     a += b * b;
     b -= 1;
 }

@@ -103,10 +103,25 @@ def main():
         color_print(Colors.RED, f"Error: Compiled executable '{"a.out"}' not found")
         return 1
 
+    # --- НАЧАЛО ИЗМЕНЕНИЙ ---
+    # Определяем имя потенциального .in файла на основе test_input
+    base_name = os.path.splitext(test_input)[0]  # убираем расширение .cl
+    input_data_file = base_name + ".in"
+    
+    stdin_content = None
+    if os.path.exists(input_data_file):
+        try:
+            with open(input_data_file, 'r') as f:
+                stdin_content = f.read()
+        except Exception as e:
+            color_print(Colors.YELLOW, f"Warning: Could not read input file '{input_data_file}': {e}")
+    # --- КОНЕЦ ИЗМЕНЕНИЙ ---
+
     result = subprocess.run(
         ["./a.out"],
         capture_output=True,
-        text=True
+        text=True,
+        input=stdin_content  # если None, то stdin не передаётся
     )
 
     if os.path.exists("a.out"):
