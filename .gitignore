@@ -6,4 +6,4 @@ third-party/
 *.ast.json
 *.ll
 CMakeUserPresets.json
-
+*.out
