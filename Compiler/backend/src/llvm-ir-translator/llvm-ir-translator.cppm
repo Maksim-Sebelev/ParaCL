@@ -141,7 +141,7 @@ llvm::Value* visit(Scan const& node, llvmIrTranslatorData& data)
     auto&& fmt = data.builder.CreateGlobalStringPtr("%d", "__scanfFormat");
     auto&& scanf_args = std::vector<llvm::Value*>{fmt, temp_var};
 
-    data.builder.CreateCall(data.libc_standart_functions.libc_scanf(), scanf_args);
+    data.builder.CreateCall(data.libc_standart_functions.libc_scanf(), scanf_args, "__scanf_exit_code");
 
     return data.builder.CreateLoad(data.builder.getInt32Ty(), temp_var, "__scan_result");
 }
@@ -302,7 +302,7 @@ void visit(Print const& node, llvmIrTranslatorData& data)
     auto&& fmt_str = data.builder.CreateGlobalStringPtr(fmt.str(), "__printfFormat");
     printf_args.insert(printf_args.begin(), fmt_str);
 
-    data.builder.CreateCall(data.libc_standart_functions.libc_printf(), printf_args);
+    data.builder.CreateCall(data.libc_standart_functions.libc_printf(), printf_args, "__printf_exit_code");
 }
 
 //-----------------------------------------------------------------------------
@@ -386,14 +386,18 @@ void visit(Condition const& node, llvmIrTranslatorData& data)
     auto&& if_condition_blocks = std::vector<llvm::BasicBlock*>{}; if_condition_blocks.reserve(ifs_size);
     auto&& if_body_blocks = std::vector<llvm::BasicBlock*>{}; if_body_blocks.reserve(ifs_size);
 
-    for (auto&& it = 0LU, ite = node.get_ifs().size(); it != ite; ++it)
+
+    if_condition_blocks.push_back(llvm::BasicBlock::Create(data.context, "if", current_func));
+    if_body_blocks.push_back(llvm::BasicBlock::Create(data.context, "then", current_func));
+
+    for (auto&& it = 1LU, ite = ifs_size; it != ite; ++it)
     {
-        if_condition_blocks.push_back(llvm::BasicBlock::Create(data.context, "if_cond", current_func));
-        if_body_blocks.push_back(llvm::BasicBlock::Create(data.context, "if_body", current_func));
+        if_condition_blocks.push_back(llvm::BasicBlock::Create(data.context, "else-if", current_func));
+        if_body_blocks.push_back(llvm::BasicBlock::Create(data.context, "then", current_func));
     }
 
     auto&& else_block = node.has_else() ? llvm::BasicBlock::Create(data.context, "else", current_func) : nullptr;
-    auto&& condition_end = llvm::BasicBlock::Create(data.context, "condition_end", current_func);
+    auto&& condition_end = llvm::BasicBlock::Create(data.context, "fi", current_func);
 
     if (ifs_size == 0)
         throw std::logic_error("No if-block in condition");
