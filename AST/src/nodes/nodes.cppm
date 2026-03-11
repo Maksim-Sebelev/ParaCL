@@ -170,19 +170,20 @@ public:
 
 // --- Conditions & Flow ---------------------------------------------------------------------------
 
-class ConditionWithBody {
-    BasicNode condition_;
+class ConditionWithBody
+{
+    BasicNode cond_;
     BasicNode body_;
 
 public:
     ConditionWithBody() = default;
     
-    ConditionWithBody(const BasicNode& cond, const BasicNode& bdy) : condition_(cond), body_(bdy) {}
-    ConditionWithBody(const BasicNode& cond, BasicNode&& bdy)      : condition_(cond), body_(std::move(bdy)) {}
-    ConditionWithBody(BasicNode&& cond, const BasicNode& bdy)      : condition_(std::move(cond)), body_(bdy) {}
-    ConditionWithBody(BasicNode&& cond, BasicNode&& bdy)           : condition_(std::move(cond)), body_(std::move(bdy)) {}
+    template<typename T>
+        requires std::is_constructible_v<BasicNode, T>
+    ConditionWithBody(T&& cond, T&& body)
+        : cond_(std::forward<T>(cond)), body_(std::forward<T>(body)) {}
 
-    [[nodiscard]] const BasicNode& condition() const & noexcept { return condition_; }
+    [[nodiscard]] const BasicNode& condition() const & noexcept { return cond_; }
     [[nodiscard]] const BasicNode& body()      const & noexcept { return body_; }
 };
 
