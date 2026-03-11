@@ -137,7 +137,7 @@ public:
     BinaryOperator(BinaryOperatorT type, TARG&& larg, TARG&& rarg)
         : larg_(std::forward<TARG>(larg)), rarg_(std::forward<TARG>(rarg)), type_(type) {}
 
-    [[nodiscard]] BinaryOperatorT   type() const noexcept { return type_; }
+    [[nodiscard]] BinaryOperatorT  type() const noexcept { return type_; }
     [[nodiscard]] const BasicNode& larg() const & noexcept { return larg_; }
     [[nodiscard]] const BasicNode& rarg() const & noexcept { return rarg_; }
 };
@@ -167,8 +167,6 @@ public:
 
 
 
-
-// --- Conditions & Flow ---------------------------------------------------------------------------
 
 class ConditionWithBody
 {
@@ -215,11 +213,10 @@ private:
 
 
 
-// --- Condition (The Container) -------------------------------------------------------------------
 
 export class Condition final {
     std::vector<BasicNode> ifs_;
-    BasicNode              else_node_; // Назовем просто else_node_ или default_branch_
+    BasicNode              else_node_;
 
 public:
     Condition() = default;
