@@ -24,13 +24,19 @@ function(target_e2e_test test_target run_script test_dir ans_dir)
 
         # add test
         add_test(
-            NAME test_${test_target}_${run_script}_${test_it}
+            NAME paracl::compiler::test::${test_it}
             # execute test
             COMMAND ${TEST_COMMAND}
             # working directory - dircetory with executable file
             WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         )
     endwhile()
+
+    # add deps for test_target 
+    target_include_directories(${test_target}
+    PRIVATE
+        ${test_dir}
+    )
 endfunction(target_e2e_test)
 
 # =================================================================================================

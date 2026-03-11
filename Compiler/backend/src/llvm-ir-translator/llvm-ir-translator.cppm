@@ -14,6 +14,10 @@ module;
 #include <filesystem>
 #include <sstream>
 #include <stdexcept>
+#include <cassert>
+
+// TODO: remove iostream
+#include <iostream>
 
 #include "create-basic-node.hpp"
 
@@ -53,8 +57,24 @@ struct llvmIrTranslatorData
 
 //---------------------------------------------------------------------------------------------------------------
 
+llvm::Value* convert_to_Int1(llvmIrTranslatorData& data, llvm::Value *value)
+{
+    assert(value);
+    LOGINFO("paracl: ir translator: converting value to i1 type");
+    auto&& value_type = value->getType();
+    auto&& zero = llvm::ConstantInt::get(value_type, 0);
+    return data.builder.CreateICmpNE(value, zero, "__toBool");
+}
 
 //---------------------------------------------------------------------------------------------------------------
+
+llvm::Value* convert_Int1_to_Int32(llvmIrTranslatorData& data, llvm::Value* value, std::string_view description = "__convertToI1")
+{
+    return data.builder.CreateZExt(value, data.builder.getInt32Ty(), description);
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
 } /* namespace compiler::llvm_ir_translator */
 //---------------------------------------------------------------------------------------------------------------
 
@@ -69,8 +89,11 @@ using compiler::llvm_ir_translator::llvmIrTranslatorData;
 
 using generatable_statement  = void (llvmIrTranslatorData&);
 using generatable_expression = llvm::Value* (llvmIrTranslatorData&);
+using generatable_if_statement = void(llvmIrTranslatorData&, llvm::BasicBlock*, llvm::BasicBlock*, llvm::BasicBlock*, llvm::BasicBlock*);
 
 static_assert(not std::is_same_v<generatable_statement, generatable_expression>, "visit specializations must be diferent");
+static_assert(not std::is_same_v<generatable_statement, generatable_if_statement>, "visit specializations must be diferent");
+static_assert(not std::is_same_v<generatable_if_statement, generatable_expression>, "visit specializations must be diferent");
 
 //-----------------------------------------------------------------------------
 
@@ -79,6 +102,9 @@ decltype(auto) generate_statement(BasicNode const & node, llvmIrTranslatorData& 
 
 decltype(auto) generate_expression(BasicNode const & node, llvmIrTranslatorData& data)
 { return visit<llvm::Value*, llvmIrTranslatorData&>(node, data); }
+
+decltype(auto) generate_if_statement(BasicNode const & node, llvmIrTranslatorData& data, llvm::BasicBlock* self_condition, llvm::BasicBlock* self_body, llvm::BasicBlock* next, llvm::BasicBlock* end)
+{ return visit<void, llvmIrTranslatorData&, llvm::BasicBlock*>(node, data, self_condition, self_body, next, end); }
 
 namespace visit_specializations
 {
@@ -126,8 +152,6 @@ void visit(Variable const& node, llvmIrTranslatorData& data)
 }
 
 //-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 // SCAN
 //-----------------------------------------------------------------------------
 template <>
@@ -139,9 +163,9 @@ llvm::Value* visit(Scan const& node, llvmIrTranslatorData& data)
     auto&& fmt = data.builder.CreateGlobalStringPtr("%d", "__scanfFormat");
     auto&& scanf_args = std::vector<llvm::Value*>{fmt, temp_var};
 
-    data.builder.CreateCall(data.libc_standart_functions.libc_scanf(), scanf_args);
+    data.builder.CreateCall(data.libc_standart_functions.libc_scanf(), scanf_args, "__scanf_exit_code");
 
-    return data.builder.CreateLoad(data.builder.getInt32Ty(), temp_var, "__scan_result");
+    return data.builder.CreateLoad(data.builder.getInt32Ty(), temp_var, "__scanf_result");
 }
 
 template <>
@@ -166,14 +190,14 @@ llvm::Value* visit(UnaryOperator const& node, llvmIrTranslatorData& data)
             return arg;
         case UnaryOperator::MINUS:
         {
-            auto&& zero = llvm::ConstantInt::get(data.builder.getInt32Ty(), 0);
+            auto&& zero = llvm::ConstantInt::get(data.builder.getInt32Ty(), 0, "__0");
             return data.builder.CreateSub(zero, arg, "__unaryMinus");
         }
         case UnaryOperator::NOT:
         {
-            auto&& zero = llvm::ConstantInt::get(data.builder.getInt32Ty(), 0);
-            auto&& cmp = data.builder.CreateICmpEQ(arg, zero);
-            return data.builder.CreateZExt(cmp, data.builder.getInt32Ty(), "__unaryNot");
+            auto&& zero = llvm::ConstantInt::get(data.builder.getInt32Ty(), 0, "__0");
+            auto&& cmp = data.builder.CreateICmpEQ(arg, zero, "__tmpUnaryNotValue");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__unaryNot");
         }
         default:
             __builtin_unreachable();
@@ -213,37 +237,51 @@ llvm::Value* visit(BinaryOperator const& node, llvmIrTranslatorData& data)
         case BinaryOperator::MUL: return data.builder.CreateMul (left, right, "__mul");
         case BinaryOperator::DIV: return data.builder.CreateSDiv(left, right, "__div");
         case BinaryOperator::REM: return data.builder.CreateSRem(left, right, "__rem");
-        case BinaryOperator::AND: return data.builder.CreateAnd (left, right, "__and");
-        case BinaryOperator::OR:  return data.builder.CreateOr  (left, right, "__or" );
+        case BinaryOperator::AND:
+        {
+            auto&&  left_Int1 = compiler::llvm_ir_translator::convert_to_Int1(data, left);
+            auto&& right_Int1 = compiler::llvm_ir_translator::convert_to_Int1(data, right);
+
+            auto&& and_result = data.builder.CreateAnd(left_Int1, right_Int1, "__andBool");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, and_result, "__and");
+        }
+        case BinaryOperator::OR:
+        {
+            auto&&  left_Int1 = compiler::llvm_ir_translator::convert_to_Int1(data, left);
+            auto&& right_Int1 = compiler::llvm_ir_translator::convert_to_Int1(data, right);
+
+            auto&& or_result = data.builder.CreateOr(left_Int1, right_Int1, "__orBool");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, or_result, "__or");
+        }
         case BinaryOperator::ISAB:
         {
             auto&& cmp = data.builder.CreateICmpSGT(left, right);
-            return data.builder.CreateZExt(cmp, data.builder.getInt32Ty(), "__cmp_ab");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_ab");
         }
         case BinaryOperator::ISABE:
         {
             auto&& cmp = data.builder.CreateICmpSGE(left, right);
-            return data.builder.CreateZExt(cmp, data.builder.getInt32Ty(), "__cmp_abe");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_abe");
         }
         case BinaryOperator::ISLS:
         {
             auto&& cmp = data.builder.CreateICmpSLT(left, right);
-            return data.builder.CreateZExt(cmp, data.builder.getInt32Ty(), "__cmp_ls");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_ls");
         }
         case BinaryOperator::ISLSE:
         {
             auto&& cmp = data.builder.CreateICmpSLE(left, right);
-            return data.builder.CreateZExt(cmp, data.builder.getInt32Ty(), "__cmp_lse");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_lse");
         }
         case BinaryOperator::ISEQ:
         {
             auto&& cmp = data.builder.CreateICmpEQ(left, right);
-            return data.builder.CreateZExt(cmp, data.builder.getInt32Ty(), "__cmp_eq");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_eq");
         }
         case BinaryOperator::ISNE:
         {
             auto&& cmp = data.builder.CreateICmpNE(left, right);
-            return data.builder.CreateZExt(cmp, data.builder.getInt32Ty(), "__cmp_ne");
+            return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_ne");
         }
         default: break;
     }
@@ -289,7 +327,7 @@ void visit(Print const& node, llvmIrTranslatorData& data)
     {
         if (arg.is_a<StringLiteral>())
             fmt << "%s";
-        else /* print expect only string literals, variables and number literals */
+        else /* print expect only string literals, variables and number literals, so if not %s, using %d */
             fmt << "%d";
 
         printf_args.push_back(generate_expression(arg, data));
@@ -300,7 +338,7 @@ void visit(Print const& node, llvmIrTranslatorData& data)
     auto&& fmt_str = data.builder.CreateGlobalStringPtr(fmt.str(), "__printfFormat");
     printf_args.insert(printf_args.begin(), fmt_str);
 
-    data.builder.CreateCall(data.libc_standart_functions.libc_printf(), printf_args);
+    data.builder.CreateCall(data.libc_standart_functions.libc_printf(), printf_args, "__printf_exit_code");
 }
 
 //-----------------------------------------------------------------------------
@@ -336,52 +374,25 @@ void visit(While const& node, llvmIrTranslatorData& data)
 //-----------------------------------------------------------------------------
 // IF
 //-----------------------------------------------------------------------------
-template <>
-void visit(If const& node, llvmIrTranslatorData& data)
-{
-    LOGINFO("paracl: ir translator: generating if statement");
-
-    auto&& current_func = data.builder.GetInsertBlock()->getParent();
-
-    auto&& cond_val = generate_expression(node.condition(), data);
-    auto&& cond_i1 = data.builder.CreateICmpNE(cond_val, 
-        llvm::ConstantInt::get(data.builder.getInt32Ty(), 0), "if_cond");
-
-    auto&& then_block = llvm::BasicBlock::Create(data.context, "if_then", current_func);
-    auto&& end_block = llvm::BasicBlock::Create(data.context, "if_end", current_func);
-
-    data.builder.CreateCondBr(cond_i1, then_block, end_block);
-
-    data.builder.SetInsertPoint(then_block);
-    generate_statement(node.body(), data);
-    data.builder.CreateBr(end_block);
-
-    data.builder.SetInsertPoint(end_block);
-}
 
 template <>
-bool visit(If const& node, llvmIrTranslatorData& data)
+void visit(If const& node, llvmIrTranslatorData& data, llvm::BasicBlock* self_condition, llvm::BasicBlock* self_body, llvm::BasicBlock* next, llvm::BasicBlock* end)
 {
+    /* expect, thah SetInsertPoint already done */
+
     LOGINFO("paracl: ir translator: generating if condition with status");
-    
-    auto&& current_func = data.builder.GetInsertBlock()->getParent();
-    
-    auto&& cond_val = generate_expression(node.condition(), data);
-    auto&& cond_i1 = data.builder.CreateICmpNE(cond_val, 
-        llvm::ConstantInt::get(data.builder.getInt32Ty(), 0), "if_cond");
-    
-    auto&& then_block = llvm::BasicBlock::Create(data.context, "if_then", current_func);
-    auto&& end_block = llvm::BasicBlock::Create(data.context, "if_end", current_func);
-    
-    data.builder.CreateCondBr(cond_i1, then_block, end_block);
-    
-    data.builder.SetInsertPoint(then_block);
+
+    data.builder.SetInsertPoint(self_condition);
+    auto&& if_condition = generate_expression(node.condition(), data);
+
+    auto&& if_condition_bool = data.builder.CreateICmpNE(if_condition, 
+        llvm::ConstantInt::get(data.builder.getInt32Ty(), 0), "__condition");
+
+    data.builder.CreateCondBr(if_condition_bool, self_body, next ? next : end);
+
+    data.builder.SetInsertPoint(self_body);
     generate_statement(node.body(), data);
-    data.builder.CreateBr(end_block);
-    
-    data.builder.SetInsertPoint(end_block);
-    
-    return true;
+    data.builder.CreateBr(end);
 }
 
 //-----------------------------------------------------------------------------
@@ -397,6 +408,7 @@ void visit(Else const& node, llvmIrTranslatorData& data)
 //-----------------------------------------------------------------------------
 // CONDITION
 //-----------------------------------------------------------------------------
+
 template <>
 void visit(Condition const& node, llvmIrTranslatorData& data)
 {
@@ -404,51 +416,51 @@ void visit(Condition const& node, llvmIrTranslatorData& data)
 
     auto&& current_func = data.builder.GetInsertBlock()->getParent();
 
-    auto&& if_blocks = std::vector<llvm::BasicBlock*>{};
-    auto&& body_blocks = std::vector<llvm::BasicBlock*>{};
+    auto&& ifs = node.get_ifs();    
+    size_t ifs_size = ifs.size();
 
-    for (auto&& it = 0LU, ite = node.get_ifs().size(); it != ite; ++it)
+    auto&& if_condition_blocks = std::vector<llvm::BasicBlock*>{}; if_condition_blocks.reserve(ifs_size);
+    auto&& if_body_blocks = std::vector<llvm::BasicBlock*>{}; if_body_blocks.reserve(ifs_size);
+
+
+    if_condition_blocks.push_back(llvm::BasicBlock::Create(data.context, "if", current_func));
+    if_body_blocks.push_back(llvm::BasicBlock::Create(data.context, "then", current_func));
+
+    for (auto&& it = 1LU, ite = ifs_size; it != ite; ++it)
     {
-        if_blocks  .push_back(llvm::BasicBlock::Create(data.context, "if_cond", current_func));
-        body_blocks.push_back(llvm::BasicBlock::Create(data.context, "if_body", current_func));
+        if_condition_blocks.push_back(llvm::BasicBlock::Create(data.context, "else-if", current_func));
+        if_body_blocks.push_back(llvm::BasicBlock::Create(data.context, "then", current_func));
     }
 
-    auto&& else_block = (node.has_else())
-        ? llvm::BasicBlock::Create(data.context, "else", current_func) 
-        : nullptr;
+    auto&& else_block = node.has_else() ? llvm::BasicBlock::Create(data.context, "else", current_func) : nullptr;
+    auto&& condition_end = llvm::BasicBlock::Create(data.context, "fi", current_func);
 
-    auto&& end_block = llvm::BasicBlock::Create(data.context, "if_end", current_func);
+    if (ifs_size == 0)
+        throw std::logic_error("No if-block in condition");
 
-    data.builder.CreateBr(if_blocks[0]);
+    data.builder.CreateBr(if_condition_blocks[0]);
 
-    for (auto&& it = 0LU, ite = node.get_ifs().size(); it != ite; ++it)
+    if (ifs_size == 1)
     {
-        data.builder.SetInsertPoint(if_blocks[it]);
+        generate_if_statement(ifs[0], data, if_condition_blocks[0], if_body_blocks[0], else_block, condition_end);
+    }
+    else
+    {
+        for (auto&& it = 0LU, ite = ifs_size - 1; it != ite; ++it)
+            generate_if_statement(ifs[it], data, if_condition_blocks[it], if_body_blocks[it], if_condition_blocks[it + 1], condition_end);
 
-        auto&& if_it = static_cast<If>(node.get_ifs()[it]);
-        auto&& cond_val = generate_expression(if_it.condition(), data);
-        auto&& cond_i1 = data.builder.CreateICmpNE(cond_val, 
-            llvm::ConstantInt::get(data.builder.getInt32Ty(), 0), "if_cond");
-
-        auto&& next_block = (it + 1 < node.get_ifs().size()) 
-            ? if_blocks[it + 1] 
-            : (else_block ? else_block : end_block);
-
-        data.builder.CreateCondBr(cond_i1, body_blocks[it], next_block);
-
-        data.builder.SetInsertPoint(body_blocks[it]);
-        generate_statement(node.get_ifs()[it], data);
-        data.builder.CreateBr(end_block);
+        generate_if_statement(ifs[ifs_size - 1], data, if_condition_blocks[ifs_size - 1], if_body_blocks[ifs_size - 1], else_block, condition_end);
     }
 
+    /* create else basic block always, cause its simply */
     if (else_block)
     {
         data.builder.SetInsertPoint(else_block);
         generate_statement(node.get_else(), data);
-        data.builder.CreateBr(end_block);
+        data.builder.CreateBr(condition_end);
     }
 
-    data.builder.SetInsertPoint(end_block);
+    data.builder.SetInsertPoint(condition_end);
 }
 
 //-----------------------------------------------------------------------------
@@ -458,12 +470,12 @@ template <>
 void visit(Scope const& node, llvmIrTranslatorData& data)
 {
     LOGINFO("paracl: ir translator: generating scope");
-    
+
     data.nametable.new_scope();
-    
+
     for (auto&& stmt : node)
         generate_statement(stmt, data);
-    
+
     data.nametable.leave_scope();
 }
 
@@ -481,7 +493,7 @@ SPECIALIZE_CREATE(last::node::StringLiteral , last::node::generatable_expression
 SPECIALIZE_CREATE(last::node::UnaryOperator , last::node::generatable_expression, last::node::generatable_statement)
 SPECIALIZE_CREATE(last::node::BinaryOperator, last::node::generatable_expression, last::node::generatable_statement)
 SPECIALIZE_CREATE(last::node::While         , last::node::generatable_statement)
-SPECIALIZE_CREATE(last::node::If            , last::node::generatable_statement)
+SPECIALIZE_CREATE(last::node::If            , last::node::generatable_if_statement)
 SPECIALIZE_CREATE(last::node::Else          , last::node::generatable_statement)
 SPECIALIZE_CREATE(last::node::Condition     , last::node::generatable_statement)
 SPECIALIZE_CREATE(last::node::Scope         , last::node::generatable_statement)

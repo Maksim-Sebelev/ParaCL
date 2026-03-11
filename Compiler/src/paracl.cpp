@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) try
         throw std::invalid_argument("Usage:\n" + std::string(argv[0]) + " <source>.cl [-o executable]");
 
     auto&& executable = (argc == 4) ? std::filesystem::path{argv[3]} : std::filesystem::path{"a.out"};
-    std::filesystem::path tmp_ast_json = executable;
+    auto&& tmp_ast_json = std::filesystem::path{executable};
     tmp_ast_json.replace_extension(".ast.json");
 
     auto&& source = std::filesystem::path{argv[1]};
@@ -38,6 +38,8 @@ int main(int argc, char* argv[]) try
     auto&& compiler_exit_code = std::system(compiler_command.str().c_str());
     if (compiler_exit_code != EXIT_SUCCESS)
         throw std::runtime_error("Compilation failed with exit code " + std::to_string(compiler_exit_code));
+
+    std::filesystem::remove(tmp_ast_json);
 
     return EXIT_SUCCESS;
 }

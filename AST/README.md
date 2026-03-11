@@ -274,3 +274,20 @@ bool last::node::BasicNode::is_a();
 Возврщаает true, если нода была инициализирована объектом типа T, иначе false.
 
 <br>
+
+Так же BasicNode умеет приводиться к любому типу, возвращая const & на свои данные:
+
+```cpp
+// class BasicNode {
+template <typename T>
+requires (not std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, bool>)
+operator const T &() const;
+
+template <typename T>
+requires (not std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, bool>)
+operator T () const;
+```
+
+Если нода не была инициализирова типом T, будет брошено исключение std::bad_cast.
+
+<br>

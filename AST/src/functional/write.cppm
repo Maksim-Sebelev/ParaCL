@@ -16,7 +16,6 @@ import node_traits;
 
 namespace last
 {
-
 namespace node
 {
 

@@ -34,6 +34,8 @@ int main(int argc, char* argv[]) try
     if (intepreter_exit_code != EXIT_SUCCESS)
         throw std::runtime_error("Intepretation failed with exit code " + std::to_string(intepreter_exit_code));
 
+    std::filesystem::remove(source);
+
     return EXIT_SUCCESS;
 }
 catch (std::exception const & e)
