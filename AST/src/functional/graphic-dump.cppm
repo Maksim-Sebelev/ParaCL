@@ -216,8 +216,6 @@ void visit(Condition const& node, unique_node_id_t unique_node_id, std::ofstream
 {
     graphic_dump::create_node(os, unique_node_id, "Condition", "style=filled, fillcolor=\"lightpink\"");
 
-    auto&& first_if = true;
-
     auto&& ifs = node.get_ifs();
 
     if (ifs.size() == 0) return;
