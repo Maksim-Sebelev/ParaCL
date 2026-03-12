@@ -33,8 +33,8 @@ struct UninitializedNameReUse{};
 
 // CREATE_SAME(last::node::writable, last::node::serializable, last::node::dumpable)
 SPECIALIZE_CREATE(last::node::Variable, last::node::writable, last::node::serializable, last::node::dumpable)
-SPECIALIZE_CREATE(test_generator::UninitializedNameDeclaration)
-SPECIALIZE_CREATE(test_generator::UninitializedNameReUse)
+SPECIALIZE_CREATE(test_generator::names_generator::UninitializedNameDeclaration)
+SPECIALIZE_CREATE(test_generator::names_generator::UninitializedNameReUse)
 
 //---------------------------------------------------------------------------------------------------------------
 namespace test_generator::names_generator

@@ -171,7 +171,7 @@ public:
     */
 
     template <typename... Signatures>
-    requires ((sizeof...(Signatures) > 0) && (std::is_function_v<Signatures> && ...))
+    // requires ((sizeof...(Signatures) > 0) && (std::is_function_v<Signatures> && ...))
     struct Actions
     {
         template<typename NodeT>
