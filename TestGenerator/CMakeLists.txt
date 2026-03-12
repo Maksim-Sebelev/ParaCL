@@ -34,7 +34,6 @@ set(TEST_GENERATOR_SRC_DIR ${PROJECT_SOURCE_DIR}/src)
 # =================================================================================================
 # ast serializer library
 
-
 set(TEST_GENERATOR_AST_SERIALIZER_LIB ast-serializer)
 add_library(${TEST_GENERATOR_AST_SERIALIZER_LIB})
 
@@ -56,6 +55,32 @@ PRIVATE
     TheLast::TheLast
 )
 
+# =================================================================================================
+# name generator library
+
+set(TEST_GENERATOR_NAMEGENERATOR_LIB test-generator-name-generator)
+add_library(${TEST_GENERATOR_NAMEGENERATOR_LIB})
+
+set(TEST_GENERATOR_NAMEGENERATOR_SRC_DIR ${TEST_GENERATOR_SRC_DIR}/generator/name-generator)
+set(TEST_GENERATOR_NAMEGENERATOR_SRCS
+    ${TEST_GENERATOR_NAMEGENERATOR_SRC_DIR}/name-generator.cppm
+    ${TEST_GENERATOR_NAMEGENERATOR_SRC_DIR}/nametable.cppm
+)
+
+target_sources(${TEST_GENERATOR_NAMEGENERATOR_LIB}
+PUBLIC
+    FILE_SET CXX_MODULES
+    TYPE CXX_MODULES
+    FILES
+        ${TEST_GENERATOR_NAMEGENERATOR_SRCS}
+)
+
+target_link_libraries(${TEST_GENERATOR_NAMEGENERATOR_LIB}
+PUBLIC
+    TheLast::TheLast
+PRIVATE
+    ${TEST_GENERATOR_AST_SERIALIZER_LIB}
+)
 
 # =================================================================================================
 # nametable library

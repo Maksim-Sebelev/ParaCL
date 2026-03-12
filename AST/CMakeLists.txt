@@ -283,14 +283,14 @@ install(FILES
 # ================== ===============================================================================
 # test
 
-# add_executable(thelast-test
-# ${THELAST_SRC_DIR}/../tests/test.cpp
-# )
+add_executable(thelast-test
+${THELAST_SRC_DIR}/../tests/test.cpp
+)
 
-# target_link_libraries(thelast-test
-# PRIVATE
-#     TheLast::TheLast
-# )
+target_link_libraries(thelast-test
+PRIVATE
+    TheLast::TheLast
+)
 
 # =================================================================================================
 

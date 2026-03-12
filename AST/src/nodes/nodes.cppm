@@ -1,11 +1,12 @@
 module;
 
-#include <initializer_list>
-#include <iostream>
+#include <utility>
+#include <cstddef>
 #include <string>
 #include <string_view>
-#include <utility>
 #include <vector>
+#include <initializer_list>
+#include <iostream>
 
 export module ast_nodes;
 
@@ -14,13 +15,10 @@ export import node_type_erasure;
 namespace last::node
 {
 
+//--------------------------------------------------------------------------------------------------------------------------------------
 
-
-
-
-// --- Scope ---------------------------------------------------------------------------------------
-
-export class Scope final : private std::vector<BasicNode>
+export
+class Scope final : private std::vector<BasicNode>
 {
 public:
     using std::vector<BasicNode>::emplace_back;
@@ -29,34 +27,37 @@ public:
     using std::vector<BasicNode>::end;
     using std::vector<BasicNode>::size;
 
+public:
     Scope() = default;
-    explicit Scope(size_t size) : std::vector<BasicNode>(size) {}
-    explicit Scope(std::vector<BasicNode>&& nodes) : std::vector<BasicNode>(std::move(nodes)) {}
-    Scope(std::initializer_list<BasicNode> il) : std::vector<BasicNode>(il) {}
+    Scope(size_t size) : std::vector<BasicNode>(size)
+    {}
+
+    Scope(std::vector<BasicNode>&& nodes) : std::vector<BasicNode>(nodes)
+    {}
+
+    Scope(std::initializer_list<BasicNode> il) : std::vector<BasicNode>(il)
+    {}
 };
 
-
-
-
-// --- Variable ------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------
 
 export
 class Variable final
 {
+private:
     std::string name_;
-
 public:
-    explicit Variable(std::string&& name) : name_(std::move(name)) {}
-
-    [[nodiscard]] std::string_view name() const & noexcept { return name_; }
+    Variable(std::string&& name) : name_(std::move(name)) /* variale must own his value */
+    {}
+public:
+    std::string_view name() const & noexcept
+    { return name_; }
 };
 
+//--------------------------------------------------------------------------------------------------------------------------------------
 
-
-
-// --- Print ---------------------------------------------------------------------------------------
-
-export class Print final : private std::vector<BasicNode>
+export
+class Print final : private std::vector<BasicNode>
 {
 public:
     using std::vector<BasicNode>::emplace_back;
@@ -68,169 +69,280 @@ public:
     using std::vector<BasicNode>::iterator;
     using std::vector<BasicNode>::const_iterator;
 
+public:
     Print() = default;
-    explicit Print(std::vector<BasicNode>&& args) : std::vector<BasicNode>(std::move(args)) {}
-    Print(std::initializer_list<BasicNode> il) : std::vector<BasicNode>(il) {}
+    Print(std::vector<BasicNode>&& args) : std::vector<BasicNode>(std::move(args))
+    {}
+    Print(std::initializer_list<BasicNode> il) : std::vector<BasicNode>(il)
+    {}
 };
 
+//--------------------------------------------------------------------------------------------------------------------------------------
 
-
-
-
-// --- Scan ----------------------------------------------------------------------------------------
-
-export class Scan final
+export
+class Scan final
 {
 public:
     Scan() = default;
 };
 
+//--------------------------------------------------------------------------------------------------------------------------------------
 
-
-
-
-// --- UnaryOperator -------------------------------------------------------------------------------
-
-export class UnaryOperator final
+export
+class UnaryOperator final
 {
 public:
-    enum UnaryOperatorT { MINUS, PLUS, NOT };
-
+    enum UnaryOperatorT
+    { MINUS, PLUS, NOT };
 private:
-    BasicNode      arg_;
+    BasicNode arg_;
     UnaryOperatorT type_;
+public:
+    UnaryOperator(UnaryOperatorT type, BasicNode const &arg) :
+    arg_(arg), type_(type)
+    {}
+
+    UnaryOperator(UnaryOperatorT type, BasicNode&& arg) :
+    arg_(std::move(arg)), type_(type)
+    {}
 
 public:
-    UnaryOperator(UnaryOperatorT type, const BasicNode& arg) 
-        : arg_(arg), type_(type) {}
+    UnaryOperatorT type() const noexcept
+    { return type_; }
 
-    UnaryOperator(UnaryOperatorT type, BasicNode&& arg) 
-        : arg_(std::move(arg)), type_(type) {}
-
-    [[nodiscard]] UnaryOperatorT    type() const noexcept { return type_; }
-    [[nodiscard]] const BasicNode& arg()  const & noexcept { return arg_; }
+    BasicNode const &arg() const & noexcept
+    { return arg_; }
 };
 
+//--------------------------------------------------------------------------------------------------------------------------------------
 
-
-
-
-// --- BinaryOperator ------------------------------------------------------------------------------
-
-export class BinaryOperator final
+export
+class BinaryOperator final
 {
 public:
-    enum BinaryOperatorT {
-        AND, OR, ADD, SUB, MUL, DIV, REM,
-        ISAB, ISABE, ISLS, ISLSE, ISEQ, ISNE,
-        ASGN, ADDASGN, SUBASGN, MULASGN, DIVASGN, REMASGN
+    enum BinaryOperatorT
+    {
+        AND,
+        OR,
+        ADD,
+        SUB,
+        MUL,
+        DIV,
+        REM,
+        ISAB,
+        ISABE,
+        ISLS,
+        ISLSE,
+        ISEQ,
+        ISNE,
+        ASGN,    /* =  */
+        ADDASGN, /* += */
+        SUBASGN, /* -= */
+        MULASGN, /* *= */
+        DIVASGN, /* /= */
+        REMASGN, /* %= */
     };
 
 private:
-    BasicNode       larg_;
-    BasicNode       rarg_;
+    BasicNode larg_;
+    BasicNode rarg_;
     BinaryOperatorT type_;
 
 public:
-    template <typename TARG>
-        requires std::is_constructible_v<BasicNode, TARG>
-    BinaryOperator(BinaryOperatorT type, TARG&& larg, TARG&& rarg)
-        : larg_(std::forward<TARG>(larg)), rarg_(std::forward<TARG>(rarg)), type_(type) {}
+    BinaryOperator(BinaryOperatorT type, BasicNode const &larg, BasicNode const &rarg) :
+    larg_(larg), rarg_(rarg), type_(type)
+    {}
 
-    [[nodiscard]] BinaryOperatorT  type() const noexcept { return type_; }
-    [[nodiscard]] const BasicNode& larg() const & noexcept { return larg_; }
-    [[nodiscard]] const BasicNode& rarg() const & noexcept { return rarg_; }
-};
+    BinaryOperator(BinaryOperatorT type, BasicNode&& larg, BasicNode&& rarg) :
+    larg_(std::move(larg)), rarg_(std::move(rarg)), type_(type)
+    {}
 
+    BinaryOperator(BinaryOperatorT type, BasicNode const &larg, BasicNode&& rarg) :
+    larg_(larg), rarg_(std::move(rarg)), type_(type)
+    {}
 
-
-
-
-// --- Literals ------------------------------------------------------------------------------------
-
-export class NumberLiteral final {
-    int value_;
+    BinaryOperator(BinaryOperatorT type, BasicNode&& larg, BasicNode const &rarg) :
+    larg_(std::move(larg)), rarg_(rarg), type_(type)
+    {}
 
 public:
-    explicit NumberLiteral(int value) : value_(value) {}
-    [[nodiscard]] int value() const noexcept { return value_; }
+    BinaryOperatorT type() const noexcept
+    { return type_; }
+    BasicNode const &larg() const & noexcept
+    { return larg_; }
+    BasicNode const &rarg() const & noexcept
+    { return rarg_; }
 };
 
-export class StringLiteral final {
-    std::string value_;
+//--------------------------------------------------------------------------------------------------------------------------------------
 
-public:
-    explicit StringLiteral(std::string&& value) : value_(std::move(value)) {}
-    [[nodiscard]] std::string_view value() const & noexcept { return value_; }
-};
-
-
-
-
-
-class ConditionWithBody
+export
+class NumberLiteral final
 {
-    BasicNode cond_;
-    BasicNode body_;
+private:
+    int value_;
+public:
+    explicit NumberLiteral(int value) :
+        value_(value)
+    {}
+public:
+    int value() const noexcept
+    { return value_; };
 
+    NumberLiteral(const NumberLiteral& other) : value_(other.value_)
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+    }
+
+    NumberLiteral(NumberLiteral&& other): value_(other.value_)
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+    }
+
+    NumberLiteral& operator=(const NumberLiteral& other)
+    {
+        value_ = other.value_;
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        return *this;
+    }
+
+    NumberLiteral& operator=(NumberLiteral&& other)
+    {
+        value_ = other.value_;
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        return *this;
+    }
+};
+
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+export
+class StringLiteral final
+{
+private:
+    std::string value_;
+public:
+    StringLiteral(std::string&& value) : /* string literal must own his value */
+    value_(value)
+    {}
+public:
+    std::string_view value() const & noexcept
+    { return value_; }
+};
+
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+/* impl basic class for while, if, else-if classes */
+class ConditionWithBody /* not final */
+{
+private:
+    BasicNode condition_;
+    BasicNode body_;
 public:
     ConditionWithBody() = default;
-    
-    template<typename T>
-        requires std::is_constructible_v<BasicNode, T>
-    ConditionWithBody(T&& cond, T&& body)
-        : cond_(std::forward<T>(cond)), body_(std::forward<T>(body)) {}
+    ConditionWithBody(BasicNode const &condition, BasicNode const &body) :
+    condition_(condition), body_(body)
+    {}
 
-    [[nodiscard]] const BasicNode& condition() const & noexcept { return cond_; }
-    [[nodiscard]] const BasicNode& body()      const & noexcept { return body_; }
+    ConditionWithBody(BasicNode const &condition, BasicNode &&body) :
+    condition_(condition), body_(std::move(body))
+    {}
+
+    ConditionWithBody(BasicNode &&condition, BasicNode const &body) :
+    condition_(std::move(condition)), body_(body)
+    {}
+
+    ConditionWithBody(BasicNode&& condition, BasicNode&& body) :
+    condition_(std::move(condition)), body_(std::move(body))
+    {}
+
+public:
+    BasicNode const &condition() const & noexcept
+    { return condition_; }
+    BasicNode const &body() const & noexcept
+    { return body_; };
 };
 
-export class While final : public ConditionWithBody {
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+export
+class While final : public ConditionWithBody
+{
 public:
     using ConditionWithBody::ConditionWithBody;
 };
 
-export class If final : public ConditionWithBody {
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+export
+class If final : public ConditionWithBody
+{
 public:
     using ConditionWithBody::ConditionWithBody;
 };
 
-export class Else final {
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+export
+class Condition;
+
+export
+class Else final
+{
+private:
     BasicNode body_;
-
 public:
-    explicit Else(const BasicNode& body) : body_(body) {}
-    explicit Else(BasicNode&& body)      : body_(std::move(body)) {}
-
-    [[nodiscard]] const BasicNode& body() const & noexcept { return body_; }
+    Else(BasicNode const &body) : body_(body)
+    {}
+    Else(BasicNode&& body) : body_(std::move(body))
+    {}
+public:
+    BasicNode const &body() const & noexcept
+    { return body_; }
 
     friend class Condition;
+
 private:
     Else() = default;
 };
 
+//--------------------------------------------------------------------------------------------------------------------------------------
 
-
-
-
-
-export class Condition final {
+export
+class Condition final
+{
+private:
     std::vector<BasicNode> ifs_;
-    BasicNode              else_node_;
-
+    BasicNode else_;
 public:
     Condition() = default;
 
-    Condition(std::vector<BasicNode>&& ifs, BasicNode&& else_node)
-        : ifs_(std::move(ifs)), else_node_(std::move(else_node)) {}
+    Condition(std::vector<BasicNode>  const &ifs, BasicNode const & else_а_как_вот_это_назвать) :
+       ifs_(ifs), else_(else_а_как_вот_это_назвать)
+    {}
 
-    void add_condition(BasicNode&& cond) { ifs_.push_back(std::move(cond)); }
-    void set_else(BasicNode&& else_node)  { else_node_ = std::move(else_node); }
+    Condition(std::vector<BasicNode>&& ifs, BasicNode&& else_а_как_вот_это_назвать) :
+       ifs_(std::move(ifs)), else_(std::move(else_а_как_вот_это_назвать))
+    {}
 
-    [[nodiscard]] bool has_else() const noexcept { return static_cast<bool>(else_node_); }
+public:
+    void add_condition(BasicNode&& condition)
+    { ifs_.push_back(condition); }
 
-    [[nodiscard]] const std::vector<BasicNode>& get_ifs()  const & noexcept { return ifs_; }
-    [[nodiscard]] const BasicNode&              get_else() const & noexcept { return else_node_; }
+    void set_else(BasicNode&& else_а_как_вот_это_назвать)
+    { else_ = std::move(else_а_как_вот_это_назвать); }
+
+    bool has_else() const noexcept
+    { return else_; }
+public:
+
+    std::vector<BasicNode> const &get_ifs() const & noexcept
+    { return ifs_; }
+
+    BasicNode const &get_else() const & noexcept
+    { return else_; }
 };
 
-} // namespace last::node
+//--------------------------------------------------------------------------------------------------------------------------------------
+} /* namespace last::node */
+//--------------------------------------------------------------------------------------------------------------------------------------

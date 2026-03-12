@@ -123,7 +123,7 @@ void visit(While const & v, int& i)
 using printable = void();
 using printable_and_countable = void(int&);
 
-CREATE_SAME(printable, printable_and_countable, writable, dumpable, serializable)
+CREATE_SAME(printable, printable_and_countable, writable, dumpable)
 #include "read-ast.hpp"
 
 void print(BasicNode const & node)
@@ -147,99 +147,100 @@ int main() try
     print_and_count(n2, i);
 
     auto&& n6 = create(NumberLiteral{13});
-    auto&& n7 = create(StringLiteral{"fuck me please"});
+    auto&& n7 = create(UnaryOperator{UnaryOperator::MINUS, std::move(n6)});
 
-    auto&& n12 = create(Scan{});
-    auto&& n22 = create(Print{});
-    auto&& n72 = create(If{{n6}, n22});
-    auto&& n82 = create(Else{n12});
-
-    auto&& condition = Condition{{n72}, n82};
-    auto&& n32 = create(std::move(condition));
-    auto&& condition2 = create(NumberLiteral{42});
-
-    auto&& n8 = create(BinaryOperator{BinaryOperator::ADD, n6, condition2});
-
-    print_and_count(n12, i);
-    print(n12);
-
-    print_and_count(n22, i);
-    print(n22);
-
-    print_and_count(n32, i);
-    print(n32);
-
-    auto&& n42 = BasicNode{n32};
-    print_and_count(n42, i);
-    print(n42);
-
-    auto&& n52 = BasicNode{std::move(n12)};
-    print_and_count(n52, i);
-    print(n52);
-
-    auto&& n62 = create(Variable{"some name"});
-    print_and_count(n62, i);
-    print(n62);
-
-    auto&& nast1 = create(Print{n62, n6, n7});
-    auto&& nast2 = n6;
-    auto&& nast3 = n32;
-    auto&& nast4 = Scope{nast1, nast2, nast3};
-    auto&& nast5 = create(Print{n1, n2, n82, n8});
-    nast4.push_back(nast5);
-
-    auto&& root = create(std::move(nast4));
-    auto&& ast = AST{std::move(root)};
-    build_program(ast, "ast.cl");
-    write(ast, "ast.json");
+    auto&& ast = AST(std::move(n7));
     dump(ast, "ast.dot", "ast.svg");
 
-    auto&& readed_ast = read("ast.json");
-    write(ast, "ast.2.json");
-    dump(readed_ast, "ast.2.dot", "readed-ast.svg");
+    // auto&& n12 = create(Scan{});
+    // auto&& n22 = create(Print{});
+    // auto&& n72 = create(If{{n6}, n22});
+    // auto&& n82 = create(Else{n12});
 
-    auto&& name = create(Variable{"artem_lobachev"});
-    auto&& num = create(NumberLiteral{999});
-    auto&& num2 = create(NumberLiteral{13});
-    auto&& binop = create(BinaryOperator{BinaryOperator::ASGN, name, num});
-    auto&& print = create(Print{n7, num2, binop});
-    auto&& lastastroot = create(Scope{binop, print});
-    auto&& lastast = AST{std::move(lastastroot)};
-    build_program(lastast, "lastast.cl");
-    write(lastast, "last.ast.json");
-    dump(lastast, "ast.json.dot", "ast.json.svg");
+    // auto&& condition = Condition{{n72}, n82};
+    // auto&& n32 = create(std::move(condition));
+    // auto&& condition2 = create(StringLiteral{"suck bitch"});
 
-    std::cout << std::boolalpha << n7.is_a<StringLiteral>() << "\n" << n7.is_a<NumberLiteral>() << "\n";
+    // auto&& n8 = create(BinaryOperator{BinaryOperator::ADD, n6, condition2});
 
-    StringLiteral back_n7 = static_cast<StringLiteral>(n7);
-    std::cout << "back_n7.value() = " << back_n7.value() << "\n";
+    // print_and_count(n12, i);
+    // print(n12);
 
-    auto&& serializable_scan = create(Scan{});
-    auto&& serializable_string = create(StringLiteral("fuck"));
-    auto&& serializable_number = create(NumberLiteral(666));
-    auto&& serializable_variable = create(Variable("pretty_name"));
-    auto&& serializable_print = create(Print{serializable_string, serializable_number, serializable_scan, serializable_scan});
-    auto&& serializable_unop = create(UnaryOperator{UnaryOperator::NOT, serializable_variable});
-    auto&& serializable_binop3 = create(BinaryOperator{BinaryOperator::SUB, serializable_number, serializable_unop});
-    auto&& serializable_binop2 = create(BinaryOperator{BinaryOperator::AND, serializable_binop3, serializable_variable});
-    auto&& serializable_binop = create(BinaryOperator{BinaryOperator::ASGN, serializable_variable, serializable_binop2});
+    // print_and_count(n22, i);
+    // print(n22);
 
-    auto&& serializable_scope2 = create(Scope{serializable_print, serializable_unop, serializable_number, serializable_binop});
-    auto&& serializable_scope3 = create(Scope{serializable_print, serializable_scan, serializable_print});
-    auto&& serializable_scope4 = create(Scope{});
+    // print_and_count(n32, i);
+    // print(n32);
 
-    auto&& serializable_if = create(If{serializable_scan, serializable_scope2});
-    auto&& serializable_if2 = create(If{serializable_scan, serializable_scope3});
-    auto&& serializable_else = create(Else{serializable_scope4});
-    auto&& serializable_condition = create(Condition{{serializable_if, serializable_if2}, serializable_else});
-    auto&& serializable_scope5 = create(Scope{serializable_number});
-    auto&& serializable_while2 = create(While{serializable_scan, serializable_scope5});
-    auto&& serializable_scope = create(Scope{serializable_scan, serializable_condition, serializable_print, serializable_while2});
-    auto&& serializable_while = create(While{serializable_binop, serializable_scope});
-    auto&& serializable_global_scope = create(Scope{serializable_while});
-    auto&& serializable_ast = AST{std::move(serializable_global_scope)};
-    build_program(serializable_ast, "serializable-ast.cl");
-    dump(serializable_ast, "ser.ast.before.dot", "ser.ast.before.svg");
+    // auto&& n42 = BasicNode{n32};
+    // print_and_count(n42, i);
+    // print(n42);
+
+    // auto&& n52 = BasicNode{std::move(n12)};
+    // print_and_count(n52, i);
+    // print(n52);
+
+    // auto&& n62 = create(Variable{"some name"});
+    // print_and_count(n62, i);
+    // print(n62);
+
+    // auto&& nast1 = create(Print{n62, n6, n7});
+    // auto&& nast2 = n6;
+    // auto&& nast3 = n32;
+    // auto&& nast4 = Scope{nast1, nast2, nast3};
+    // auto&& nast5 = create(Print{n1, n2, n82, n8});
+    // nast4.push_back(nast5);
+
+    // auto&& root = create(std::move(nast4));
+    // auto&& ast = AST{std::move(root)};
+    // write(ast, "ast.json");
+    // dump(ast, "ast.dot", "ast.svg");
+
+    // auto&& readed_ast = read("ast.json");
+    // write(ast, "ast.2.json");
+    // dump(readed_ast, "ast.2.dot", "readed-ast.svg");
+
+    // auto&& name = create(Variable{"artem_lobachev"});
+    // auto&& num = create(NumberLiteral{999});
+    // auto&& num2 = create(NumberLiteral{13});
+    // auto&& binop = create(BinaryOperator{BinaryOperator::ASGN, name, num});
+    // auto&& print = create(Print{n7, num2, binop});
+    // auto&& lastastroot = create(Scope{binop, print});
+    // auto&& lastast = AST{std::move(lastastroot)};
+    // write(lastast, "last.ast.json");
+    // dump(lastast, "ast.json.dot", "ast.json.svg");
+
+    // std::cout << std::boolalpha << n7.is_a<StringLiteral>() << "\n" << n7.is_a<NumberLiteral>() << "\n";
+
+    // StringLiteral back_n7 = static_cast<StringLiteral>(n7);
+    // std::cout << "back_n7.value() = " << back_n7.value() << "\n";
+
+    // auto&& serializable_scan = create(Scan{});
+    // auto&& serializable_string = create(StringLiteral("fuck"));
+    // auto&& serializable_number = create(NumberLiteral(666));
+    // auto&& serializable_variable = create(Variable("pretty_name"));
+    // auto&& serializable_print = create(Print{serializable_string, serializable_number, serializable_scan, serializable_scan});
+    // auto&& serializable_unop = create(UnaryOperator{UnaryOperator::NOT, serializable_variable});
+    // auto&& serializable_binop3 = create(BinaryOperator{BinaryOperator::SUB, serializable_number, serializable_unop});
+    // auto&& serializable_binop2 = create(BinaryOperator{BinaryOperator::AND, serializable_binop3, serializable_variable});
+    // auto&& serializable_binop = create(BinaryOperator{BinaryOperator::ASGN, serializable_variable, serializable_binop2});
+
+    // auto&& serializable_scope2 = create(Scope{serializable_print, serializable_unop, serializable_number, serializable_binop});
+    // auto&& serializable_scope3 = create(Scope{serializable_print, serializable_scan, serializable_print});
+    // auto&& serializable_scope4 = create(Scope{});
+
+    // auto&& serializable_if = create(If{serializable_scan, serializable_scope2});
+    // auto&& serializable_if2 = create(If{serializable_scan, serializable_scope3});
+    // auto&& serializable_else = create(Else{serializable_scope4});
+    // auto&& serializable_condition = create(Condition{{serializable_if, serializable_if2}, serializable_else});
+    // auto&& serializable_scope5 = create(Scope{serializable_number});
+    // auto&& serializable_while2 = create(While{serializable_scan, serializable_scope5});
+    // auto&& serializable_scope = create(Scope{serializable_scan, serializable_condition, serializable_print, serializable_while2});
+    // auto&& serializable_while = create(While{serializable_binop, serializable_scope});
+    // auto&& serializable_global_scope = create(Scope{serializable_while});
+    // auto&& serializable_ast = AST{std::move(serializable_global_scope)};
+    // build_program(serializable_ast, "serializable-ast.cl");
+    // dump(serializable_ast, "ser.ast.before.dot", "ser.ast.before.svg");
 
     return 0;
 }

@@ -8,6 +8,7 @@ module;
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <cstddef>
 
 #define LOGINFO(...)
 #define LOGERR(...)
@@ -28,6 +29,8 @@ class Nametable final
 {
   private:
     std::vector<std::unordered_map<std::string_view, int>> scopes_;
+    size_t unique_names_quant_ = 0;
+
   private:
     int      * lookup            (std::string_view name);
     int const* lookup            (std::string_view name) const;
@@ -37,8 +40,10 @@ class Nametable final
     void new_scope         ();
     void leave_scope       ();
     void set_value         (std::string_view name, int value);
-    int  get_variable_value(std::string_view name) const;
-    bool exists            (std::string_view name) const;
+    bool exists            (std::string_view name)             const;
+    int  get_variable_value(std::string_view name)             const;
+    int  operator []       (std::string_view name)             const;
+    size_t unique_names    ()                                  const;
 };
 
 //---------------------------------------------------------------------------------------------------------------
@@ -56,6 +61,9 @@ void Nametable::leave_scope()
     LOGINFO("paracl: interpreter: nametable: exiting scope");
 
     if (scopes_.empty()) return;
+
+    unique_names_quant_ -= scopes_.back().size();
+
     scopes_.pop_back();
 }
 
@@ -75,6 +83,13 @@ int Nametable::get_variable_value(std::string_view name) const
 
     LOGINFO("paracl: interpreter: nametable: variable NOT found: \"{}\"", name);
     throw std::runtime_error(std::string("requests value of not exists variable: ") + std::string(name));
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+int Nametable::operator[] (std::string_view name) const
+{
+    return get_variable_value(name);
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -101,12 +116,19 @@ bool Nametable::exists(std::string_view name) const
     return lookup(name);
 }
 
+//---------------------------------------------------------------------------------------------------------------
+
+size_t Nametable::unique_names() const
+{
+    return unique_names_quant_;
+}
+
 // private
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
-int *Nametable::lookup(std::string_view name)
+int * Nametable::lookup(std::string_view name)
 {
     for (auto &&scope: scopes_ | std::views::reverse)
     {
@@ -120,7 +142,7 @@ int *Nametable::lookup(std::string_view name)
 
 //---------------------------------------------------------------------------------------------------------------
 
-int const *Nametable::lookup(std::string_view name) const
+int const * Nametable::lookup(std::string_view name) const
 {
     for (auto &&scope: scopes_ | std::views::reverse)
     {
@@ -141,6 +163,7 @@ void Nametable::declare(std::string_view name, int value)
     if (scopes_.empty())
         throw std::runtime_error("cannot declare variable: no active scopes");
 
+    ++unique_names_quant_;
     scopes_.back()[name] = value;
 }
 

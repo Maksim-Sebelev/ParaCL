@@ -14,7 +14,15 @@ import thelast;
 namespace test_generator::ast_serialize
 {
 
-export enum class BuildProgramSetting {DummyValue, NoEnclosure, UseEnclosure, NotFirstIf, ScopeLikeConditionBody, GlobalScope};
+enum class BuildProgramSetting
+{
+    DummyValue             ,
+    LikeExpression         ,
+    LikeStatement          ,
+    NotFirstIf             ,
+    ScopeLikeConditionBody ,
+    GlobalScope            ,
+};
 
 void write_n_tab(std::ostream& os, size_t tabs)
 { os << std::string(tabs, '\t'); }
@@ -36,7 +44,7 @@ void leave_scope(std::ostream& os, size_t enclosure)
 
 void expression_or_statement_begin_action(std::ostream& os, size_t enclosure, BuildProgramSetting setting)
 {
-    auto&& is_expression = (setting == BuildProgramSetting::NoEnclosure);
+    auto&& is_expression = (setting == BuildProgramSetting::LikeExpression);
     if (is_expression)
         os << "(";
     else
@@ -45,7 +53,7 @@ void expression_or_statement_begin_action(std::ostream& os, size_t enclosure, Bu
 
 void expression_or_statement_and_action(std::ostream& os, BuildProgramSetting setting)
 {
-    auto&& is_expression = (setting == BuildProgramSetting::NoEnclosure);
+    auto&& is_expression = (setting == BuildProgramSetting::LikeExpression);
     if (is_expression)
         os << ")";
     else
@@ -84,11 +92,11 @@ void visit(Print const & node, std::ostream& os, size_t enclosure, [[maybe_unuse
 
     if (node.size() != 0)
     {
-        build(node[0], os, 0, test_generator::ast_serialize::BuildProgramSetting::NoEnclosure);
+        build(node[0], os, 0, test_generator::ast_serialize::BuildProgramSetting::LikeExpression);
         for (auto&& it = 1LU, ite = node.size(); it < ite; ++it)
         {
             os << ", ";
-            build(node[it], os, enclosure, test_generator::ast_serialize::BuildProgramSetting::NoEnclosure);
+            build(node[it], os, enclosure, test_generator::ast_serialize::BuildProgramSetting::LikeExpression);
         }
     }
 
@@ -119,13 +127,13 @@ void visit(Scope const & node, std::ostream& os, size_t enclosure, test_generato
     }
 
     auto&& need_brackets = not (((size == 1) and is_scope_after_condition) or (is_scope_global));
-    size_t offset = static_cast<size_t>(not is_scope_global);
+    auto&& offset = static_cast<size_t>(not is_scope_global);
 
     if (need_brackets)
         test_generator::ast_serialize::begin_scope(os, enclosure);
 
     for (auto&& arg: node)
-        build(arg, os, enclosure + offset, test_generator::ast_serialize::BuildProgramSetting::UseEnclosure);
+        build(arg, os, enclosure + offset, test_generator::ast_serialize::BuildProgramSetting::LikeStatement);
 
     if (need_brackets)
         test_generator::ast_serialize::leave_scope(os, enclosure);
@@ -136,7 +144,7 @@ void visit(While const & node, std::ostream& os, size_t enclosure, [[maybe_unuse
 {
     test_generator::ast_serialize::write_n_tab(os, enclosure);
     os << "while (";
-    build(node.condition(), os, 0, test_generator::ast_serialize::BuildProgramSetting::NoEnclosure);
+    build(node.condition(), os, 0, test_generator::ast_serialize::BuildProgramSetting::LikeExpression);
     os << ")\n";
     build(node.body(), os, enclosure, test_generator::ast_serialize::BuildProgramSetting::ScopeLikeConditionBody);
 }
@@ -149,7 +157,7 @@ void visit(If const & node, std::ostream& os, size_t enclosure, test_generator::
         os << "else ";
 
     os << "if (";
-    build(node.condition(), os, 0, test_generator::ast_serialize::BuildProgramSetting::NoEnclosure);
+    build(node.condition(), os, 0, test_generator::ast_serialize::BuildProgramSetting::LikeExpression);
     os << ")\n";
     build(node.body(), os, enclosure, test_generator::ast_serialize::BuildProgramSetting::ScopeLikeConditionBody);
 }
@@ -182,7 +190,7 @@ void visit(BinaryOperator const & node, std::ostream& os, size_t enclosure, test
 {
     expression_or_statement_begin_action(os, enclosure, setting);
 
-    build(node.larg(), os, enclosure, test_generator::ast_serialize::BuildProgramSetting::NoEnclosure);
+    build(node.larg(), os, enclosure, test_generator::ast_serialize::BuildProgramSetting::LikeExpression);
     switch (node.type())
     {
         case BinaryOperator::AND    : os << " && "; break;
@@ -206,7 +214,7 @@ void visit(BinaryOperator const & node, std::ostream& os, size_t enclosure, test
         case BinaryOperator::REMASGN: os << " %= "; break;
         default: __builtin_unreachable();
     }
-    build(node.rarg(), os, enclosure, test_generator::ast_serialize::BuildProgramSetting::NoEnclosure);
+    build(node.rarg(), os, enclosure, test_generator::ast_serialize::BuildProgramSetting::LikeExpression);
 
     expression_or_statement_and_action(os, setting);
 }
@@ -224,7 +232,7 @@ void visit(UnaryOperator const & node, std::ostream& os, size_t enclosure, test_
         default: __builtin_unreachable();
     }
 
-    build(node.arg(), os, enclosure, test_generator::ast_serialize::BuildProgramSetting::NoEnclosure);
+    build(node.arg(), os, enclosure, test_generator::ast_serialize::BuildProgramSetting::LikeExpression);
 
     expression_or_statement_and_action(os, setting);
 }
@@ -232,7 +240,7 @@ void visit(UnaryOperator const & node, std::ostream& os, size_t enclosure, test_
 template <>
 void visit(Variable const & node, std::ostream& os, size_t enclosure, test_generator::ast_serialize::BuildProgramSetting setting)
 {
-    auto&& is_not_expression = (setting != test_generator::ast_serialize::BuildProgramSetting::NoEnclosure);
+    auto&& is_not_expression = (setting != test_generator::ast_serialize::BuildProgramSetting::LikeExpression);
     if (is_not_expression)
         test_generator::ast_serialize::write_n_tab(os, enclosure);
 
@@ -245,7 +253,7 @@ void visit(Variable const & node, std::ostream& os, size_t enclosure, test_gener
 template <>
 void visit(NumberLiteral const & node, std::ostream& os, size_t enclosure, test_generator::ast_serialize::BuildProgramSetting setting)
 {
-    auto&& is_not_expression = (setting != test_generator::ast_serialize::BuildProgramSetting::NoEnclosure);
+    auto&& is_not_expression = (setting != test_generator::ast_serialize::BuildProgramSetting::LikeExpression);
     if (is_not_expression)
         test_generator::ast_serialize::write_n_tab(os, enclosure);
 
