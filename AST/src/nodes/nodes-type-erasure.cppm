@@ -81,7 +81,7 @@ private:
                 if constexpr (std::is_void_v<ReturnT>)
                 {
                     visit_specializations::template visit<NodeT, ReturnT, Args...>(
-                        data, 
+                        data,
                         unwrap_arg_<Args>(args[Is])...
                     );
                     return std::any{};
@@ -89,7 +89,7 @@ private:
                 else
                 {
                     auto&& result = visit_specializations::template visit<NodeT, ReturnT, Args...>(
-                        data, 
+                        data,
                         unwrap_arg_<Args>(args[Is])...
                     );
                     return std::any(std::move(result));

@@ -188,6 +188,30 @@ public:
 public:
     int value() const noexcept
     { return value_; };
+
+    NumberLiteral(const NumberLiteral& other) : value_(other.value_)
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+    }
+
+    NumberLiteral(NumberLiteral&& other): value_(other.value_)
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+    }
+
+    NumberLiteral& operator=(const NumberLiteral& other)
+    {
+        value_ = other.value_;
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        return *this;
+    }
+
+    NumberLiteral& operator=(NumberLiteral&& other)
+    {
+        value_ = other.value_;
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        return *this;
+    }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------

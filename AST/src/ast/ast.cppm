@@ -14,13 +14,10 @@ namespace last
 export
 class AST
 {
-private:
     node::BasicNode root_;
 
 public:
-    AST(node::BasicNode const & root) : /* too long, because all tree will copy */
-        root_(root)
-    {}
+    AST(node::BasicNode const & root) : root_(root) {}
     
     AST() = default;
 
@@ -28,12 +25,7 @@ public:
         root_(std::move(root))
     {}
 
-    
-
-public:
-    node::BasicNode const &root() const noexcept
-    { return root_; }
-
+    node::BasicNode const &root() const noexcept { return root_; }
 };
 
 } /* namespace last */

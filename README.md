@@ -1,51 +1,23 @@
-# Компилятор и интепретатор ParaCL
+# Компилятор и интепретор ParaCL
 
-# Зависимости
-
-## ОС
-
-Ubuntu 24.04.3 LTS\
-По крайней мере на ней точно работает :) Можете попытаться собрать это в других местах, но разработчики ничего не гарантируют.
-
-## Компилятор
-
-`clang++-17`/`clang++-18`
-
+ААА БАЛЯ КОНАН РАБОТАЕТ
 ```shell
-sudo apt install -y clang++
+git clone https://github.com/Maksim-Sebelev/ParaCL.git;
+cd ParaCL;
+python3 -m venv .venv && source .venv/bin/activate && pip3 install conan;
+conan install . --output-folder=third-party --build=missing;
+cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=./third-party/conan_toolchain.cmake -DCMAKE_CXX_COMPILER=clang++ -G Ninja;
+cmake --build build;
+ctest --test-dir build;
+build/benchmark;
 ```
 
-## Система сборки
+## Зависимости
 
-`Ninja-1.11.1`
-
-```shell
-sudo apt install ninja-build
-```
-
-## Сторонние зависимости
-
-[Boost-1.70.0+](https://www.boost.org/releases/1.70.0/)
-
-```shell
-sudo apt install -y libboost-all-dev
-```
-
-[LLVM-17.0.1](https://github.com/llvm/llvm-project/releases/tag/llvmorg-17.0.1)
-
-*Идет вместе с Ubuntu 24.04.3 LTS*
-
-[Bison-3.8.2](https://ftp.gnu.org/gnu/bison/)
-
-```shell
-sudo apt install bison
-```
-
+[Boost-1.70.0+](https://www.boost.org/releases/1.70.0/)\
+[LLVM-17.0.1](https://github.com/llvm/llvm-project/releases/tag/llvmorg-17.0.1)\
+[Bison-3.8.2](https://ftp.gnu.org/gnu/bison/)\
 [Flex-2.6.4](https://sourceforge.net/projects/gnuwin32/files/flex/)
-
-```shell
-sudo apt install flex
-```
 
 ## Установка
 

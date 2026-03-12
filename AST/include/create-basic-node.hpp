@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #define SPECIALIZE_CREATE(NodeT, ...)                                                                                       \
 template <>                                                                                                                 \
 inline last::node::BasicNode last::node::create(NodeT node)                                                                 \
