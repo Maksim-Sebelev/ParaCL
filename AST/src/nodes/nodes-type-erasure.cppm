@@ -7,6 +7,8 @@ module;
 #include <utility>
 #include <typeinfo>
 
+#define STRINGIFY(X) #X
+
 export module node_type_erasure;
 
 namespace last::node
@@ -18,7 +20,14 @@ namespace visit_specializations
 template <typename NodeT, typename ReturnT, typename... Args>
 ReturnT visit(NodeT const &, Args...)
 {
-    static_assert(false, "using not specialized visit function. "
+    static_assert(false, "using not specialized '" STRINGIFY(__PRETTY_FUNCTION__) "'. "
+                         "this static_assert help you to not see terribale linker errors :)");
+}
+
+template <typename NodeT, typename ReturnT, typename... Args>
+ReturnT visit(NodeT &, Args...)
+{
+    static_assert(false, "using not specialized '" STRINGIFY(__PRETTY_FUNCTION__) "'. "
                          "this static_assert help you to not see terribale linker errors :)");
 }
 } /* visit_specializations */
@@ -75,8 +84,31 @@ private:
                     return std::any_cast<T>(arg);
             }
 
+            /* for const visit */
             template<size_t... Is>
             static std::any call_impl_(const NodeT& data, std::any* args, std::index_sequence<Is...>)
+            {
+                if constexpr (std::is_void_v<ReturnT>)
+                {
+                    visit_specializations::template visit<NodeT, ReturnT, Args...>(
+                        data,
+                        unwrap_arg_<Args>(args[Is])...
+                    );
+                    return std::any{};
+                }
+                else
+                {
+                    auto&& result = visit_specializations::template visit<NodeT, ReturnT, Args...>(
+                        data,
+                        unwrap_arg_<Args>(args[Is])...
+                    );
+                    return std::any(std::move(result));
+                }
+            }
+
+            /* for non-const visit */
+            template<size_t... Is>
+            static std::any call_impl_(NodeT& data, std::any* args, std::index_sequence<Is...>)
             {
                 if constexpr (std::is_void_v<ReturnT>)
                 {
@@ -225,6 +257,45 @@ public:
         }
     }
 
+    template<typename ReturnT, typename... Args>
+    friend ReturnT visit(BasicNode & node, Args... args)
+    {
+        if (not node.self_)
+            throw std::runtime_error("visite node, which is not constructible (node.self_ is nullptr)");
+
+        using SignatureT = ReturnT(Args...);
+
+        if (not node.self_->supports_signature_(typeid(SignatureT))) 
+        {
+            throw std::runtime_error(
+                std::string("This node dont support this function: ") + typeid(SignatureT).name()
+            );
+        }
+
+        std::any arg_array[] = {pack_arg_(std::forward<Args>(args))...};
+        auto&& result = node.self_->invoke_(
+            typeid(SignatureT),
+            arg_array
+        );
+
+        if constexpr (not std::is_void_v<ReturnT>)
+        {
+        try
+        {
+            return std::any_cast<ReturnT>(result);
+        }
+        catch (const std::bad_any_cast& e)
+        {
+            throw std::runtime_error(
+                std::string("Return type mismatch: expected ") + 
+                typeid(ReturnT).name() + 
+                " but got " + 
+                result.type().name()
+            );
+        }
+        }
+    }
+
     /*
     default ctor (need for nodes default ctor)
     warning: after this constructor visit will throw std::runtime_error
@@ -304,9 +375,11 @@ BasicNode create(NodeT)
 {
     /*
     use this like:
-    return BasicNode::Actions<__your_signatures__>::create(node)
+    return BasicNode::Actions<__your_signatures__>::create(node),
+    this is realized in macro SPECIALIZE_CREATE in 'include/create-basic-node.hpp',
+    DONT do it with your hands
     */
-    static_assert(false, "using unspecialized create.");
+    static_assert(false, "using unspecialized '" STRINGIFY(__PRETTY_FUNCTION__) "'.");
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------

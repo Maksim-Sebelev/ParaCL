@@ -2,7 +2,14 @@
 
 #include <memory>
 
+#if defined(THELAST_EXPORT_CREATE_SPEZIALIZATIONS)
+#define THELAST_EXPORT_CREATE_SPEZIALIZATIONS__ export
+#else /* defined(THELAST_EXPORT_CREATE_SPEZIALIZATIONS) */
+#define THELAST_EXPORT_CREATE_SPEZIALIZATIONS__
+#endif /* defined(THELAST_EXPORT_CREATE_SPEZIALIZATIONS) */
+
 #define SPECIALIZE_CREATE(NodeT, ...)                                                                                       \
+THELAST_EXPORT_CREATE_SPEZIALIZATIONS__                                                                                     \
 template <>                                                                                                                 \
 inline last::node::BasicNode last::node::create(NodeT node)                                                                 \
 {                                                                                                                           \

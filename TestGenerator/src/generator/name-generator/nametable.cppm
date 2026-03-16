@@ -2,7 +2,6 @@ module;
 
 //---------------------------------------------------------------------------------------------------------------
 
-#include <string_view>
 #include <ranges>
 #include <stdexcept>
 #include <string>
@@ -19,10 +18,8 @@ module;
 export module name_generator_nametable;
 
 //---------------------------------------------------------------------------------------------------------------
-
 namespace test_generator::names_generator
 {
-
 //---------------------------------------------------------------------------------------------------------------
 
 export
@@ -99,8 +96,8 @@ void Nametable::declare(unique_name_id_t id)
     if (exists(id))
         throw std::runtime_error("Redeclarion of '" + std::to_string(id) + "'");
 
-    ++unique_names_quant_;
     scopes_.back().insert(id);
+    ++unique_names_quant_;
 }
 
 //---------------------------------------------------------------------------------------------------------------
