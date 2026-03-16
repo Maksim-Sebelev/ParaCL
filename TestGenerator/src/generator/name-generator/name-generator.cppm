@@ -150,14 +150,13 @@ public:
     }
 
     /* replace UninitializedNameDeclaration/UninitializedNameReUse with last::node::Variable  */
-    void set_name_to_unnamed_variable(last::node::BasicNode& variable)
+
+    void set_name_to_unnamed_variable(last::node::BasicNode& node)
     {
-        if (variable.is_a<UninitializedNameDeclaration>())
-            variable =  generate_new_variable();
-        else if (variable.is_a<UninitializedNameReUse>())
-            variable = generate_existing_variable(static_cast<UninitializedNameReUse const &>(variable).id());
-        else
-            throw std::runtime_error("Try to set name to not a uninit variable with in namegenerator");
+        if (node.is_a<UninitializedNameDeclaration>())
+            node =  generate_new_variable();
+        else if (node.is_a<UninitializedNameReUse>())
+            node = generate_existing_variable(static_cast<UninitializedNameReUse const &>(node).id());
     }
 };
 

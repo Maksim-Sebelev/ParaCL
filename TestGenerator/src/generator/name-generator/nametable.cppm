@@ -33,7 +33,7 @@ class Nametable
   private:
     using scopes_t = std::vector<std::unordered_set<unique_name_id_t>>;
     scopes_t scopes_;
-
+    std::vector<size_t> scopes_unique_names_;
     /* here size_t is not a unique_name_id_t */
     size_t unique_names_quant_ = 0;
 
@@ -69,6 +69,8 @@ void Nametable::leave_scope()
 
 unique_name_id_t Nametable::get_new_unique_name_id() const noexcept(std::is_nothrow_copy_constructible_v<unique_name_id_t>)
 {
+    if (scopes_.empty())
+        return 0;
     return unique_names_quant_;
 }
 

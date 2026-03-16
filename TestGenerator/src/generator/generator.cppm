@@ -15,8 +15,7 @@ export import thelast;
 import name_generator;
 import ast_serializer;
 import global_create_settings;
-
-//---------------------------------------------------------------------------------------------------------------
+import name_inserter;
 
 //---------------------------------------------------------------------------------------------------------------
 namespace test_generator
@@ -56,7 +55,10 @@ private:
 private:
 
 
-    void initialize_names();
+    void initialize_names()
+    {
+        name_inserter::in
+    }
  
     last::node::BasicNode generate_random_statement()
 

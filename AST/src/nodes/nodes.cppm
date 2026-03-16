@@ -37,6 +37,9 @@ public:
 
     Scope(std::initializer_list<BasicNode> il) : std::vector<BasicNode>(il)
     {}
+
+    BasicNode const & last()
+    { return back(); }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -341,6 +344,20 @@ public:
 
     BasicNode const &get_else() const & noexcept
     { return else_; }
+
+    BasicNode &get_else() & noexcept
+    { return else_; }
+};
+
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+export
+class Return
+{
+private:
+    BasicNode expression_;
+public:
+    Return(BasicNode)
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
