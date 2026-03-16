@@ -85,6 +85,7 @@ STRING    \"[^"]*\"
 "else"            { return yy::parser::token::ELSE; }
 ";"               { return yy::parser::token::SC; }
 ","               { return yy::parser::token::COMMA; }
+"func"            { return yy::parser::token::DECLFUNC; }
 
 {STRING} {
     yytext[yyleng - 1] = '\0';

@@ -17,229 +17,51 @@ import thelast;
 using namespace ::last::node;
 using namespace ::last;
 
-namespace last::node::visit_specializations
-{
-template <>
-void visit([[maybe_unused]] Scan const & scan)
-{ std::cout << "Scan" << std::endl; }
+CREATE_SAME(writable, dumpable, serializable)
 
-template <>
-void visit([[maybe_unused]] Print const & print)
-{ std::cout << "Print" << std::endl; }
-
-template <>
-void visit([[maybe_unused]] Condition const & print)
-{ std::cout << "Condition" << std::endl; }
-
-template <>
-void visit(Variable const & v)
-{ std::cout << "Variable{" << v.name() << "}" << std::endl; }
-
-template <>
-void visit(NumberLiteral const & l)
-{ std::cout << "NumberLiteral{" << l.value() << "}" << std::endl; }
-
-template <>
-void visit(StringLiteral const & l)
-{ std::cout << "NumberLiteral{" << l.value() << "}" << std::endl; }
-
-template <>
-void visit([[maybe_unused]] If const & l)
-{ std::cout << "If{"  << "}" << std::endl; }
-
-template <>
-void visit([[maybe_unused]] Else const & l)
-{ std::cout << "Else{"  << "}" << std::endl; }
-
-template <>
-void visit(Scope const & s)
-{ std::cout << "Scope{\n";  for (auto&& m: s) visit<void>(m); std::cout << "}" << std::endl; }
-
-template <>
-void visit([[maybe_unused]] BinaryOperator const & bp)
-{ std::cout << "BinaryOp{}\n";}
-
-template <>
-void visit([[maybe_unused]] UnaryOperator const & uo)
-{ std::cout << "UnaryOp{}\n";}
-
-template <>
-void visit([[maybe_unused]] While const & uo)
-{ std::cout << "While{}\n";}
-}
-
-namespace last::node::visit_specializations
-{
-template <>
-void visit([[maybe_unused]] Scan const & scan, int& i)
-{ std::cout << "Scan " << ++i << std::endl; }
-
-template <> 
-void visit([[maybe_unused]] Print const & print, int& i)
-{ std::cout << "Print " << ++i << std::endl; }
-
-template <>
-void visit([[maybe_unused]] Condition const & print, int& i)
-{ std::cout << "Condition " << ++i << std::endl; }
-
-template <> 
-void visit([[maybe_unused]] BinaryOperator const & print, int& i)
-{ std::cout << "BinaryOp " << ++i << std::endl; }
-
-template <>
-void visit([[maybe_unused]] UnaryOperator const & print, int& i)
-{ std::cout << "UnaryOp " << ++i << std::endl; }
-
-template <>
-void visit(Variable const & v, int& i)
-{ std::cout << "Variable{" << v.name() << "} " << ++i << std::endl; }
-
-template <>
-void visit(If const & v, int& i)
-{ std::cout << "If{" << "} " << ++i << std::endl; }
-
-template <>
-void visit(Else const & v, int& i)
-{ std::cout << "Else{" << "} " << ++i << std::endl; }
-
-template <>
-void visit(Scope const & v, int& i)
-{ std::cout << "Scope{" << "} " << ++i << std::endl; }
-
-template <>
-void visit(NumberLiteral const & v, int& i)
-{ std::cout << "NumberLiteral{" << "} " << ++i << std::endl; }
-
-template <>
-void visit(StringLiteral const & v, int& i)
-{ std::cout << "StringLiteral{" << "} " << ++i << std::endl; }
-
-template <>
-void visit(While const & v, int& i)
-{ std::cout << "While{" << "} " << ++i << std::endl; }
-
-}
-
-using printable = void();
-using printable_and_countable = void(int&);
-
-CREATE_SAME(printable, printable_and_countable, writable, dumpable, serializable)
 #include "read-ast.hpp"
-
-void print(BasicNode const & node)
-{ return visit<void>(node); }
-
-void print_and_count(BasicNode const & node, int & i)
-{ return visit<void, int&>(node, i); }
 
 
 int main() try
 {
-    int i = 0;
+    auto&& n_scan = create(Scan{});
+    auto&& n_string = create(StringLiteral("fuck"));
+    auto&& n_number = create(NumberLiteral(666));
+    auto&& n_variable = create(Variable("pretty_name"));
+    auto&& n_print = create(Print{n_string, n_number, n_scan, n_scan});
+    auto&& n_unop = create(UnaryOperator{UnaryOperator::NOT, n_variable});
+    auto&& n_binop3 = create(BinaryOperator{BinaryOperator::SUB, n_number, n_unop});
+    auto&& n_binop2 = create(BinaryOperator{BinaryOperator::AND, n_binop3, n_variable});
+    auto&& n_binop = create(BinaryOperator{BinaryOperator::ASGN, n_variable, n_binop2});
 
-    auto&& n = last::node::create(Scan{});
-    print(n);
+    auto&& n_scope2 = create(Scope{n_print, n_unop, n_number, n_binop});
+    auto&& n_scope3 = create(Scope{n_print, n_scan, n_print});
+    auto&& n_scope4 = create(Scope{});
 
-    auto&& n1 = create(Scope{});
-    auto&& n2 = create(Scope{});
-
-    print_and_count(n1, i);
-    print_and_count(n2, i);
-
-    auto&& n6 = create(NumberLiteral{13});
-    auto&& n7 = create(StringLiteral{"fuck me please"});
-
-    auto&& n12 = create(Scan{});
-    auto&& n22 = create(Print{});
-    auto&& n72 = create(If{{n6}, n22});
-    auto&& n82 = create(Else{n12});
-
-    auto&& condition = Condition{{n72}, n82};
-    auto&& n32 = create(std::move(condition));
-    auto&& condition2 = create(NumberLiteral{42});
-
-    auto&& n8 = create(BinaryOperator{BinaryOperator::ADD, n6, condition2});
-
-    print_and_count(n12, i);
-    print(n12);
-
-    print_and_count(n22, i);
-    print(n22);
-
-    print_and_count(n32, i);
-    print(n32);
-
-    auto&& n42 = BasicNode{n32};
-    print_and_count(n42, i);
-    print(n42);
-
-    auto&& n52 = BasicNode{std::move(n12)};
-    print_and_count(n52, i);
-    print(n52);
-
-    auto&& n62 = create(Variable{"some name"});
-    print_and_count(n62, i);
-    print(n62);
-
-    auto&& nast1 = create(Print{n62, n6, n7});
-    auto&& nast2 = n6;
-    auto&& nast3 = n32;
-    auto&& nast4 = Scope{nast1, nast2, nast3};
-    auto&& nast5 = create(Print{n1, n2, n82, n8});
-    nast4.push_back(nast5);
-
-    auto&& root = create(std::move(nast4));
-    auto&& ast = AST{std::move(root)};
-    build_program(ast, "ast.cl");
-    write(ast, "ast.json");
+    auto&& n_return2 = create(Return{n_binop});
+    auto&& n_scope6 = create(Scope{n_return2});
+    auto&& n_declfunc = create(FunctionDeclaration{"foo", {}, n_scope6});
+    auto&& n_var1 = create(Variable{"x"});
+    auto&& n_var2 = create(Variable{"y"});
+    auto&& n_var3 = create(Variable{"z"});
+    auto&& n_call_func = create(FunctionCall("foo", {n_var1, n_var2, n_var3}));
+    auto&& n_if = create(If{n_scan, n_scope2});
+    auto&& n_if2 = create(If{n_scan, n_scope3});
+    auto&& n_else = create(Else{n_scope4});
+    auto&& n_condition = create(Condition{{n_if, n_if2}, n_else});
+    auto&& n_scope5 = create(Scope{n_number});
+    auto&& n_while2 = create(While{n_scan, n_scope5});
+    auto&& n_return = create(Return{n_scan});
+    auto&& n_scope = create(Scope{n_scan, n_condition, n_print, n_while2, n_return});
+    auto&& n_while = create(While{n_call_func, n_scope});
+    auto&& n_global_scope = create(Scope{n_declfunc, n_while});
+    auto&& ast = AST{std::move(n_global_scope)};
+    write(ast, "serializable-ast.ast.json");
+    build_program(ast, "serializable-ast.cl");
     dump(ast, "ast.dot", "ast.svg");
 
-    auto&& readed_ast = read("ast.json");
-    write(ast, "ast.2.json");
-    dump(readed_ast, "ast.2.dot", "readed-ast.svg");
-
-    auto&& name = create(Variable{"artem_lobachev"});
-    auto&& num = create(NumberLiteral{999});
-    auto&& num2 = create(NumberLiteral{13});
-    auto&& binop = create(BinaryOperator{BinaryOperator::ASGN, name, num});
-    auto&& print = create(Print{n7, num2, binop});
-    auto&& lastastroot = create(Scope{binop, print});
-    auto&& lastast = AST{std::move(lastastroot)};
-    build_program(lastast, "lastast.cl");
-    write(lastast, "last.ast.json");
-    dump(lastast, "ast.json.dot", "ast.json.svg");
-
-    std::cout << std::boolalpha << n7.is_a<StringLiteral>() << "\n" << n7.is_a<NumberLiteral>() << "\n";
-
-    StringLiteral back_n7 = static_cast<StringLiteral>(n7);
-    std::cout << "back_n7.value() = " << back_n7.value() << "\n";
-
-    auto&& serializable_scan = create(Scan{});
-    auto&& serializable_string = create(StringLiteral("fuck"));
-    auto&& serializable_number = create(NumberLiteral(666));
-    auto&& serializable_variable = create(Variable("pretty_name"));
-    auto&& serializable_print = create(Print{serializable_string, serializable_number, serializable_scan, serializable_scan});
-    auto&& serializable_unop = create(UnaryOperator{UnaryOperator::NOT, serializable_variable});
-    auto&& serializable_binop3 = create(BinaryOperator{BinaryOperator::SUB, serializable_number, serializable_unop});
-    auto&& serializable_binop2 = create(BinaryOperator{BinaryOperator::AND, serializable_binop3, serializable_variable});
-    auto&& serializable_binop = create(BinaryOperator{BinaryOperator::ASGN, serializable_variable, serializable_binop2});
-
-    auto&& serializable_scope2 = create(Scope{serializable_print, serializable_unop, serializable_number, serializable_binop});
-    auto&& serializable_scope3 = create(Scope{serializable_print, serializable_scan, serializable_print});
-    auto&& serializable_scope4 = create(Scope{});
-
-    auto&& serializable_if = create(If{serializable_scan, serializable_scope2});
-    auto&& serializable_if2 = create(If{serializable_scan, serializable_scope3});
-    auto&& serializable_else = create(Else{serializable_scope4});
-    auto&& serializable_condition = create(Condition{{serializable_if, serializable_if2}, serializable_else});
-    auto&& serializable_scope5 = create(Scope{serializable_number});
-    auto&& serializable_while2 = create(While{serializable_scan, serializable_scope5});
-    auto&& serializable_scope = create(Scope{serializable_scan, serializable_condition, serializable_print, serializable_while2});
-    auto&& serializable_while = create(While{serializable_binop, serializable_scope});
-    auto&& serializable_global_scope = create(Scope{serializable_while});
-    auto&& serializable_ast = AST{std::move(serializable_global_scope)};
-    build_program(serializable_ast, "serializable-ast.cl");
-    dump(serializable_ast, "ser.ast.before.dot", "ser.ast.before.svg");
+    auto&& ast2 = read("serializable-ast.ast.json");
+    build_program(ast2, "2.cl");
 
     return 0;
 }

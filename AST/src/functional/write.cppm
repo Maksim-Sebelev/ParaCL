@@ -195,6 +195,54 @@ boost::json::value visit(const Scope& node)
     return obj;
 }
 
+template <>
+boost::json::value visit(const Return& node)
+{
+    auto&& obj = boost::json::object{};
+    obj["kind"] = traits::get_node_info<Return, traits::NAME>();
+
+    obj[traits::get_node_info<Return, traits::FIELD, 0>()] = write(node.expression());
+    return obj;
+}
+
+template <>
+boost::json::value visit(const FunctionDeclaration& node)
+{
+    auto&& obj = boost::json::object{};
+    obj["kind"] = traits::get_node_info<FunctionDeclaration, traits::NAME>();
+
+    obj[traits::get_node_info<FunctionDeclaration, traits::FIELD, 0>()] = node.name();
+
+    auto&& args = boost::json::array{};
+    args.reserve(node.args().size());
+
+    for (auto&& arg: node.args())
+        args.emplace_back(arg);
+
+    obj[traits::get_node_info<FunctionDeclaration, traits::FIELD, 1>()] = std::move(args);
+
+    obj[traits::get_node_info<FunctionDeclaration, traits::FIELD, 2>()] = write(node.body());
+    return obj;
+}
+
+
+template <>
+boost::json::value visit(const FunctionCall& node)
+{
+    auto&& obj = boost::json::object{};
+    obj["kind"] = traits::get_node_info<FunctionCall, traits::NAME>();
+
+    obj[traits::get_node_info<FunctionCall, traits::FIELD, 0>()] = node.name();
+
+    auto&& args = boost::json::array{};
+    for (auto&& arg: node.args())
+        args.push_back(write(arg));
+
+    obj[traits::get_node_info<FunctionCall, traits::FIELD, 1>()] = std::move(args);
+
+    return obj;
+}
+
 } /* namespace visit_specializations */
 } /* namespace node */
 

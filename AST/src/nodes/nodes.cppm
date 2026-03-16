@@ -16,7 +16,6 @@ namespace last::node
 {
 
 //--------------------------------------------------------------------------------------------------------------------------------------
-
 export
 class Scope final : private std::vector<BasicNode>
 {
@@ -26,6 +25,7 @@ public:
     using std::vector<BasicNode>::begin;
     using std::vector<BasicNode>::end;
     using std::vector<BasicNode>::size;
+    using std::vector<BasicNode>::back;
 
 public:
     Scope() = default;
@@ -52,6 +52,9 @@ public:
 public:
     std::string_view name() const & noexcept
     { return name_; }
+    
+    std::string & name() & noexcept
+    { return name_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -74,7 +77,7 @@ public:
     Print(std::vector<BasicNode>&& args) : std::vector<BasicNode>(std::move(args))
     {}
     Print(std::initializer_list<BasicNode> il) : std::vector<BasicNode>(il)
-    {}
+    {}    
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -111,6 +114,9 @@ public:
     { return type_; }
 
     BasicNode const &arg() const & noexcept
+    { return arg_; }
+    
+    BasicNode &arg() & noexcept
     { return arg_; }
 };
 
@@ -168,9 +174,15 @@ public:
 public:
     BinaryOperatorT type() const noexcept
     { return type_; }
+    
     BasicNode const &larg() const & noexcept
     { return larg_; }
+    BasicNode &larg() & noexcept
+    { return larg_; }
+    
     BasicNode const &rarg() const & noexcept
+    { return rarg_; }
+    BasicNode &rarg() & noexcept
     { return rarg_; }
 };
 
@@ -188,6 +200,15 @@ public:
 public:
     int value() const noexcept
     { return value_; };
+    
+    int value() noexcept
+    { return value_; };
+
+    NumberLiteral(const NumberLiteral& other) : value_(other.value_)
+    {}
+
+    NumberLiteral(NumberLiteral&& other): value_(other.value_)
+    {}
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -203,7 +224,7 @@ public:
     {}
 public:
     std::string_view value() const & noexcept
-    { return value_; }
+    { return value_; }    
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -235,7 +256,12 @@ public:
 public:
     BasicNode const &condition() const & noexcept
     { return condition_; }
+    BasicNode &condition() & noexcept
+    { return condition_; }
+    
     BasicNode const &body() const & noexcept
+    { return body_; };
+    BasicNode &body() & noexcept
     { return body_; };
 };
 
@@ -254,7 +280,7 @@ export
 class If final : public ConditionWithBody
 {
 public:
-    using ConditionWithBody::ConditionWithBody;
+    using ConditionWithBody::ConditionWithBody;    
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -275,6 +301,9 @@ public:
 public:
     BasicNode const &body() const & noexcept
     { return body_; }
+    
+    BasicNode &body() & noexcept
+    { return body_; }
 
     friend class Condition;
 
@@ -293,7 +322,7 @@ private:
 public:
     Condition() = default;
 
-    Condition(std::vector<BasicNode>  const &ifs, BasicNode const & else_а_как_вот_это_назвать) :
+    Condition(std::vector<BasicNode> const &ifs, BasicNode const & else_а_как_вот_это_назвать) :
        ifs_(ifs), else_(else_а_как_вот_это_назвать)
     {}
 
@@ -314,9 +343,152 @@ public:
 
     std::vector<BasicNode> const &get_ifs() const & noexcept
     { return ifs_; }
+    std::vector<BasicNode> &get_ifs() & noexcept
+    { return ifs_; }
 
     BasicNode const &get_else() const & noexcept
     { return else_; }
+    BasicNode &get_else() & noexcept
+    { return else_; }
+};
+
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+export
+class Return final
+{
+private:
+    BasicNode expression_;
+public:
+    BasicNode const & expression() const & noexcept
+    { return expression_; }
+    BasicNode       & expression()       & noexcept
+    { return expression_; }
+
+    Return() = default;
+
+    Return(BasicNode&& expression) :
+        expression_(std::move(expression))
+    {}
+    Return(BasicNode const & expression) :
+        expression_(expression)
+    {}
+};
+
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+export
+class FunctionDeclaration final
+{
+private:
+    std::string name_;
+    std::vector<std::string> args_;
+    BasicNode body_;
+    std::string mangled_name_;
+
+private:
+    std::string mangle_name_() const
+    { return name_ + "_" + std::to_string(args_.size()) + "_args"; }
+
+public:
+    std::string_view name() const & noexcept
+    { return name_; }
+
+    std::string_view mangled_name() const & noexcept
+    { return mangled_name_; }
+
+    std::vector<std::string> const & args() const & noexcept
+    { return args_; } 
+
+    std::vector<std::string>       & args()       & noexcept
+    { return args_; } 
+
+    BasicNode const & body() const & noexcept
+    { return body_; }
+
+    BasicNode       & body()       & noexcept
+    { return body_; }
+
+    FunctionDeclaration() = default;
+
+FunctionDeclaration(std::string&& name, std::vector<std::string>&& args, BasicNode&& body) :
+        name_(std::move(name)),
+        args_(std::move(args)),
+        body_(std::move(body)),
+        mangled_name_(mangle_name_())
+    {}
+
+    FunctionDeclaration(std::string&& name, std::vector<std::string>&& args, BasicNode const& body) :
+        name_(std::move(name)),
+        args_(std::move(args)),
+        body_(body),
+        mangled_name_(mangle_name_())
+    {}
+
+    FunctionDeclaration(std::string&& name, std::vector<std::string> const& args, BasicNode&& body) :
+        name_(std::move(name)),
+        args_(args),
+        body_(std::move(body)),
+        mangled_name_(mangle_name_())
+    {}
+
+    FunctionDeclaration(std::string&& name, std::vector<std::string> const& args, BasicNode const& body) :
+        name_(std::move(name)),
+        args_(args),
+        body_(body),
+        mangled_name_(mangle_name_())
+    {}
+
+    void add_arg(std::string&& new_arg)
+    { args_.push_back(std::move(new_arg)); }
+
+    void set_name(std::string&& name)
+    { name_ = std::move(name); mangled_name_ = mangle_name_(); }
+
+    void set_body(BasicNode && new_body)
+    { body_ = std::move(new_body); }
+
+    void set_body(BasicNode const & new_body)
+    { body_ = new_body; }
+};
+
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+export
+class FunctionCall final
+{
+private:
+    std::string name_;
+    std::vector<BasicNode> args_;
+
+public:
+    FunctionCall() = default;
+
+    FunctionCall(std::string&& name, std::vector<BasicNode>&& args) :
+        name_(std::move(name)), args_(std::move(args))
+    {}
+
+    FunctionCall(std::string&& name, std::vector<BasicNode> const& args) :
+        name_(std::move(name)), args_(args)
+    {}
+
+    std::string_view name() const & noexcept
+    { return name_; }
+
+    std::vector<BasicNode> const & args() const & noexcept
+    { return args_; }
+
+    std::vector<BasicNode> & args() & noexcept
+    { return args_; }
+
+    void add_arg(BasicNode const & new_arg)
+    { args_.push_back(new_arg); }
+
+    void add_arg(BasicNode && new_arg)
+    { args_.push_back(std::move(new_arg)); }
+
+    void set_name(std::string&& name)
+    { name_ = std::move(name); }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------

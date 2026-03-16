@@ -24,7 +24,16 @@ namespace node
 namespace building_program
 {
 
-export enum class BuildProgramSetting {DummyValue, NoEnclosure, UseEnclosure, NotFirstIf, ScopeLikeConditionBody, GlobalScope};
+export enum class BuildProgramSetting
+{
+    DummyValue = 0,
+    NoEnclosure,
+    UseEnclosure,
+    NotFirstIf,
+    ScopeLikeConditionBody,
+    GlobalScope,
+    DontSeparateExpression,
+};
 
 void write_n_tab(std::ostream& os, size_t tabs)
 { os << std::string(tabs, '\t'); }
@@ -44,19 +53,32 @@ void leave_scope(std::ostream& os, size_t enclosure)
     os << "}\n";
 }
 
+bool is_not_expression(BuildProgramSetting setting)
+{
+    return ((setting != BuildProgramSetting::NoEnclosure) and (setting != BuildProgramSetting::DontSeparateExpression));
+}
+
 void expression_or_statement_begin_action(std::ostream& os, size_t enclosure, BuildProgramSetting setting)
 {
     auto&& is_expression = (setting == BuildProgramSetting::NoEnclosure);
-    if (is_expression)
+    auto&& dont_separate_expression = (setting == BuildProgramSetting::DontSeparateExpression);
+
+    if (dont_separate_expression)
+        return;
+    else if (is_expression)
         os << "(";
     else
         write_n_tab(os, enclosure);
 }
 
-void expression_or_statement_and_action(std::ostream& os, BuildProgramSetting setting)
+void expression_or_statement_end_action(std::ostream& os, BuildProgramSetting setting)
 {
     auto&& is_expression = (setting == BuildProgramSetting::NoEnclosure);
-    if (is_expression)
+    auto&& dont_separate_expression = (setting == BuildProgramSetting::DontSeparateExpression);
+
+    if (dont_separate_expression)
+        return;
+    else if (is_expression)
         os << ")";
     else
         os << ";\n";
@@ -93,11 +115,11 @@ void visit(Print const & node, std::ostream& os, size_t enclosure, [[maybe_unuse
 
     if (node.size() != 0)
     {
-        build(node[0], os, 0, building_program::BuildProgramSetting::NoEnclosure);
+        build(node[0], os, 0, building_program::BuildProgramSetting::DontSeparateExpression);
         for (auto&& it = 1LU, ite = node.size(); it < ite; ++it)
         {
             os << ", ";
-            build(node[it], os, enclosure, building_program::BuildProgramSetting::NoEnclosure);
+            build(node[it], os, enclosure, building_program::BuildProgramSetting::DontSeparateExpression);
         }
     }
 
@@ -109,7 +131,7 @@ void visit([[maybe_unused]] Scan const & node, std::ostream& os, size_t enclosur
 {
     expression_or_statement_begin_action(os, enclosure, setting);
     os << "?";
-    expression_or_statement_and_action(os, setting);
+    expression_or_statement_end_action(os, setting);
 }
 
 template <>
@@ -145,7 +167,7 @@ void visit(While const & node, std::ostream& os, size_t enclosure, [[maybe_unuse
 {
     building_program::write_n_tab(os, enclosure);
     os << "while (";
-    build(node.condition(), os, 0, building_program::BuildProgramSetting::NoEnclosure);
+    build(node.condition(), os, 0, building_program::BuildProgramSetting::DontSeparateExpression);
     os << ")\n";
     build(node.body(), os, enclosure, building_program::BuildProgramSetting::ScopeLikeConditionBody);
 }
@@ -158,7 +180,7 @@ void visit(If const & node, std::ostream& os, size_t enclosure, building_program
         os << "else ";
 
     os << "if (";
-    build(node.condition(), os, 0, building_program::BuildProgramSetting::NoEnclosure);
+    build(node.condition(), os, 0, building_program::BuildProgramSetting::DontSeparateExpression);
     os << ")\n";
     build(node.body(), os, enclosure, building_program::BuildProgramSetting::ScopeLikeConditionBody);
 }
@@ -217,7 +239,7 @@ void visit(BinaryOperator const & node, std::ostream& os, size_t enclosure, buil
     }
     build(node.rarg(), os, enclosure, building_program::BuildProgramSetting::NoEnclosure);
 
-    expression_or_statement_and_action(os, setting);
+    expression_or_statement_end_action(os, setting);
 }
 
 template <>
@@ -235,13 +257,13 @@ void visit(UnaryOperator const & node, std::ostream& os, size_t enclosure, build
 
     build(node.arg(), os, enclosure, building_program::BuildProgramSetting::NoEnclosure);
 
-    expression_or_statement_and_action(os, setting);
+    expression_or_statement_end_action(os, setting);
 }
 
 template <>
 void visit(Variable const & node, std::ostream& os, size_t enclosure, building_program::BuildProgramSetting setting)
 {
-    auto&& is_not_expression = (setting != building_program::BuildProgramSetting::NoEnclosure);
+    auto&& is_not_expression = building_program::is_not_expression(setting);
     if (is_not_expression)
         building_program::write_n_tab(os, enclosure);
 
@@ -254,7 +276,7 @@ void visit(Variable const & node, std::ostream& os, size_t enclosure, building_p
 template <>
 void visit(NumberLiteral const & node, std::ostream& os, size_t enclosure, building_program::BuildProgramSetting setting)
 {
-    auto&& is_not_expression = (setting != building_program::BuildProgramSetting::NoEnclosure);
+    auto&& is_not_expression = building_program::is_not_expression(setting);
     if (is_not_expression)
         building_program::write_n_tab(os, enclosure);
 
@@ -268,6 +290,57 @@ template <>
 void visit(StringLiteral const & node, std::ostream& os, [[maybe_unused]] size_t enclosure, [[maybe_unused]] building_program::BuildProgramSetting)
 {
     os << "\"" << node.value() << "\"";
+}
+
+template <>
+void visit(Return const & node, std::ostream& os, [[maybe_unused]] size_t enclosure, [[maybe_unused]] building_program::BuildProgramSetting)
+{
+    building_program::write_n_tab(os, enclosure);
+    os << "return "; 
+    build(node.expression(), os, 0, building_program::BuildProgramSetting::DontSeparateExpression);
+    building_program::statement_end(os);
+}
+
+template <>
+void visit(FunctionDeclaration const & node, std::ostream& os, [[maybe_unused]] size_t enclosure, [[maybe_unused]] building_program::BuildProgramSetting)
+{
+    os << node.name() << " = func(";
+    auto&& args = node.args();
+    if (args.size() != 0)
+    {
+        os << args[0];
+        for (auto&& it = 1LU, ite = args.size(); it != ite; ++it)
+        {
+            os << ", ";
+            os << args[it];
+        }
+    }
+    os << ")\n";
+    build(node.body(), os, 0, building_program::BuildProgramSetting::DummyValue);
+}
+
+template <>
+void visit(FunctionCall const & node, std::ostream& os, [[maybe_unused]] size_t enclosure, building_program::BuildProgramSetting setting)
+{
+    auto&& is_not_expression = building_program::is_not_expression(setting);
+    if (is_not_expression)
+        building_program::write_n_tab(os, enclosure);
+
+    os << node.name() << "(";
+    auto&& args = node.args();
+    if (args.size() != 0)
+    {
+        build(args[0], os, 0, building_program::BuildProgramSetting::DontSeparateExpression);
+        for (auto&& it = 1LU, ite = args.size(); it != ite; ++it)
+        {
+            os << ", ";
+            build(args[it], os, 0, building_program::BuildProgramSetting::DontSeparateExpression);
+        }
+    }
+    os << ")";
+
+    if (is_not_expression)
+        building_program::statement_end(os);
 }
 
 } /* namespace visit_specializations */
@@ -285,7 +358,6 @@ void build_program(AST const & ast, std::filesystem::path const & ouput_file)
 
     ofs << "// Automatic generated with '" << __PRETTY_FUNCTION__ << "'\n"
         << "// " << std::put_time(&tm_local, "%Y-%m-%d %H:%M:%S") << "\n\n";
-
 
     build(ast.root(), ofs, 0, node::building_program::BuildProgramSetting::GlobalScope);
 }

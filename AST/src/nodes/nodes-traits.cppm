@@ -529,5 +529,109 @@ struct NodeTraits<Condition, NodeInfo::FIELD, 1>
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
+// return
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+template <>
+struct NodeTraits<Return, NodeInfo::NAME>
+{
+    using type = const char *;
+    static constexpr type value = STRINGIFY(Return);
+};
+
+template <>
+struct NodeTraits<Return, NodeInfo::FIELDS>
+{
+    using type = size_t;
+    static constexpr type value = 2;
+};
+
+template <>
+struct NodeTraits<Return, NodeInfo::FIELD, 0>
+{
+    using type = const char*;
+    static constexpr type value = "returning-value";
+};
+
+template <>
+struct NodeTraits<Return, NodeInfo::FIELD, 1>
+{
+    using type = const char*;
+    static constexpr type value = "else";
+};
+
+
+//--------------------------------------------------------------------------------------------------------------------------------------
+// FUNCTION CALL
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+template <>
+struct NodeTraits<FunctionCall, NodeInfo::NAME>
+{
+    using type = const char *;
+    static constexpr type value = STRINGIFY(FunctionCall);
+};
+
+template <>
+struct NodeTraits<FunctionCall, NodeInfo::FIELDS>
+{
+    using type = size_t;
+    static constexpr type value = 2;
+};
+
+template <>
+struct NodeTraits<FunctionCall, NodeInfo::FIELD, 0>
+{
+    using type = const char*;
+    static constexpr type value = "name";
+};
+
+template <>
+struct NodeTraits<FunctionCall, NodeInfo::FIELD, 1>
+{
+    using type = const char*;
+    static constexpr type value = "args";
+};
+
+//--------------------------------------------------------------------------------------------------------------------------------------
+// FUNCTION DECLARATION
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+template <>
+struct NodeTraits<FunctionDeclaration, NodeInfo::NAME>
+{
+    using type = const char *;
+    static constexpr type value = STRINGIFY(FunctionDeclaration);
+};
+
+template <>
+struct NodeTraits<FunctionDeclaration, NodeInfo::FIELDS>
+{
+    using type = size_t;
+    static constexpr type value = 3;
+};
+
+template <>
+struct NodeTraits<FunctionDeclaration, NodeInfo::FIELD, 0>
+{
+    using type = const char*;
+    static constexpr type value = "name";
+};
+
+template <>
+struct NodeTraits<FunctionDeclaration, NodeInfo::FIELD, 1>
+{
+    using type = const char*;
+    static constexpr type value = "args";
+};
+
+template <>
+struct NodeTraits<FunctionDeclaration, NodeInfo::FIELD, 2>
+{
+    using type = const char*;
+    static constexpr type value = "body";
+};
+
+//--------------------------------------------------------------------------------------------------------------------------------------
 } /* namespace last::node::traits */
 //--------------------------------------------------------------------------------------------------------------------------------------

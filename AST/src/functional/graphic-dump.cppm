@@ -1,5 +1,6 @@
 module;
 
+#include <memory>
 #include <filesystem>
 #include <fstream>
 #include <string_view>
@@ -229,6 +230,47 @@ void visit(Condition const& node, unique_node_id_t unique_node_id, std::ofstream
     graphic_dump::dump_and_link_with_parent(os, unique_node_id, node.get_else(), "else");
 }
 
+template <>
+void visit(Return const& node, unique_node_id_t unique_node_id, std::ofstream& os)
+{
+    graphic_dump::create_node(os, unique_node_id, "return", "style=filled, fillcolor=\"lightgreen\"");
+    graphic_dump::dump_and_link_with_parent(os, unique_node_id, node.expression(), "expression");
+}
+
+template <>
+void visit(FunctionDeclaration const& node, unique_node_id_t unique_node_id, std::ofstream& os)
+{
+    auto&& label = "func: '" + std::string(node.name()) + "(";
+
+    auto&& args = node.args();
+    if (args.size() != 0)
+    {
+        label += args[0];
+        for (auto&& it = 1LU, ite = args.size(); it != ite; ++it)
+            label += (", " + args[it]);
+    }
+    label += (")' (mangled: '" + std::string(node.mangled_name()) + "')");
+    graphic_dump::create_node(os, unique_node_id, label, "style=filled, fillcolor=\"greenyellow\"");
+    graphic_dump::dump_and_link_with_parent(os, unique_node_id, node.body(), "body");
+}
+
+template <>
+void visit(FunctionCall const& node, unique_node_id_t unique_node_id, std::ofstream& os)
+{
+    auto&& label = "call: '" + std::string(node.name()) + "'";
+    graphic_dump::create_node(os, unique_node_id, label, "style=filled, fillcolor=\"indianred2\"");
+    
+    auto&& args = node.args();
+    if (args.size() != 0)
+    {
+        unique_node_id_t args_unique_id = std::addressof(node.args());
+        graphic_dump::create_node(os, args_unique_id, "Args", "style=filled, fillcolor=\"aqua\"");
+        graphic_dump::link_nodes(os, unique_node_id, args_unique_id, "args");
+
+        for (auto&& arg: args)
+            graphic_dump::dump_and_link_with_parent(os, args_unique_id, arg);
+    }
+}
 //-----------------------------------------------------------------------------
 } /* namespace last::node::visit_specializations */
 //-----------------------------------------------------------------------------

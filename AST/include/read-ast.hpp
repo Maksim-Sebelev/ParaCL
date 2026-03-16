@@ -140,6 +140,36 @@ BasicNode node_from_json(const boost::json::value& jv)
 
         return create(std::move(node));
     }
+    if (kind == traits::get_node_info<Return, traits::NAME>())
+    {
+        auto&& expression = node_from_json(obj.at(traits::get_node_info<Return, traits::FIELD, 0>()));
+        return create(Return{std::move(expression)});
+    }
+    if (kind == traits::get_node_info<FunctionDeclaration, traits::NAME>())
+    {
+        auto&& node = FunctionDeclaration{};
+        auto&& name = static_cast<std::string>(obj.at(traits::get_node_info<FunctionDeclaration, traits::FIELD, 0>()).as_string());
+        node.set_name(std::move(name));
+    
+        for (auto&& arg: obj.at(traits::get_node_info<FunctionDeclaration, traits::FIELD, 1>()).as_array())
+            node.add_arg(static_cast<std::string>(arg.as_string()));
+        
+        auto&& body = node_from_json(obj.at(traits::get_node_info<FunctionDeclaration, traits::FIELD, 2>()));
+        node.set_body(std::move(body));
+
+        return create(std::move(node));
+    }
+    if (kind == traits::get_node_info<FunctionCall, traits::NAME>())
+    {
+        auto&& node = FunctionCall{};
+        auto&& name = static_cast<std::string>(obj.at(traits::get_node_info<FunctionCall, traits::FIELD, 0>()).as_string());
+        node.set_name(std::move(name));
+    
+        for (auto&& arg: obj.at(traits::get_node_info<FunctionCall, traits::FIELD, 1>()).as_array())
+            node.add_arg(node_from_json(arg));
+        
+        return create(std::move(node));
+    }
 
     throw std::runtime_error("Unsupported node kind during deserialization: " + std::string(kind));
 }
