@@ -91,6 +91,7 @@ add_library(${COMPILER_NAMETABLE_LIB})
 set(COMPILER_NAMETABLE_SRC_DIR ${COMPILE_SRC_DIR}/llvm-ir-translator)
 set(COMPILER_NAMETABLE_SRC
     ${COMPILER_NAMETABLE_SRC_DIR}/nametable.cppm
+    ${COMPILER_NAMETABLE_SRC_DIR}/functions-table.cppm
 )
 
 target_sources(${COMPILER_NAMETABLE_LIB}
@@ -114,6 +115,7 @@ target_include_directories(${COMPILER_NAMETABLE_LIB}
 target_link_libraries(${COMPILER_NAMETABLE_LIB}
     PUBLIC
         ${LLVM_LIBRARIES}
+        TheLast::TheLast
 )
 
 # =================================================================================================

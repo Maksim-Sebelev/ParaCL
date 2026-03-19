@@ -48,6 +48,7 @@ add_custom_command(
         -d
         -o ${BISON_OUTPUT_DIR}/${BISON_PARSER_CPP_OUT}
         ${BISON_INPUT_FILE}
+        # -Wcounterexamples
     DEPENDS ${BISON_INPUT_FILE}
     COMMENT "Generating Bison parser (${BISON_PARSER_CPP_OUT})"
     VERBATIM

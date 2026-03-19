@@ -44,27 +44,30 @@
 %precedence ADD SUB
 %precedence MUL DIV REM
 %precedence NEG NOT
-%precedence AS
-%precedence ADDASGN SUBASGN MULASGN DIVASGN
+%right AS
+%right ADDASGN SUBASGN MULASGN DIVASGN
 %precedence THEN
 %precedence ELIF
 %precedence ELSE
 
 %token <int> NUM
-%token <std::string> VAR
+%token <std::string> NAME
 %token LCIB RCIB LCUB RCUB
-%token WH IN PRINT IF ELIF ELSE
+%token WH IN PRINT IF
 %token SC COMMA
 %token <std::string> STRING
+%token DECLFUNC RET
 
-%type <std::vector<last::node::BasicNode>> statements print_args
-%type <last::node::BasicNode> statement assignment combined_assignment
-%type <last::node::BasicNode> print_statement while_statement condition_statement
-%type <last::node::BasicNode> expression assignment_expression logical_or_expression
+%type <std::vector<last::node::BasicNode>> statements function_call_args
+%type <last::node::BasicNode> statement assignment
+%type <last::node::BasicNode> print_expression while_statement condition_statement
+%type <last::node::BasicNode> expression assignment_expression logical_or_expression primary_expression
 %type <last::node::BasicNode> logical_and_expression equality_expression relational_expression
-%type <last::node::BasicNode> additive_expression multiplicative_expression unary_expression factor
+%type <last::node::BasicNode> additive_expression multiplicative_expression unary_expression return_statement
 %type <last::node::BasicNode> scope one_stmt_scope if_statement else_statement
 %type <std::vector<last::node::BasicNode>> elif_statements
+%type <last::node::BasicNode> function_declaration function_call
+%type <std::vector<std::string>> function_decl_args
 
 %start program
 %%
@@ -98,16 +101,16 @@ statements:
 
 statement:
     assignment SC { $$ = std::move($1); }
-    | combined_assignment SC { $$ = std::move($1); }
-    | print_statement SC { $$ = std::move($1); }
     | while_statement { $$ = std::move($1); }
     | condition_statement { $$ = std::move($1); }
     | SC { $$ = last::node::create(last::node::Scope{}); }
+    | function_declaration { $$ = std::move($1); }
+    | return_statement SC { $$ = std::move($1); }
     | expression SC { $$ = std::move($1); }
     ;
 
 assignment:
-    VAR AS expression {
+    NAME AS expression {
         name_table.declare_or_do_nothing_if_already_declared($1);
 
         auto&& binop = last::node::BinaryOperator(
@@ -118,69 +121,14 @@ assignment:
 
         $$ = last::node::create(std::move(binop));
     }
-    | VAR AS error {
+    | NAME AS error {
         ErrorHandler::throwError(@3, "expected expression after assignment");
         YYABORT;
     }
     ;
 
-combined_assignment:
-    VAR ADDASGN expression {
-        if (name_table.is_not_declare($1)) {
-            ErrorHandler::throwError(@1, "using undeclared variable: " + $1);
-            YYABORT;
-        }
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::ADDASGN,
-            last::node::create(last::node::Variable(std::move($1))),
-            std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | VAR SUBASGN expression {
-        if (name_table.is_not_declare($1)) {
-            ErrorHandler::throwError(@1, "using undeclared variable: " + $1);
-            YYABORT;
-        }
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::SUBASGN,
-            last::node::create(last::node::Variable(std::move($1))),
-            std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | VAR MULASGN expression {
-        if (name_table.is_not_declare($1)) {
-            ErrorHandler::throwError(@1, "using undeclared variable: " + $1);
-            YYABORT;
-        }
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::MULASGN,
-            last::node::create(last::node::Variable(std::move($1))),
-            std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | VAR DIVASGN expression {
-        if (name_table.is_not_declare($1)) {
-            ErrorHandler::throwError(@1, "using undeclared variable: " + $1);
-            YYABORT;
-        }
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::DIVASGN,
-            last::node::create(last::node::Variable(std::move($1))),
-            std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | VAR ADDASGN error { ErrorHandler::throwError(@3, "expected expression after '+='"); YYABORT; }
-    | VAR SUBASGN error { ErrorHandler::throwError(@3, "expected expression after '-='"); YYABORT; }
-    | VAR MULASGN error { ErrorHandler::throwError(@3, "expected expression after '*='"); YYABORT; }
-    | VAR DIVASGN error { ErrorHandler::throwError(@3, "expected expression after '/='"); YYABORT; }
-    ;
-
-print_statement:
-    PRINT print_args {
+print_expression:
+    PRINT function_call_args {
         auto&& p = last::node::Print(std::move($2));
         $$ = last::node::create(std::move(p));
     }
@@ -190,10 +138,28 @@ print_statement:
     }
     ;
 
-print_args:
+function_call_args:
     %empty { $$ = std::vector<last::node::BasicNode>(); }
-    | print_args expression { $1.push_back(std::move($2)); $$ = std::move($1); }
-    | print_args COMMA expression { $1.push_back(std::move($3)); $$ = std::move($1); }
+    | function_call_args expression { $1.push_back(std::move($2)); $$ = std::move($1); }
+    | function_call_args COMMA expression { $1.push_back(std::move($3)); $$ = std::move($1); }
+    ;
+
+
+function_decl_args:
+    %empty { 
+        $$ = std::vector<std::string>(); 
+        name_table.new_scope(); 
+    }
+    | function_decl_args NAME {
+        name_table.declare_or_do_nothing_if_already_declared($2);
+        $1.push_back(std::move($2));
+        $$ = std::move($1);
+    }
+    | function_decl_args COMMA NAME {
+        name_table.declare_or_do_nothing_if_already_declared($3);
+        $1.push_back(std::move($3));
+        $$ = std::move($1);
+    }
     ;
 
 while_statement:
@@ -262,61 +228,77 @@ else_statement:
     }
     | ELSE error { ErrorHandler::throwError(@2, "expected scope after else"); YYABORT; }
     ;
-
-expression:
-    combined_assignment { $$ = std::move($1); }
-    | assignment_expression { $$ = std::move($1); } 
+primary_expression:
+    NUM { $$ = last::node::create(last::node::NumberLiteral($1)); }
+    | NAME {
+        if (name_table.is_not_declare($1)) {
+            ErrorHandler::throwError(@1, "using undeclared variable: " + $1);
+            YYABORT;
+        }
+        $$ = last::node::create(last::node::Variable(std::move($1)));
+    }
+    | LCIB expression RCIB { $$ = std::move($2); }
+    | IN { $$ = last::node::create(last::node::Scan{}); }
+    | STRING { $$ = last::node::create(last::node::StringLiteral(std::move($1))); }
+    | function_call { $$ = std::move($1); }
     ;
 
-assignment_expression:
-    logical_or_expression { $$ = std::move($1); }
-    | VAR AS assignment_expression %prec AS {
-        name_table.declare_or_do_nothing_if_already_declared($1);
-
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::ASGN,
-            last::node::create(last::node::Variable(std::move($1))),
-            std::move($3)
+unary_expression:
+    primary_expression { $$ = std::move($1); }
+    | SUB unary_expression %prec NEG {
+        auto&& unop = last::node::UnaryOperator(
+            last::node::UnaryOperator::UnaryOperatorT::MINUS,
+            std::move($2)
         );
-        
+        $$ = last::node::create(std::move(unop));
+    }
+    | NOT unary_expression %prec NOT {
+        auto&& unop = last::node::UnaryOperator(
+            last::node::UnaryOperator::UnaryOperatorT::NOT,
+            std::move($2)
+        );
+        $$ = last::node::create(std::move(unop));
+    }
+    | ADD unary_expression %prec NEG { $$ = std::move($2); }
+    ;
+
+multiplicative_expression:
+    unary_expression { $$ = std::move($1); }
+    | multiplicative_expression MUL unary_expression %prec MUL {
+        auto&& binop = last::node::BinaryOperator(
+            last::node::BinaryOperator::BinaryOperatorT::MUL,
+            std::move($1), std::move($3)
+        );
         $$ = last::node::create(std::move(binop));
     }
-    ;
-
-logical_or_expression:
-    logical_and_expression { $$ = std::move($1); }
-    | logical_or_expression OR logical_and_expression %prec OR {
+    | multiplicative_expression DIV unary_expression %prec DIV {
         auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::OR,
+            last::node::BinaryOperator::BinaryOperatorT::DIV,
+            std::move($1), std::move($3)
+        );
+        $$ = last::node::create(std::move(binop));
+    }
+    | multiplicative_expression REM unary_expression %prec REM {
+        auto&& binop = last::node::BinaryOperator(
+            last::node::BinaryOperator::BinaryOperatorT::REM,
             std::move($1), std::move($3)
         );
         $$ = last::node::create(std::move(binop));
     }
     ;
 
-logical_and_expression:
-    equality_expression { $$ = std::move($1); }
-    | logical_and_expression AND equality_expression %prec AND {
+additive_expression:
+    multiplicative_expression { $$ = std::move($1); }
+    | additive_expression ADD multiplicative_expression %prec ADD {
         auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::AND,
+            last::node::BinaryOperator::BinaryOperatorT::ADD,
             std::move($1), std::move($3)
         );
         $$ = last::node::create(std::move(binop));
     }
-    ;
-
-equality_expression:
-    relational_expression { $$ = std::move($1); }
-    | equality_expression ISEQ relational_expression %prec ISEQ {
+    | additive_expression SUB multiplicative_expression %prec SUB {
         auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::ISEQ,
-            std::move($1), std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | equality_expression ISNE relational_expression %prec ISNE {
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::ISNE,
+            last::node::BinaryOperator::BinaryOperatorT::SUB,
             std::move($1), std::move($3)
         );
         $$ = last::node::create(std::move(binop));
@@ -355,80 +337,111 @@ relational_expression:
     }
     ;
 
-additive_expression:
-    multiplicative_expression { $$ = std::move($1); }
-    | additive_expression ADD multiplicative_expression %prec ADD {
+equality_expression:
+    relational_expression { $$ = std::move($1); }
+    | equality_expression ISEQ relational_expression %prec ISEQ {
         auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::ADD,
+            last::node::BinaryOperator::BinaryOperatorT::ISEQ,
             std::move($1), std::move($3)
         );
         $$ = last::node::create(std::move(binop));
     }
-    | additive_expression SUB multiplicative_expression %prec SUB {
+    | equality_expression ISNE relational_expression %prec ISNE {
         auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::SUB,
-            std::move($1), std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    ;
-
-multiplicative_expression:
-    unary_expression { $$ = std::move($1); }
-    | multiplicative_expression MUL unary_expression %prec MUL {
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::MUL,
-            std::move($1), std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | multiplicative_expression DIV unary_expression %prec DIV {
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::DIV,
-            std::move($1), std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | multiplicative_expression REM unary_expression %prec REM {
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::REM,
+            last::node::BinaryOperator::BinaryOperatorT::ISNE,
             std::move($1), std::move($3)
         );
         $$ = last::node::create(std::move(binop));
     }
     ;
 
-unary_expression:
-    factor { $$ = std::move($1); }
-    | SUB unary_expression %prec NEG {
-        auto&& unop = last::node::UnaryOperator(
-            last::node::UnaryOperator::UnaryOperatorT::MINUS,
-            std::move($2)
+logical_and_expression:
+    equality_expression { $$ = std::move($1); }
+    | logical_and_expression AND equality_expression %prec AND {
+        auto&& binop = last::node::BinaryOperator(
+            last::node::BinaryOperator::BinaryOperatorT::AND,
+            std::move($1), std::move($3)
         );
-        $$ = last::node::create(std::move(unop));
+        $$ = last::node::create(std::move(binop));
     }
-    | NOT unary_expression %prec NOT {
-        auto&& unop = last::node::UnaryOperator(
-            last::node::UnaryOperator::UnaryOperatorT::NOT,
-            std::move($2)
-        );
-        $$ = last::node::create(std::move(unop));
-    }
-    | ADD unary_expression %prec NEG { $$ = std::move($2); }
     ;
 
-factor:
-    NUM { $$ = last::node::create(last::node::NumberLiteral($1)); }
-    | VAR {
+logical_or_expression:
+    logical_and_expression { $$ = std::move($1); }
+    | logical_or_expression OR logical_and_expression %prec OR {
+        auto&& binop = last::node::BinaryOperator(
+            last::node::BinaryOperator::BinaryOperatorT::OR,
+            std::move($1), std::move($3)
+        );
+        $$ = last::node::create(std::move(binop));
+    }
+    ;
+
+assignment_expression:
+    logical_or_expression { $$ = std::move($1); }
+    | NAME AS assignment_expression %prec AS {
+        name_table.declare_or_do_nothing_if_already_declared($1);
+        auto&& binop = last::node::BinaryOperator(
+            last::node::BinaryOperator::BinaryOperatorT::ASGN,
+            last::node::create(last::node::Variable(std::move($1))),
+            std::move($3)
+        );
+        $$ = last::node::create(std::move(binop));
+    }
+    | NAME ADDASGN assignment_expression %prec ADDASGN {
         if (name_table.is_not_declare($1)) {
             ErrorHandler::throwError(@1, "using undeclared variable: " + $1);
             YYABORT;
         }
-        $$ = last::node::create(last::node::Variable(std::move($1)));
+        auto&& binop = last::node::BinaryOperator(
+            last::node::BinaryOperator::BinaryOperatorT::ADDASGN,
+            last::node::create(last::node::Variable(std::move($1))),
+            std::move($3)
+        );
+        $$ = last::node::create(std::move(binop));
     }
-    | LCIB expression RCIB { $$ = std::move($2); }
-    | IN { $$ = last::node::create(last::node::Scan{}); }
-    | STRING { $$ = last::node::create(last::node::StringLiteral(std::move($1))); }
+    | NAME SUBASGN assignment_expression %prec SUBASGN {
+        if (name_table.is_not_declare($1)) {
+            ErrorHandler::throwError(@1, "using undeclared variable: " + $1);
+            YYABORT;
+        }
+        auto&& binop = last::node::BinaryOperator(
+            last::node::BinaryOperator::BinaryOperatorT::SUBASGN,
+            last::node::create(last::node::Variable(std::move($1))),
+            std::move($3)
+        );
+        $$ = last::node::create(std::move(binop));
+    }
+    | NAME MULASGN assignment_expression %prec MULASGN {
+        if (name_table.is_not_declare($1)) {
+            ErrorHandler::throwError(@1, "using undeclared variable: " + $1);
+            YYABORT;
+        }
+        auto&& binop = last::node::BinaryOperator(
+            last::node::BinaryOperator::BinaryOperatorT::MULASGN,
+            last::node::create(last::node::Variable(std::move($1))),
+            std::move($3)
+        );
+        $$ = last::node::create(std::move(binop));
+    }
+    | NAME DIVASGN assignment_expression %prec DIVASGN {
+        if (name_table.is_not_declare($1)) {
+            ErrorHandler::throwError(@1, "using undeclared variable: " + $1);
+            YYABORT;
+        }
+        auto&& binop = last::node::BinaryOperator(
+            last::node::BinaryOperator::BinaryOperatorT::DIVASGN,
+            last::node::create(last::node::Variable(std::move($1))),
+            std::move($3)
+        );
+        $$ = last::node::create(std::move(binop));
+    }
+    ;
+
+expression:
+    assignment_expression { $$ = std::move($1); } |
+    LCUB scope RCUB { $$ = std::move($2); } |
+    print_expression { $$ = std::move($1); }
     ;
 
 scope:
@@ -445,6 +458,25 @@ one_stmt_scope:
         $$ = last::node::create(std::move(s));
     }
     ;
+
+return_statement:
+    RET expression {
+        $$ = create(last::node::Return{std::move($2)});
+    }
+    ;
+
+function_declaration:
+    NAME AS DECLFUNC LCIB function_decl_args RCIB LCUB scope RCUB {
+        $$ = last::node::create(last::node::FunctionDeclaration{std::move($1), std::move($5), std::move($8)});
+    }
+    ;
+
+function_call:
+    NAME LCIB function_call_args RCIB {
+        $$ = last::node::create(last::node::FunctionCall{std::move($1), std::move($3)});
+    }
+    ;
+
 
 scope_enter_action: %empty { name_table.new_scope(); } ;
 scope_leave_action: %empty { name_table.leave_scope(); } ;

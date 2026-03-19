@@ -22,8 +22,6 @@ export
 class LibcStandartFunctions final
 {
   private:
-    llvm::Module &module_;
-
     llvm::FunctionType *libc_printf_ty_;
     llvm::FunctionType *libc_scanf_ty_;
 
@@ -42,8 +40,7 @@ class LibcStandartFunctions final
 
 //---------------------------------------------------------------------------------------------------------------
 
-LibcStandartFunctions::LibcStandartFunctions(llvm::Module &module, llvm::IRBuilder<> &builder)
-    : module_(module),
+LibcStandartFunctions::LibcStandartFunctions(llvm::Module &module, llvm::IRBuilder<> &builder) :
       libc_printf_ty_(llvm::FunctionType::get(builder.getInt32Ty(), {builder.getInt8Ty()->getPointerTo()}, true)),
       libc_scanf_ty_(llvm::FunctionType::get(builder.getInt32Ty(), {builder.getInt8Ty()->getPointerTo()}, true)),
       libc_printf_(llvm::Function::Create(libc_printf_ty_, llvm::Function::ExternalLinkage, "printf", module)),

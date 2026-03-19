@@ -259,7 +259,7 @@ dump реализует дамп ast (аргумент ast) в формате [G
 
 ```cpp
 template <typename... Signatures>
-bool last::node::BasicNode::support();
+bool last::node::BasicNode::supports();
 ```
 
 Возврщаает true, если нода поддерживает все сигнатуры, иначе false.

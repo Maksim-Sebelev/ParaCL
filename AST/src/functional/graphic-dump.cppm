@@ -177,7 +177,7 @@ void visit(BinaryOperator const& node, unique_node_id_t unique_node_id, std::ofs
         case BinaryOperator::MULASGN: label += "*="; break;
         case BinaryOperator::DIVASGN: label += "/="; break;
         case BinaryOperator::REMASGN: label += "%="; break;
-        default:                       label += "??"; break;
+        default:                      label += "??"; break;
     }
 
     graphic_dump::create_node(os, unique_node_id, label, "style=filled, fillcolor=\"lightyellow\"");
@@ -249,7 +249,7 @@ void visit(FunctionDeclaration const& node, unique_node_id_t unique_node_id, std
         for (auto&& it = 1LU, ite = args.size(); it != ite; ++it)
             label += (", " + args[it]);
     }
-    label += (")' (mangled: '" + std::string(node.mangled_name()) + "')");
+    label += ")'";
     graphic_dump::create_node(os, unique_node_id, label, "style=filled, fillcolor=\"greenyellow\"");
     graphic_dump::dump_and_link_with_parent(os, unique_node_id, node.body(), "body");
 }
@@ -259,7 +259,7 @@ void visit(FunctionCall const& node, unique_node_id_t unique_node_id, std::ofstr
 {
     auto&& label = "call: '" + std::string(node.name()) + "'";
     graphic_dump::create_node(os, unique_node_id, label, "style=filled, fillcolor=\"indianred2\"");
-    
+
     auto&& args = node.args();
     if (args.size() != 0)
     {

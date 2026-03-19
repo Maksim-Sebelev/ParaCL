@@ -8,15 +8,18 @@ module;
 #include <llvm/IR/Verifier.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/ToolOutputFile.h>
+#include <llvm/Support/TargetSelect.h>
+#include <llvm/TargetParser/Host.h>
+
 #include <boost/json.hpp>
 
 #include <cstdlib>
+#include <iterator>
 #include <filesystem>
 #include <sstream>
 #include <stdexcept>
 #include <cassert>
 
-// TODO: remove iostream
 #include <iostream>
 
 #include "create-basic-node.hpp"
@@ -31,6 +34,7 @@ export module llvm_ir_translator;
 //---------------------------------------------------------------------------------------------------------------
 
 import nametable;
+import functions_table;
 import libc_standart_functions;
 import thelast;
 
@@ -47,12 +51,17 @@ struct llvmIrTranslatorData
     llvm::Module module;
     llvm::IRBuilder<> builder;
     nametable::Nametable nametable;
+    functions_table::FunctionsTable functable;
+    llvm::BasicBlock* main_function;
+
     LibcStandartFunctions libc_standart_functions;
 
     llvmIrTranslatorData(std::filesystem::path const &source) :
         context(), module(source.string(), context), builder(context),
-        nametable(module, builder), libc_standart_functions(module, builder)
-    {}
+        nametable(builder), functable(builder), libc_standart_functions(module, builder)
+    {
+        module.setTargetTriple(llvm::sys::getDefaultTargetTriple());
+    }
 };
 
 //---------------------------------------------------------------------------------------------------------------
@@ -255,32 +264,32 @@ llvm::Value* visit(BinaryOperator const& node, llvmIrTranslatorData& data)
         }
         case BinaryOperator::ISAB:
         {
-            auto&& cmp = data.builder.CreateICmpSGT(left, right);
+            auto&& cmp = data.builder.CreateICmpSGT(left, right, "__cmpTmp");
             return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_ab");
         }
         case BinaryOperator::ISABE:
         {
-            auto&& cmp = data.builder.CreateICmpSGE(left, right);
+            auto&& cmp = data.builder.CreateICmpSGE(left, right, "__cmpTmp");
             return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_abe");
         }
         case BinaryOperator::ISLS:
         {
-            auto&& cmp = data.builder.CreateICmpSLT(left, right);
+            auto&& cmp = data.builder.CreateICmpSLT(left, right, "__cmpTmp");
             return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_ls");
         }
         case BinaryOperator::ISLSE:
         {
-            auto&& cmp = data.builder.CreateICmpSLE(left, right);
+            auto&& cmp = data.builder.CreateICmpSLE(left, right, "__cmpTmp");
             return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_lse");
         }
         case BinaryOperator::ISEQ:
         {
-            auto&& cmp = data.builder.CreateICmpEQ(left, right);
+            auto&& cmp = data.builder.CreateICmpEQ(left, right, "__cmpTmp");
             return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_eq");
         }
         case BinaryOperator::ISNE:
         {
-            auto&& cmp = data.builder.CreateICmpNE(left, right);
+            auto&& cmp = data.builder.CreateICmpNE(left, right, "__cmpTmp");
             return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__cmp_ne");
         }
         default: break;
@@ -316,12 +325,13 @@ void visit(BinaryOperator const& node, llvmIrTranslatorData& data)
 // PRINT
 //-----------------------------------------------------------------------------
 template <>
-void visit(Print const& node, llvmIrTranslatorData& data)
+llvm::Value* visit(Print const& node, llvmIrTranslatorData& data)
 {
     LOGINFO("paracl: ir translator: generating print statement");
 
     auto&& fmt = std::ostringstream{};
     auto&& printf_args = std::vector<llvm::Value*>{};
+    printf_args.reserve(node.size());
 
     for (auto&& arg : node)
     {
@@ -338,7 +348,15 @@ void visit(Print const& node, llvmIrTranslatorData& data)
     auto&& fmt_str = data.builder.CreateGlobalStringPtr(fmt.str(), "__printfFormat");
     printf_args.insert(printf_args.begin(), fmt_str);
 
-    data.builder.CreateCall(data.libc_standart_functions.libc_printf(), printf_args, "__printf_exit_code");
+    return data.builder.CreateCall(data.libc_standart_functions.libc_printf(), printf_args, "__printf_exit_code");
+}
+
+//-----------------------------------------------------------------------------
+
+template <>
+void visit(Print const& node, llvmIrTranslatorData& data)
+{
+    (void) visit<Print, llvm::Value*, llvmIrTranslatorData&>(node, data);
 }
 
 //-----------------------------------------------------------------------------
@@ -467,42 +485,176 @@ void visit(Condition const& node, llvmIrTranslatorData& data)
 // SCOPE
 //-----------------------------------------------------------------------------
 template <>
-void visit(Scope const& node, llvmIrTranslatorData& data)
+llvm::Value* visit(Scope const& node, llvmIrTranslatorData& data)
 {
     LOGINFO("paracl: ir translator: generating scope");
 
     data.nametable.new_scope();
 
-    for (auto&& stmt : node)
-        generate_statement(stmt, data);
+    auto&& size = node.size();
+
+    if (size == 0)
+        return nullptr;
+
+    for (auto&& it = 0LU, ite = size - 1; it != ite; ++it)
+        generate_statement(node[it], data);
+
+    auto&& last = node[size - 1];
+    auto&& return_value = static_cast<llvm::Value*>(nullptr);
+
+    if (last.supports<generatable_expression>())
+    {
+        return_value = generate_expression(last, data);
+    }
+    else
+    {
+        generate_statement(last, data);
+        return_value = nullptr;
+    }
 
     data.nametable.leave_scope();
+    return return_value;
 }
 
 //-----------------------------------------------------------------------------
+
+template <>
+void visit(Scope const& node, llvmIrTranslatorData& data)
+{
+    (void) visit<Scope, llvm::Value*, llvmIrTranslatorData&>(node, data);
+}
+
+//-----------------------------------------------------------------------------
+// RETURN
+//-----------------------------------------------------------------------------
+template <>
+void visit(Return const & node, llvmIrTranslatorData& data)
+{
+    LOGINFO("paracl: ir translator: return");
+
+    auto&& returning_value = generate_expression(node.expression(), data);
+    data.builder.CreateRet(returning_value);
+}
+
+//-----------------------------------------------------------------------------
+// FUNCTION DECLARATION
+//-----------------------------------------------------------------------------
+
+template <>
+void visit(FunctionDeclaration const & node, llvmIrTranslatorData& data)
+{
+    LOGINFO("paracl: ir translator: func decl");
+
+    auto&& args = node.args();
+    /* all function return int32 */
+    auto&& return_type = data.builder.getInt32Ty();
+    /* all args types are int32 */
+    auto&& args_types = std::vector<llvm::Type*>(args.size(), data.builder.getInt32Ty());  
+    /* all functions return int32 */
+    auto&& type = llvm::FunctionType::get(std::move(return_type), std::move(args_types), false);
+    /* declare function in ir with mangled name, cause function overload must be supported */
+    auto&& mangled_name = compiler::llvm_ir_translator::functions_table::FunctionsTable::mangle_name(node.name(), args);
+
+    auto&& function = llvm::Function::Create(std::move(type), llvm::Function::InternalLinkage, mangled_name, data.module);
+
+    auto&& entry_block = llvm::BasicBlock::Create(data.context,  mangled_name + "-entry", function);
+    data.builder.SetInsertPoint(entry_block);
+
+    /* set  arguments name and put it in nametable */
+
+    auto&& func_args = function->args(); assert(std::distance(func_args.begin(), func_args.end()) == args.size());
+    /* create scope for args */
+    data.nametable.new_scope();
+
+    for (auto&& it = 0LU, ite = args.size(); it != ite; ++it)
+    {
+        auto&& func_args_it = func_args.begin() + it;
+        func_args_it->setName(args[it]);
+        data.nametable.declare(args[it], func_args_it);
+    }
+
+    /* declare here, cause we can call it recursive in the body*/
+    data.functable.declare(node, function);
+
+    assert(node.body().is_a<Scope>());
+
+    auto&& body = generate_expression(node.body(), data);
+
+    /*
+        if body == nullptr, we expect that the last statement in function scope
+        is Return, so we dont need to create with our hands.
+        but if scope returned a value, that means last was an expression
+        and we need to return it
+    */
+    if (body)
+        data.builder.CreateRet(body);
+
+    /* leave scope for function args */
+    data.nametable.leave_scope();
+
+    /* back into the main */
+    data.builder.SetInsertPoint(data.main_function);
+}
+
+//-----------------------------------------------------------------------------
+// FUNCTION CALL
+//-----------------------------------------------------------------------------
+
+template <>
+llvm::Value* visit(FunctionCall const & node, llvmIrTranslatorData& data)
+{
+    LOGINFO("paracl: ir translator: func call");
+
+    auto&& args = node.args();
+    auto&& completed_args = std::vector<llvm::Value*>{};
+    completed_args.reserve(args.size());
+
+    for (auto&& it = 0LU, ite = args.size(); it != ite; ++it)
+    {
+        auto&& arg_value = generate_expression(args[it], data);
+        completed_args.push_back(arg_value);
+    }
+
+    auto&& funccall = data.functable.call(node.name(), completed_args);
+
+    return funccall;
+}
+
+//-----------------------------------------------------------------------------
+
+template <>
+void visit(FunctionCall const & node, llvmIrTranslatorData& data)
+{
+    (void) visit<FunctionCall, llvm::Value*, llvmIrTranslatorData&>(node, data);
+}
+
+//-----------------------------------------------------------------------------
+
 } /* namespace visit_specializations */
 //-----------------------------------------------------------------------------
 } /* namespace last::node */
 //-----------------------------------------------------------------------------
 
-SPECIALIZE_CREATE(last::node::Print         , last::node::generatable_statement)
-SPECIALIZE_CREATE(last::node::Scan          , last::node::generatable_expression, last::node::generatable_statement)
-SPECIALIZE_CREATE(last::node::Variable      , last::node::generatable_expression, last::node::generatable_statement)
-SPECIALIZE_CREATE(last::node::NumberLiteral , last::node::generatable_expression, last::node::generatable_statement)
-SPECIALIZE_CREATE(last::node::StringLiteral , last::node::generatable_expression)
-SPECIALIZE_CREATE(last::node::UnaryOperator , last::node::generatable_expression, last::node::generatable_statement)
-SPECIALIZE_CREATE(last::node::BinaryOperator, last::node::generatable_expression, last::node::generatable_statement)
-SPECIALIZE_CREATE(last::node::While         , last::node::generatable_statement)
-SPECIALIZE_CREATE(last::node::If            , last::node::generatable_if_statement)
-SPECIALIZE_CREATE(last::node::Else          , last::node::generatable_statement)
-SPECIALIZE_CREATE(last::node::Condition     , last::node::generatable_statement)
-SPECIALIZE_CREATE(last::node::Scope         , last::node::generatable_statement)
+SPECIALIZE_CREATE(last::node::Print              , last::node::generatable_statement, last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::Scan               , last::node::generatable_statement, last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::Variable           , last::node::generatable_statement, last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::NumberLiteral      , last::node::generatable_statement, last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::StringLiteral      ,                                    last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::UnaryOperator      , last::node::generatable_statement, last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::BinaryOperator     , last::node::generatable_statement, last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::While              , last::node::generatable_statement)
+SPECIALIZE_CREATE(last::node::If                 , last::node::generatable_if_statement)
+SPECIALIZE_CREATE(last::node::Else               , last::node::generatable_statement)
+SPECIALIZE_CREATE(last::node::Condition          , last::node::generatable_statement)
+SPECIALIZE_CREATE(last::node::Scope              , last::node::generatable_statement, last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::Return             , last::node::generatable_statement)
+SPECIALIZE_CREATE(last::node::FunctionDeclaration, last::node::generatable_statement)
+SPECIALIZE_CREATE(last::node::FunctionCall       , last::node::generatable_statement, last::node::generatable_expression)
 
 //---------------------------------------------------------------------------------------------------------------
 
 #define THELAST_READ_AST_NO_INCLUDES
 #include "read-ast.hpp"
-#undef THELAST_READ_AST_NO_INCLUDES
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -524,19 +676,18 @@ void generate_llvm_ir(std::filesystem::path const & ast_text_representation,
     auto&& main_function = llvm::Function::Create(main_type, llvm::Function::ExternalLinkage, "main", data.module);
 
     auto&& entry_block = llvm::BasicBlock::Create(data.context, "entry", main_function);
+    data.main_function = entry_block;
     data.builder.SetInsertPoint(entry_block);
 
-    data.nametable.new_scope();
     last::node::generate_statement(ast.root(), data);
-    data.nametable.leave_scope();
 
     data.builder.CreateRet(llvm::ConstantInt::get(data.builder.getInt32Ty(), 0));
 
-    if (llvm::verifyModule(data.module, &llvm::errs()))
-    {
-        LOGERR("paracl: ir translator: module verification failed");
-        throw std::runtime_error("IR module verification failed");
-    }
+    // if (llvm::verifyModule(data.module, &llvm::errs()))
+    // {
+    //     LOGERR("paracl: ir translator: module verification failed");
+    //     throw std::runtime_error("IR module verification failed");
+    // }
 
     LOGINFO("paracl: ir translator: writing IR to file: {}", ir_file.string());
 

@@ -197,7 +197,7 @@ public:
         if (not node.self_->supports_signature_(typeid(SignatureT))) 
         {
             throw std::runtime_error(
-                std::string("This node dont support this function: ") + typeid(SignatureT).name()
+                std::string("This node '" + std::string(node.self_->type_().name()) + "' dont supports this function: ") + typeid(SignatureT).name()
             );
         }
 
@@ -249,10 +249,10 @@ public:
     BasicNode& operator=(BasicNode&&) noexcept = default;
 
 
-    /* check that node support some visit functions */
+    /* check that node supports some visit functions */
     template<typename... Signatures>
     requires (std::is_function_v<Signatures> && ...)
-    bool support() const
+    bool supports() const
     {
         return
             (self_) and

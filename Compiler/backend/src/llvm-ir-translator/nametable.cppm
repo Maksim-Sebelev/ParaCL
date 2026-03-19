@@ -22,7 +22,7 @@ export module nametable;
 
 //---------------------------------------------------------------------------------------------------------------
 
-namespace compiler::nametable
+namespace compiler::llvm_ir_translator::nametable
 {
 
 //---------------------------------------------------------------------------------------------------------------
@@ -30,16 +30,17 @@ namespace compiler::nametable
 export class Nametable final
 {
   private:
-    llvm::Module &module_;
     llvm::IRBuilder<> &builder_;
 
     std::vector<std::unordered_map<std::string_view, llvm::AllocaInst *>> scopes_;
 
-    llvm::AllocaInst *lookup(std::string_view name);
-    void declare(std::string_view name, llvm::Value * = nullptr);
+    llvm::AllocaInst *lookup_(std::string_view name);
+    void declare_(std::string_view name, llvm::Value * = nullptr);
 
   public:
-    Nametable(llvm::Module &module, llvm::IRBuilder<> &builder);
+
+  public:
+    Nametable(llvm::IRBuilder<> &builder);
 
     void new_scope();
     void leave_scope();
@@ -48,12 +49,13 @@ export class Nametable final
     llvm::Value *get_variable_value(std::string_view name);
 
     void set_value(std::string_view name, llvm::Value *value);
+    void declare(std::string_view name, llvm::Value *value);
 };
 
 //---------------------------------------------------------------------------------------------------------------
 
-Nametable::Nametable(llvm::Module &module, llvm::IRBuilder<> &builder)
-    : module_(module), builder_(builder), scopes_()
+Nametable::Nametable(llvm::IRBuilder<> &builder)
+    : builder_(builder), scopes_(1 /* global scope */)
 {
 }
 
@@ -112,9 +114,9 @@ void Nametable::set_value(std::string_view name, llvm::Value *value)
     if (scopes_.empty())
         throw std::runtime_error("cannot set_value variable: no active scopes");
 
-    auto&& var = lookup(name);
+    auto&& var = lookup_(name);
 
-    if (not var) return declare(name, value);
+    if (not var) return declare_(name, value);
 
     builder_.CreateStore(value, var);
 }
@@ -124,7 +126,7 @@ void Nametable::set_value(std::string_view name, llvm::Value *value)
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
-llvm::AllocaInst *Nametable::lookup(std::string_view name)
+llvm::AllocaInst *Nametable::lookup_(std::string_view name)
 {
     for (auto &&scopes_it : scopes_ | std::views::reverse)
     {
@@ -141,12 +143,12 @@ llvm::AllocaInst *Nametable::lookup(std::string_view name)
 
 //---------------------------------------------------------------------------------------------------------------
 
-void Nametable::declare(std::string_view name, llvm::Value *value)
+void Nametable::declare_(std::string_view name, llvm::Value *value)
 {
-    LOGINFO("paracl: compiler: nametable: declare \"{}\"", name);
+    LOGINFO("paracl: compiler: nametable: declare_ \"{}\"", name);
 
     if (scopes_.empty())
-        throw std::runtime_error("cannot declare variable: no active scopes");
+        throw std::runtime_error("cannot declare_ variable: no active scopes");
 
     auto&& var = scopes_.back()[name];
     var = builder_.CreateAlloca(builder_.getInt32Ty(), nullptr, name);
@@ -158,6 +160,25 @@ void Nametable::declare(std::string_view name, llvm::Value *value)
 
 //---------------------------------------------------------------------------------------------------------------
 
-} /* namespace compiler::nametable */
+void Nametable::declare(std::string_view name, llvm::Value *value)
+{
+    LOGINFO("paracl: compiler: nametable: declare_ \"{}\"", name);
 
+    if (scopes_.empty())
+        throw std::runtime_error("cannot declare_ variable: no active scopes");
+
+    if (scopes_.back().find(name) != scopes_.back().end())
+        throw std::runtime_error("cannot declare_ '" + std::string(name) + "', cause it already exists in current scope");
+
+
+    auto&& var = scopes_.back()[name];
+    var = builder_.CreateAlloca(builder_.getInt32Ty(), nullptr, name);
+
+    if (not value) return;
+
+    builder_.CreateStore(value, var);
+}
+
+//---------------------------------------------------------------------------------------------------------------
+} /* namespace compiler::llvm_ir_translator::nametable */
 //---------------------------------------------------------------------------------------------------------------

@@ -86,6 +86,7 @@ STRING    \"[^"]*\"
 ";"               { return yy::parser::token::SC; }
 ","               { return yy::parser::token::COMMA; }
 "func"            { return yy::parser::token::DECLFUNC; }
+"return"          { return yy::parser::token::RET; }
 
 {STRING} {
     yytext[yyleng - 1] = '\0';
@@ -100,7 +101,7 @@ STRING    \"[^"]*\"
 
 {LETTER}({LETTER}|{DIGIT})* {
     yylval->build<std::string>(yytext);
-    return yy::parser::token::VAR;
+    return yy::parser::token::NAME;
 }
 
 <<EOF>> {

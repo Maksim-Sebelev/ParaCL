@@ -26,6 +26,7 @@ public:
     using std::vector<BasicNode>::end;
     using std::vector<BasicNode>::size;
     using std::vector<BasicNode>::back;
+    using std::vector<BasicNode>::operator[];
 
 public:
     Scope() = default;
@@ -330,6 +331,14 @@ public:
        ifs_(std::move(ifs)), else_(std::move(else_а_как_вот_это_назвать))
     {}
 
+    Condition(std::vector<BasicNode> const & ifs, BasicNode&& else_а_как_вот_это_назвать) :
+       ifs_(ifs), else_(std::move(else_а_как_вот_это_назвать))
+    {}
+
+    Condition(std::vector<BasicNode>&& ifs, BasicNode const & else_а_как_вот_это_назвать) :
+       ifs_(std::move(ifs)), else_(else_а_как_вот_это_назвать)
+    {}
+
 public:
     void add_condition(BasicNode&& condition)
     { ifs_.push_back(condition); }
@@ -384,18 +393,10 @@ private:
     std::string name_;
     std::vector<std::string> args_;
     BasicNode body_;
-    std::string mangled_name_;
-
 private:
-    std::string mangle_name_() const
-    { return name_ + "_" + std::to_string(args_.size()) + "_args"; }
-
 public:
     std::string_view name() const & noexcept
     { return name_; }
-
-    std::string_view mangled_name() const & noexcept
-    { return mangled_name_; }
 
     std::vector<std::string> const & args() const & noexcept
     { return args_; } 
@@ -414,36 +415,32 @@ public:
 FunctionDeclaration(std::string&& name, std::vector<std::string>&& args, BasicNode&& body) :
         name_(std::move(name)),
         args_(std::move(args)),
-        body_(std::move(body)),
-        mangled_name_(mangle_name_())
+        body_(std::move(body))
     {}
 
     FunctionDeclaration(std::string&& name, std::vector<std::string>&& args, BasicNode const& body) :
         name_(std::move(name)),
         args_(std::move(args)),
-        body_(body),
-        mangled_name_(mangle_name_())
+        body_(body)
     {}
 
     FunctionDeclaration(std::string&& name, std::vector<std::string> const& args, BasicNode&& body) :
         name_(std::move(name)),
         args_(args),
-        body_(std::move(body)),
-        mangled_name_(mangle_name_())
+        body_(std::move(body))
     {}
 
     FunctionDeclaration(std::string&& name, std::vector<std::string> const& args, BasicNode const& body) :
         name_(std::move(name)),
         args_(args),
-        body_(body),
-        mangled_name_(mangle_name_())
+        body_(body)
     {}
 
     void add_arg(std::string&& new_arg)
     { args_.push_back(std::move(new_arg)); }
 
     void set_name(std::string&& name)
-    { name_ = std::move(name); mangled_name_ = mangle_name_(); }
+    { name_ = std::move(name); }
 
     void set_body(BasicNode && new_body)
     { body_ = std::move(new_body); }
@@ -460,7 +457,6 @@ class FunctionCall final
 private:
     std::string name_;
     std::vector<BasicNode> args_;
-
 public:
     FunctionCall() = default;
 
