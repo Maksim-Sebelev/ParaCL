@@ -66,12 +66,19 @@ struct llvmIrTranslatorData
 
 //---------------------------------------------------------------------------------------------------------------
 
+llvm::Value* create_null_Int32(llvmIrTranslatorData& data)
+{
+    return llvm::ConstantInt::get(data.builder.getInt32Ty(), 0, true);;
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
 llvm::Value* convert_to_Int1(llvmIrTranslatorData& data, llvm::Value *value)
 {
     assert(value);
     LOGINFO("paracl: ir translator: converting value to i1 type");
     auto&& value_type = value->getType();
-    auto&& zero = llvm::ConstantInt::get(value_type, 0);
+    auto&& zero = llvm::ConstantInt::get(value_type, 0, true);
     return data.builder.CreateICmpNE(value, zero, "__toBool");
 }
 
@@ -199,12 +206,12 @@ llvm::Value* visit(UnaryOperator const& node, llvmIrTranslatorData& data)
             return arg;
         case UnaryOperator::MINUS:
         {
-            auto&& zero = llvm::ConstantInt::get(data.builder.getInt32Ty(), 0, "__0");
+            auto&& zero = compiler::llvm_ir_translator::create_null_Int32(data);
             return data.builder.CreateSub(zero, arg, "__unaryMinus");
         }
         case UnaryOperator::NOT:
         {
-            auto&& zero = llvm::ConstantInt::get(data.builder.getInt32Ty(), 0, "__0");
+            auto&& zero = compiler::llvm_ir_translator::create_null_Int32(data);
             auto&& cmp = data.builder.CreateICmpEQ(arg, zero, "__tmpUnaryNotValue");
             return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__unaryNot");
         }
@@ -386,7 +393,7 @@ void visit(While const& node, llvmIrTranslatorData& data)
 
     auto&& cond_val = generate_expression(node.condition(), data);
     auto&& cond_i1 = data.builder.CreateICmpNE(cond_val, 
-        llvm::ConstantInt::get(data.builder.getInt32Ty(), 0), "__whileCondition");
+        compiler::llvm_ir_translator::create_null_Int32(data), "__whileCondition");
 
     data.builder.CreateCondBr(cond_i1, body_block, end_block);
 
@@ -412,7 +419,7 @@ void visit(If const& node, llvmIrTranslatorData& data, llvm::BasicBlock* self_co
     auto&& if_condition = generate_expression(node.condition(), data);
 
     auto&& if_condition_bool = data.builder.CreateICmpNE(if_condition, 
-        llvm::ConstantInt::get(data.builder.getInt32Ty(), 0), "__condition");
+        compiler::llvm_ir_translator::create_null_Int32(data), "__condition");
 
     data.builder.CreateCondBr(if_condition_bool, self_body, next ? next : end);
 
@@ -711,7 +718,7 @@ void generate_llvm_ir(std::filesystem::path const & ast_text_representation,
 
     last::node::generate_statement(ast.root(), data);
 
-    data.builder.CreateRet(llvm::ConstantInt::get(data.builder.getInt32Ty(), 0));
+    data.builder.CreateRet(compiler::llvm_ir_translator::create_null_Int32(data));
 
     // if (llvm::verifyModule(data.module, &llvm::errs()))
     // {
