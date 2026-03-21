@@ -5,7 +5,7 @@ find_program(FLEX_EXECUTABLE
 
 if (NOT FLEX_EXECUTABLE)
     message(STATUS "Fetching flex...")
-    FetchContent_Declare(
+    FetchContent_force_declare(
         flex
         URL https://github.com/westes/flex/archive/refs/tags/v2.6.4.zip
         DOWNLOAD_EXTRACT_TIMESTAMP TRUE

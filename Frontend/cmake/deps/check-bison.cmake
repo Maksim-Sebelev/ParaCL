@@ -4,7 +4,7 @@ find_program(BISON_EXECUTABLE
 
 if (NOT BISON_EXECUTABLE)
     message(STATUS "Fetching flex...")
-    FetchContent_Declare (
+    FetchContent_force_declare (
         bison
         URL https://github.com/akimd/bison/archive/refs/tags/v3.8.2.zip
         DOWNLOAD_EXTRACT_TIMESTAMP TRUE

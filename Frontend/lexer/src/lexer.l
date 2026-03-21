@@ -85,6 +85,7 @@ STRING    \"[^"]*\"
 "else"            { return yy::parser::token::ELSE; }
 ";"               { return yy::parser::token::SC; }
 ","               { return yy::parser::token::COMMA; }
+":"               { return yy::parser::token::COLON; }
 "func"            { return yy::parser::token::DECLFUNC; }
 "return"          { return yy::parser::token::RET; }
 

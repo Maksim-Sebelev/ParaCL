@@ -293,7 +293,7 @@ void visit(StringLiteral const & node, std::ostream& os, [[maybe_unused]] size_t
 }
 
 template <>
-void visit(Return const & node, std::ostream& os, [[maybe_unused]] size_t enclosure, [[maybe_unused]] building_program::BuildProgramSetting)
+void visit(Return const & node, std::ostream& os, size_t enclosure, [[maybe_unused]] building_program::BuildProgramSetting)
 {
     building_program::write_n_tab(os, enclosure);
     os << "return "; 
@@ -320,7 +320,7 @@ void visit(FunctionDeclaration const & node, std::ostream& os, [[maybe_unused]] 
 }
 
 template <>
-void visit(FunctionCall const & node, std::ostream& os, [[maybe_unused]] size_t enclosure, building_program::BuildProgramSetting setting)
+void visit(FunctionCall const & node, std::ostream& os, size_t enclosure, building_program::BuildProgramSetting setting)
 {
     auto&& is_not_expression = building_program::is_not_expression(setting);
     if (is_not_expression)

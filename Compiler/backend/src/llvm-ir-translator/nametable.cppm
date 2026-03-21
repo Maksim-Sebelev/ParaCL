@@ -11,7 +11,7 @@ module;
 #include <string_view>
 #include <unordered_map>
 #include <vector>
-
+#include <iostream>
 // #include "log/log_api.hpp"
 #define LOGINFO(...)
 #define LOGERR(...)
@@ -32,12 +32,16 @@ export class Nametable final
   private:
     llvm::IRBuilder<> &builder_;
 
-    std::vector<std::unordered_map<std::string_view, llvm::AllocaInst *>> scopes_;
+    std::vector<std::unordered_map<std::string_view, llvm::Value *>> scopes_;
 
-    llvm::AllocaInst *lookup_(std::string_view name);
+    llvm::Value *lookup_(std::string_view name);
     void declare_(std::string_view name, llvm::Value * = nullptr);
 
-  public:
+  private:
+    static bool is_function(llvm::Value const* value)
+    {
+        return llvm::isa<llvm::Function>(value);
+    }
 
   public:
     Nametable(llvm::IRBuilder<> &builder);
@@ -45,12 +49,28 @@ export class Nametable final
     void new_scope();
     void leave_scope();
 
-    llvm::AllocaInst *get_variable(std::string_view name);
-    llvm::Value *get_variable_value(std::string_view name);
+    llvm::Value *get(std::string_view name);
 
-    void set_value(std::string_view name, llvm::Value *value);
-    void declare(std::string_view name, llvm::Value *value);
+    void set(std::string_view name, llvm::Value *value);
+    void force_declare(std::string_view name, llvm::Value *value);
+
+    friend void dump(Nametable const & nt)
+    {
+        static auto&& dump_counter = 0LU;
+        std::cout << "NAMETABLE DUMP[" << dump_counter++ << "]\n{" << std::endl;
+        for (auto&& scope: nt.scopes_)
+        {
+            for (auto&& name: scope)
+                std::cout << "\t(" << name.first << ", " << name.second->getType()->getTypeID() << ")" << std::endl;
+            std::cout << std::endl;;
+        }
+        std::cout << "}" << std::endl;
+    }
 };
+
+//---------------------------------------------------------------------------------------------------------------
+
+export void dump(Nametable const &);
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -78,45 +98,41 @@ void Nametable::leave_scope()
 
 //---------------------------------------------------------------------------------------------------------------
 
-llvm::AllocaInst *Nametable::get_variable(std::string_view name)
+llvm::Value *Nametable::get(std::string_view name)
 {
-    LOGINFO("paracl: compiler: nametable: searching variable: \"{}\"", name);
-
-    for (auto &&scopes_it : scopes_ | std::views::reverse)
-    {
-        auto&& found = scopes_it.find(name);
-        if (found == scopes_it.end()) continue;
-        LOGINFO("paracl: compiler: nametable: variable found: \"{}\"", name);
-        return found->second;
-    }
-
-    LOGINFO("paracl: compiler: nametable: variable NOT found: \"{}\"", name);
-    return nullptr;
-}
-
-//---------------------------------------------------------------------------------------------------------------
-
-llvm::Value *Nametable::get_variable_value(std::string_view name)
-{
-    auto&& var = get_variable(name);
-
+    auto&& var = lookup_(name);
     if (not var) return nullptr;
-
+    if (is_function(var)) return var;
     return builder_.CreateLoad(builder_.getInt32Ty(), var, std::string(name) + "_load");
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-void Nametable::set_value(std::string_view name, llvm::Value *value)
+void Nametable::set(std::string_view name, llvm::Value *value)
 {
     LOGINFO("paracl: compiler: nametable: set \"{}\"", name);
 
     if (scopes_.empty())
-        throw std::runtime_error("cannot set_value variable: no active scopes");
+        throw std::runtime_error("cannot set '" + std::string(name) + "': no active scopes");
 
     auto&& var = lookup_(name);
-
     if (not var) return declare_(name, value);
+
+    if (is_function(value))
+    {
+        // FIXME: here we execute lookup_ action again. need to made somethig smarter
+        // we cannont just made: var = value, cause lookup_ return not a pointer reference, just pointer
+        for (auto&& scope : scopes_ | std::views::reverse)
+        {
+            auto&& found = scope.find(name);
+            if (found == scope.end()) continue;
+            found->second = value;
+        }
+    
+        return;
+    }
+
+    /* if (not is_function(value))*/
 
     builder_.CreateStore(value, var);
 }
@@ -126,15 +142,12 @@ void Nametable::set_value(std::string_view name, llvm::Value *value)
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
-llvm::AllocaInst *Nametable::lookup_(std::string_view name)
+llvm::Value *Nametable::lookup_(std::string_view name)
 {
-    for (auto &&scopes_it : scopes_ | std::views::reverse)
+    for (auto&& scope : scopes_ | std::views::reverse)
     {
-        auto&& found = scopes_it.find(name);
-
-        if (found == scopes_it.end())
-            continue;
-
+        auto&& found = scope.find(name);
+        if (found == scope.end()) continue;
         return found->second;
     }
 
@@ -150,17 +163,20 @@ void Nametable::declare_(std::string_view name, llvm::Value *value)
     if (scopes_.empty())
         throw std::runtime_error("cannot declare_ variable: no active scopes");
 
-    auto&& var = scopes_.back()[name];
-    var = builder_.CreateAlloca(builder_.getInt32Ty(), nullptr, name);
+    if (is_function(value))
+    {
+        scopes_.back()[name] = value;
+        return;
+    }
 
-    if (not value) return;
+    auto&& variable = (scopes_.back()[name] = builder_.CreateAlloca(value->getType(), nullptr, name));
 
-    builder_.CreateStore(value, var);
+    builder_.CreateStore(value, variable);
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-void Nametable::declare(std::string_view name, llvm::Value *value)
+void Nametable::force_declare(std::string_view name, llvm::Value *value)
 {
     LOGINFO("paracl: compiler: nametable: declare_ \"{}\"", name);
 
@@ -170,15 +186,10 @@ void Nametable::declare(std::string_view name, llvm::Value *value)
     if (scopes_.back().find(name) != scopes_.back().end())
         throw std::runtime_error("cannot declare_ '" + std::string(name) + "', cause it already exists in current scope");
 
-
-    auto&& var = scopes_.back()[name];
-    var = builder_.CreateAlloca(builder_.getInt32Ty(), nullptr, name);
-
-    if (not value) return;
-
-    builder_.CreateStore(value, var);
+    declare_(name, value);
 }
 
 //---------------------------------------------------------------------------------------------------------------
 } /* namespace compiler::llvm_ir_translator::nametable */
 //---------------------------------------------------------------------------------------------------------------
+

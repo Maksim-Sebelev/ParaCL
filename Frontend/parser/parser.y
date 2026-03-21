@@ -57,6 +57,7 @@
 %token SC COMMA
 %token <std::string> STRING
 %token DECLFUNC RET
+%token COLON
 
 %type <std::vector<last::node::BasicNode>> statements function_call_args
 %type <last::node::BasicNode> statement assignment
@@ -68,6 +69,7 @@
 %type <std::vector<last::node::BasicNode>> elif_statements
 %type <last::node::BasicNode> function_declaration function_call
 %type <std::vector<std::string>> function_decl_args
+%type <last::node::BasicNode> special_expression function_assignment scope_assignment
 
 %start program
 %%
@@ -104,8 +106,8 @@ statement:
     | while_statement { $$ = std::move($1); }
     | condition_statement { $$ = std::move($1); }
     | SC { $$ = last::node::create(last::node::Scope{}); }
-    | function_declaration { $$ = std::move($1); }
     | return_statement SC { $$ = std::move($1); }
+    | special_expression { $$ = std::move($1); }
     | expression SC { $$ = std::move($1); }
     ;
 
@@ -231,8 +233,8 @@ else_statement:
 primary_expression:
     NUM { $$ = last::node::create(last::node::NumberLiteral($1)); }
     | NAME {
-        if (name_table.is_not_declare($1)) {
-            ErrorHandler::throwError(@1, "using undeclared variable: " + $1);
+        if (name_table.is_not_force_declare($1)) {
+            ErrorHandler::throwError(@1, "using unforce_declared variable: " + $1);
             YYABORT;
         }
         $$ = last::node::create(last::node::Variable(std::move($1)));
@@ -389,8 +391,8 @@ assignment_expression:
         $$ = last::node::create(std::move(binop));
     }
     | NAME ADDASGN assignment_expression %prec ADDASGN {
-        if (name_table.is_not_declare($1)) {
-            ErrorHandler::throwError(@1, "using undeclared variable: " + $1);
+        if (name_table.is_not_force_declare($1)) {
+            ErrorHandler::throwError(@1, "using unforce_declared variable: " + $1);
             YYABORT;
         }
         auto&& binop = last::node::BinaryOperator(
@@ -401,8 +403,8 @@ assignment_expression:
         $$ = last::node::create(std::move(binop));
     }
     | NAME SUBASGN assignment_expression %prec SUBASGN {
-        if (name_table.is_not_declare($1)) {
-            ErrorHandler::throwError(@1, "using undeclared variable: " + $1);
+        if (name_table.is_not_force_declare($1)) {
+            ErrorHandler::throwError(@1, "using unforce_declared variable: " + $1);
             YYABORT;
         }
         auto&& binop = last::node::BinaryOperator(
@@ -413,8 +415,8 @@ assignment_expression:
         $$ = last::node::create(std::move(binop));
     }
     | NAME MULASGN assignment_expression %prec MULASGN {
-        if (name_table.is_not_declare($1)) {
-            ErrorHandler::throwError(@1, "using undeclared variable: " + $1);
+        if (name_table.is_not_force_declare($1)) {
+            ErrorHandler::throwError(@1, "using unforce_declared variable: " + $1);
             YYABORT;
         }
         auto&& binop = last::node::BinaryOperator(
@@ -425,8 +427,8 @@ assignment_expression:
         $$ = last::node::create(std::move(binop));
     }
     | NAME DIVASGN assignment_expression %prec DIVASGN {
-        if (name_table.is_not_declare($1)) {
-            ErrorHandler::throwError(@1, "using undeclared variable: " + $1);
+        if (name_table.is_not_force_declare($1)) {
+            ErrorHandler::throwError(@1, "using unforce_declared variable: " + $1);
             YYABORT;
         }
         auto&& binop = last::node::BinaryOperator(
@@ -466,8 +468,11 @@ return_statement:
     ;
 
 function_declaration:
-    NAME AS DECLFUNC LCIB function_decl_args RCIB LCUB scope RCUB {
-        $$ = last::node::create(last::node::FunctionDeclaration{std::move($1), std::move($5), std::move($8)});
+    DECLFUNC LCIB function_decl_args RCIB LCUB scope RCUB {
+        $$ = last::node::create(last::node::FunctionDeclaration{"", std::move($3), std::move($6)});
+    } |
+    DECLFUNC LCIB function_decl_args RCIB COLON NAME LCUB scope RCUB {
+        $$ = last::node::create(last::node::FunctionDeclaration{std::move($6), std::move($3), std::move($8)});
     }
     ;
 
@@ -477,6 +482,38 @@ function_call:
     }
     ;
 
+scope_assignment:
+    NAME AS LCUB scope RCUB {
+        name_table.declare_or_do_nothing_if_already_declared($1);
+        auto&& asgn = last::node::BinaryOperator{last::node::BinaryOperator::ASGN,
+            last::node::create(last::node::Variable(std::move($1))),
+            std::move($4)
+        };
+
+        $$ = last::node::create(std::move(asgn));
+    }
+    ;
+
+function_assignment:
+    NAME AS function_declaration {
+        name_table.declare_or_do_nothing_if_already_declared($1);
+        auto&& asgn = last::node::BinaryOperator{last::node::BinaryOperator::ASGN,
+            last::node::create(last::node::Variable(std::move($1))),
+            std::move($3)
+        };
+    
+        $$ = last::node::create(std::move(asgn));
+    }
+    ;
+
+special_expression:
+    function_declaration
+    { $$ = std::move($1); }
+    | function_assignment
+    { $$ = std::move($1); }
+    | scope_assignment
+    { $$ = std::move($1); }
+    ;
 
 scope_enter_action: %empty { name_table.new_scope(); } ;
 scope_leave_action: %empty { name_table.leave_scope(); } ;

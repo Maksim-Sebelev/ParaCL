@@ -105,7 +105,7 @@ private:
     llvm::IRBuilder<>& builder_;
     
 private:
-    llvm::Function * lookup(std::string_view name, declaration_args_t const & args)
+    llvm::Function * lookup_(std::string_view name, declaration_args_t const & args)
     {
         auto&& overload_set = functions_.find(name);
         if (overload_set == functions_.end())
@@ -133,25 +133,30 @@ public:
 public:
     void declare(last::node::FunctionDeclaration const & funcdecl, llvm::Function* funcvalue)
     {
-        if (lookup(funcdecl.name(), funcdecl))
-            throw std::logic_error("Redeclaration of '" + std::string(funcdecl.name()) + "'");
- 
+        static auto&& no_name_functions_counter = 0LU;
+
         auto&& declname = funcdecl.name();
+
+        if (declname.empty())
+            throw std::logic_error("declare function without name. So, i actually can help you here");
+
+        if (lookup_(declname, funcdecl))
+            throw std::logic_error("Redeclaration of '" + std::string(declname) + "'");
+
         auto&& declargs = declaration_args_t{funcdecl};
         functions_[declname][declargs] = funcvalue;
     }
 
     llvm::Function* get(std::string_view name, call_args_t const & args)
     {
-        return lookup(name, args);
+        return lookup_(name, args);
     }
 
     llvm::Value* call(std::string_view name, call_args_t const & args)
     {
-        auto&& function = lookup(name, args);
+        auto&& function = lookup_(name, args);
         if (not function)
-            throw std::logic_error("Call not declared functions: '" + std::string(name) + "'");
-    
+            return nullptr;
         return builder_.CreateCall(function, args, mangle_name(name, args));
     }
 
@@ -173,9 +178,6 @@ public:
     }
 };
 
+export void dump(FunctionsTable const & t);
 
 } /* namespace compiler::llvm_ir_translator::functions_table */
-
-
-namespace compiler::llvm_ir_translator::functions_table
-{ export void dump(FunctionsTable const & t); }
