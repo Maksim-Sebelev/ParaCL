@@ -11,6 +11,7 @@ module;
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/TargetParser/Host.h>
 
+// for read 
 #include <boost/json.hpp>
 
 #include <cstdlib>
@@ -19,10 +20,12 @@ module;
 #include <sstream>
 #include <stdexcept>
 #include <cassert>
-
-#include <iostream>
+#include <tuple>
 
 #include "create-basic-node.hpp"
+
+// TODO: remove iostream
+#include <iostream>
 
 #define LOGINFO(...)
 #define LOGERR(...)
@@ -37,6 +40,7 @@ import nametable;
 import functions_table;
 import libc_standart_functions;
 import thelast;
+import compiler_exceptions;
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -50,17 +54,25 @@ struct llvmIrTranslatorData
     llvm::LLVMContext context;
     llvm::Module module;
     llvm::IRBuilder<> builder;
-    nametable::Nametable nametable;
+    Nametable nametable;
     functions_table::FunctionsTable functable;
-    llvm::BasicBlock* main_function;
+    llvm::BasicBlock* current_function;
+    ValueStatus current_scope_status;
 
     LibcStandartFunctions libc_standart_functions;
 
     llvmIrTranslatorData(std::filesystem::path const &source) :
         context(), module(source.string(), context), builder(context),
-        nametable(builder), functable(builder), libc_standart_functions(module, builder)
+        nametable(module, builder), functable(builder), libc_standart_functions(module, builder),
+        current_function(nullptr), current_scope_status(ValueStatus::global)
     {
         module.setTargetTriple(llvm::sys::getDefaultTargetTriple());
+    }
+
+    void set_function(llvm::BasicBlock* function)
+    {
+        current_function = function;
+        builder.SetInsertPoint(function);
     }
 };
 
@@ -84,21 +96,43 @@ llvm::Value* convert_to_Int1(llvmIrTranslatorData& data, llvm::Value *value)
 
 //---------------------------------------------------------------------------------------------------------------
 
-llvm::Value* convert_Int1_to_Int32(llvmIrTranslatorData& data, llvm::Value* value, std::string_view description = "__convertToInt32")
+llvm::Value* convert_Int1_to_Int32(llvmIrTranslatorData& data, llvm::Value* value, std::string_view description = "__convertInt1ToInt32")
 {
+    assert(value);
     return data.builder.CreateZExt(value, data.builder.getInt32Ty(), description);
 }
 
 //---------------------------------------------------------------------------------------------------------------
+
+llvm::Function* get_function_of_value(llvm::Value* value) {
+    if (!value) return nullptr;
+    
+    if (auto* inst = llvm::dyn_cast<llvm::Instruction>(value)) {
+        return inst->getFunction();
+    }
+    
+    if (auto* arg = llvm::dyn_cast<llvm::Argument>(value)) {
+        return arg->getParent();
+    }
+    
+    if (auto* basicBlock = llvm::dyn_cast<llvm::BasicBlock>(value)) {
+        return basicBlock->getParent();
+    }
+    
+    // Константы, глобальные переменные, функции и т.д. не принадлежат функциям
+    return nullptr;
+}
+//---------------------------------------------------------------------------------------------------------------
 } /* namespace compiler::llvm_ir_translator */
 //---------------------------------------------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 namespace last::node
 {
-
 //-----------------------------------------------------------------------------
 
 using compiler::llvm_ir_translator::llvmIrTranslatorData;
+using compiler::llvm_ir_translator::ValueStatus;
 
 //-----------------------------------------------------------------------------
 
@@ -106,8 +140,8 @@ using generatable_statement  = void (llvmIrTranslatorData&);
 using generatable_expression = llvm::Value* (llvmIrTranslatorData&);
 using generatable_if_statement = void(llvmIrTranslatorData&, llvm::BasicBlock*, llvm::BasicBlock*, llvm::BasicBlock*, llvm::BasicBlock*);
 
-static_assert(not std::is_same_v<generatable_statement, generatable_expression>, "visit specializations must be diferent");
-static_assert(not std::is_same_v<generatable_statement, generatable_if_statement>, "visit specializations must be diferent");
+static_assert(not std::is_same_v<generatable_statement, generatable_expression>   , "visit specializations must be diferent");
+static_assert(not std::is_same_v<generatable_statement, generatable_if_statement> , "visit specializations must be diferent");
 static_assert(not std::is_same_v<generatable_if_statement, generatable_expression>, "visit specializations must be diferent");
 
 //-----------------------------------------------------------------------------
@@ -121,8 +155,10 @@ decltype(auto) generate_expression(BasicNode const & node, llvmIrTranslatorData&
 decltype(auto) generate_if_statement(BasicNode const & node, llvmIrTranslatorData& data, llvm::BasicBlock* self_condition, llvm::BasicBlock* self_body, llvm::BasicBlock* next, llvm::BasicBlock* end)
 { return visit<void, llvmIrTranslatorData&, llvm::BasicBlock*>(node, data, self_condition, self_body, next, end); }
 
+//-----------------------------------------------------------------------------
 namespace visit_specializations
 {
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 // NUMBER LITERAL
@@ -138,7 +174,7 @@ llvm::Value* visit(NumberLiteral const& node, llvmIrTranslatorData& data)
 template <>
 void visit(NumberLiteral const& node, llvmIrTranslatorData& data)
 {
-    (void) visit<NumberLiteral, llvm::Value*, llvmIrTranslatorData&>(node, data);
+    std::ignore = visit<NumberLiteral, llvm::Value*, llvmIrTranslatorData&>(node, data);
 }
 
 //-----------------------------------------------------------------------------
@@ -151,6 +187,12 @@ llvm::Value* visit(StringLiteral const& node, llvmIrTranslatorData& data)
     return data.builder.CreateGlobalStringPtr(node.value(), "__stringLiteral");
 }
 
+template <>
+void visit(StringLiteral const& node, llvmIrTranslatorData& data)
+{
+    std::ignore = visit<StringLiteral, llvm::Value*, llvmIrTranslatorData&>(node, data);
+}
+
 //-----------------------------------------------------------------------------
 // VARIABLE
 //-----------------------------------------------------------------------------
@@ -158,13 +200,24 @@ template <>
 llvm::Value* visit(Variable const& node, llvmIrTranslatorData& data)
 {
     LOGINFO("paracl: ir translator: variable access: '{}'", node.name());
-    return data.nametable.get(node.name());
+    auto&& variable = data.nametable.get(node.name());
+    if (not variable) throw compiler::exceptions::using_undeclarated_variable_error(node);
+
+    // auto&& variable_status = data.nametable.status(node.name());
+    // auto&& variable_function = compiler::llvm_ir_translator::get_function_of_value(variable);
+    // auto&& current_function = data.current_function->getParent();
+    
+    // if (variable_status == ValueStatus::local && variable_function && variable_function != current_function) {
+    //     throw compiler::exceptions::using_variable_from_parent_function_scope_error(node);
+    // }
+
+    return variable;
 }
 
 template <>
 void visit(Variable const& node, llvmIrTranslatorData& data)
 {
-    (void) visit<Variable, llvm::Value*, llvmIrTranslatorData&>(node, data);
+    std::ignore = visit<Variable, llvm::Value*, llvmIrTranslatorData&>(node, data);
 }
 
 //-----------------------------------------------------------------------------
@@ -175,19 +228,19 @@ llvm::Value* visit(Scan const& node, llvmIrTranslatorData& data)
 {
     LOGINFO("paracl: ir translator: scan expression");
 
-    auto&& temp_var = data.builder.CreateAlloca(data.builder.getInt32Ty(), nullptr, "__scanTmp");
+    auto&& scanf_res_alloca = data.builder.CreateAlloca(data.builder.getInt32Ty(), nullptr, "__scanfResAlloca");
     auto&& fmt = data.builder.CreateGlobalStringPtr("%d", "__scanfFormat");
-    auto&& scanf_args = std::vector<llvm::Value*>{fmt, temp_var};
+    auto&& scanf_args = std::vector<llvm::Value*>{fmt, scanf_res_alloca};
 
     data.builder.CreateCall(data.libc_standart_functions.libc_scanf(), scanf_args, "__scanfExitCode");
 
-    return data.builder.CreateLoad(data.builder.getInt32Ty(), temp_var, "__scanfRes");
+    return data.builder.CreateLoad(data.builder.getInt32Ty(), scanf_res_alloca, "__scanfRes");
 }
 
 template <>
 void visit(Scan const& node, llvmIrTranslatorData& data)
 {
-    (void) visit<Scan, llvm::Value*, llvmIrTranslatorData&>(node, data);
+    std::ignore = visit<Scan, llvm::Value*, llvmIrTranslatorData&>(node, data);
 }
 
 //-----------------------------------------------------------------------------
@@ -212,7 +265,7 @@ llvm::Value* visit(UnaryOperator const& node, llvmIrTranslatorData& data)
         case UnaryOperator::NOT:
         {
             auto&& zero = compiler::llvm_ir_translator::create_null_Int32(data);
-            auto&& cmp = data.builder.CreateICmpEQ(arg, zero, "__tmpUnaryNotValue");
+            auto&& cmp = data.builder.CreateICmpEQ(arg, zero, "__tmpUnaryNotCmpWithZero");
             return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__unaryNot");
         }
         default:
@@ -223,7 +276,7 @@ llvm::Value* visit(UnaryOperator const& node, llvmIrTranslatorData& data)
 template <>
 void visit(UnaryOperator const& node, llvmIrTranslatorData& data)
 {
-    (void) visit<UnaryOperator, llvm::Value*, llvmIrTranslatorData&>(node, data);
+    std::ignore = visit<UnaryOperator, llvm::Value*, llvmIrTranslatorData&>(node, data);
 }
 
 //-----------------------------------------------------------------------------
@@ -239,7 +292,7 @@ llvm::Value* visit(BinaryOperator const& node, llvmIrTranslatorData& data)
     {
         auto&& variable = static_cast<Variable const &>(node.larg());
         auto&& right = generate_expression(node.rarg(), data);
-        data.nametable.set(variable.name(), right);
+        data.nametable.set(variable.name(), right, data.current_scope_status);
         return right;
     }
 
@@ -314,18 +367,17 @@ llvm::Value* visit(BinaryOperator const& node, llvmIrTranslatorData& data)
         case BinaryOperator::MULASGN: right = data.builder.CreateMul (value, right, "__mulAsgnResult"); break;
         case BinaryOperator::DIVASGN: right = data.builder.CreateSDiv(value, right, "__divAsgnResult"); break;
         case BinaryOperator::REMASGN: right = data.builder.CreateSRem(value, right, "__remAsgnResult"); break;
-        default:
-            throw std::runtime_error("Assignment operators should be handled by statement nodes");
+        default: __builtin_unreachable();
     }
 
-    data.nametable.set(name, right);
+    data.nametable.set(name, right, data.current_scope_status);
     return right;
 }
 
 template <>
 void visit(BinaryOperator const& node, llvmIrTranslatorData& data)
 {
-    (void) visit<BinaryOperator, llvm::Value*, llvmIrTranslatorData&>(node, data);
+    std::ignore = visit<BinaryOperator, llvm::Value*, llvmIrTranslatorData&>(node, data);
 }
 
 //-----------------------------------------------------------------------------
@@ -371,7 +423,7 @@ llvm::Value* visit(Print const& node, llvmIrTranslatorData& data)
 template <>
 void visit(Print const& node, llvmIrTranslatorData& data)
 {
-    (void) visit<Print, llvm::Value*, llvmIrTranslatorData&>(node, data);
+    std::ignore = visit<Print, llvm::Value*, llvmIrTranslatorData&>(node, data);
 }
 
 //-----------------------------------------------------------------------------
@@ -514,7 +566,7 @@ llvm::Value* visit(Scope const& node, llvmIrTranslatorData& data)
     for (auto&& it = 0LU, ite = size - 1; it != ite; ++it)
         generate_statement(node[it], data);
 
-    auto&& last = node[size - 1];
+    auto&& last = node.back();
     auto&& return_value = static_cast<llvm::Value*>(nullptr);
 
     if (last.supports<generatable_expression>())
@@ -536,7 +588,7 @@ llvm::Value* visit(Scope const& node, llvmIrTranslatorData& data)
 template <>
 void visit(Scope const& node, llvmIrTranslatorData& data)
 {
-    (void) visit<Scope, llvm::Value*, llvmIrTranslatorData&>(node, data);
+    std::ignore = visit<Scope, llvm::Value*, llvmIrTranslatorData&>(node, data);
 }
 
 //-----------------------------------------------------------------------------
@@ -559,6 +611,8 @@ template <>
 llvm::Value* visit(FunctionDeclaration const & node, llvmIrTranslatorData& data)
 {
     LOGINFO("paracl: ir translator: func decl");
+    auto&& old_status = ValueStatus{data.current_scope_status};
+    data.current_scope_status = ValueStatus::local;
 
     auto&& args = node.args();
     /* all function return int32 */
@@ -572,12 +626,13 @@ llvm::Value* visit(FunctionDeclaration const & node, llvmIrTranslatorData& data)
 
     auto&& function = llvm::Function::Create(std::move(type), llvm::Function::InternalLinkage, mangled_name, data.module);
 
+    auto&& old_function = static_cast<llvm::BasicBlock*>(data.current_function);
     auto&& entry_block = llvm::BasicBlock::Create(data.context,  mangled_name + "-entry", function);
-    data.builder.SetInsertPoint(entry_block);
+    data.set_function(entry_block);
 
     /* set  arguments name and put it in nametable */
     auto&& func_args = function->args(); assert(std::distance(func_args.begin(), func_args.end()) == args.size());
-    
+
     if (not node.name().empty())
         data.functable.declare(node, function);
 
@@ -608,7 +663,9 @@ llvm::Value* visit(FunctionDeclaration const & node, llvmIrTranslatorData& data)
     data.nametable.leave_scope();
 
     /* back into the main */
-    data.builder.SetInsertPoint(data.main_function);
+    data.set_function(old_function);
+
+    data.current_scope_status = old_status;
 
     return function;
 }
@@ -618,7 +675,7 @@ llvm::Value* visit(FunctionDeclaration const & node, llvmIrTranslatorData& data)
 template <>
 void visit(FunctionDeclaration const & node, llvmIrTranslatorData& data)
 {
-    (void) visit<FunctionDeclaration, llvm::Value*, llvmIrTranslatorData&>(node, data);
+    std::ignore = visit<FunctionDeclaration, llvm::Value*, llvmIrTranslatorData&>(node, data);
 }
 
 //-----------------------------------------------------------------------------
@@ -646,13 +703,15 @@ llvm::Value* visit(FunctionCall const & node, llvmIrTranslatorData& data)
 
     auto&& value = data.nametable.get(name);
     if (not value)
-        throw std::runtime_error("Call undeclarated function '" + std::string(node.name()) + "'");
+        throw compiler::exceptions::using_undeclarated_function(node);
 
     auto&& function = llvm::dyn_cast<llvm::Function>(value);
+
+    if (not function)
+        throw compiler::exceptions::using_int_as_function_error(node);
+
     if (function->arg_size() != completed_args.size())
-        throw std::runtime_error("Functoin alias signature mismatch:\n'" + std::string(node.name()) +
-                                 "' expects " + std::to_string(function->arg_size()) +
-                                 " args,\nbut called with " + std::to_string(completed_args.size()));
+        throw compiler::exceptions::function_alias_arguments_mismatch_error(node, function, completed_args);
 
     return data.builder.CreateCall(function, completed_args, name);;
 }
@@ -662,7 +721,7 @@ llvm::Value* visit(FunctionCall const & node, llvmIrTranslatorData& data)
 template <>
 void visit(FunctionCall const & node, llvmIrTranslatorData& data)
 {
-    (void) visit<FunctionCall, llvm::Value*, llvmIrTranslatorData&>(node, data);
+    std::ignore = visit<FunctionCall, llvm::Value*, llvmIrTranslatorData&>(node, data);
 }
 
 //-----------------------------------------------------------------------------
@@ -672,21 +731,21 @@ void visit(FunctionCall const & node, llvmIrTranslatorData& data)
 } /* namespace last::node */
 //-----------------------------------------------------------------------------
 
-SPECIALIZE_CREATE(last::node::Print              , last::node::generatable_statement, last::node::generatable_expression)
-SPECIALIZE_CREATE(last::node::Scan               , last::node::generatable_statement, last::node::generatable_expression)
-SPECIALIZE_CREATE(last::node::Variable           , last::node::generatable_statement, last::node::generatable_expression)
-SPECIALIZE_CREATE(last::node::NumberLiteral      , last::node::generatable_statement, last::node::generatable_expression)
-SPECIALIZE_CREATE(last::node::StringLiteral      ,                                    last::node::generatable_expression)
-SPECIALIZE_CREATE(last::node::UnaryOperator      , last::node::generatable_statement, last::node::generatable_expression)
-SPECIALIZE_CREATE(last::node::BinaryOperator     , last::node::generatable_statement, last::node::generatable_expression)
-SPECIALIZE_CREATE(last::node::While              , last::node::generatable_statement)
-SPECIALIZE_CREATE(last::node::If                 , last::node::generatable_if_statement)
-SPECIALIZE_CREATE(last::node::Else               , last::node::generatable_statement)
-SPECIALIZE_CREATE(last::node::Condition          , last::node::generatable_statement)
-SPECIALIZE_CREATE(last::node::Scope              , last::node::generatable_statement, last::node::generatable_expression)
-SPECIALIZE_CREATE(last::node::FunctionDeclaration, last::node::generatable_statement, last::node::generatable_expression)
-SPECIALIZE_CREATE(last::node::FunctionCall       , last::node::generatable_statement, last::node::generatable_expression)
-SPECIALIZE_CREATE(last::node::Return             , last::node::generatable_statement)
+SPECIALIZE_CREATE(last::node::Print              , last::node::dumpable, last::node::generatable_statement, last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::Scan               , last::node::dumpable, last::node::generatable_statement, last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::Variable           , last::node::dumpable, last::node::generatable_statement, last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::NumberLiteral      , last::node::dumpable, last::node::generatable_statement, last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::StringLiteral      , last::node::dumpable, last::node::generatable_statement, last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::UnaryOperator      , last::node::dumpable, last::node::generatable_statement, last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::BinaryOperator     , last::node::dumpable, last::node::generatable_statement, last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::While              , last::node::dumpable, last::node::generatable_statement)
+SPECIALIZE_CREATE(last::node::If                 , last::node::dumpable, last::node::generatable_if_statement)
+SPECIALIZE_CREATE(last::node::Else               , last::node::dumpable, last::node::generatable_statement)
+SPECIALIZE_CREATE(last::node::Condition          , last::node::dumpable, last::node::generatable_statement)
+SPECIALIZE_CREATE(last::node::Scope              , last::node::dumpable, last::node::generatable_statement, last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::FunctionDeclaration, last::node::dumpable, last::node::generatable_statement, last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::FunctionCall       , last::node::dumpable, last::node::generatable_statement, last::node::generatable_expression)
+SPECIALIZE_CREATE(last::node::Return             , last::node::dumpable, last::node::generatable_statement)
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -704,16 +763,16 @@ void generate_llvm_ir(std::filesystem::path const & ast_text_representation,
 {
     LOGINFO("paracl: ir translator: starting translation from AST to LLVM IR");
 
-    auto&& ast = last::read(ast_text_representation);
+    auto&& ast = last::read(ast_text_representation); last::dump(ast, "ast.dot", "ast.svg");
     auto&& data = llvmIrTranslatorData{ast_text_representation};
 
     LOGINFO("paracl: ir translator: generating main function");
 
     auto&& main_type = llvm::FunctionType::get(data.builder.getInt32Ty(), false);
-    auto&& main_function = llvm::Function::Create(main_type, llvm::Function::ExternalLinkage, "main", data.module);
+    auto&& current_function = llvm::Function::Create(main_type, llvm::Function::ExternalLinkage, "main", data.module);
 
-    auto&& entry_block = llvm::BasicBlock::Create(data.context, "entry", main_function);
-    data.main_function = entry_block;
+    auto&& entry_block = llvm::BasicBlock::Create(data.context, "entry", current_function);
+    data.current_function = entry_block;
     data.builder.SetInsertPoint(entry_block);
 
     last::node::generate_statement(ast.root(), data);

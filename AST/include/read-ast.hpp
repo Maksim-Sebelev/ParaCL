@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <boost/json/object.hpp>
+#include <cstddef>
 #if not defined(THELAST_READ_AST_NO_INCLUDES)
 #include <string_view>
 #include <string>
@@ -47,6 +49,22 @@ UnaryOperator::UnaryOperatorT string_to_un_op(std::string_view op)
     throw std::runtime_error("Unknown unary operator: " + std::string(op));
 }
 
+CodeLocation location_from_json(const boost::json::object& obj)
+{
+    auto&& location_json = obj.at("location").as_object();
+    auto&& file         = static_cast<std::string>(location_json.at("file").as_string());
+    auto&& line_begin   = static_cast<unsigned int>(location_json.at("line_begin").as_int64());
+    auto&& line_end     = static_cast<unsigned int>(location_json.at("line_end").as_int64());
+    auto&& column_begin = static_cast<unsigned int>(location_json.at("column_begin").as_int64());
+    auto&& column_end   = static_cast<unsigned int>(location_json.at("column_end").as_int64());
+    auto&& code_excerpt = static_cast<std::string>(location_json.at("code_excerpt").as_string());
+
+    auto&& location = CodeLocation{};
+    location.set_all(file, line_begin, line_end, column_begin, column_end, code_excerpt);
+
+    return location;
+}
+
 BasicNode node_from_json(const boost::json::value& jv)
 {
     auto&& obj = jv.as_object();
@@ -56,23 +74,27 @@ BasicNode node_from_json(const boost::json::value& jv)
     {
         auto&& value = static_cast<int>(obj.at(traits::get_node_info<NumberLiteral, traits::FIELD, 0>()).as_int64());
         auto&& node = NumberLiteral{std::move(value)};
+        node.location() = location_from_json(obj);
         return create(std::move(node));
     }
     if (kind == traits::get_node_info<StringLiteral, traits::NAME>())
     {
         auto&& value = static_cast<std::string>(obj.at(traits::get_node_info<NumberLiteral, traits::FIELD, 0>()).as_string());
         auto&& node = StringLiteral{std::move(value)};
+        node.location() = location_from_json(obj);
         return create(std::move(node));
     }
     if (kind == traits::get_node_info<Variable, traits::NAME>())
     {
         auto&& value = static_cast<std::string>(obj.at(traits::get_node_info<Variable, traits::FIELD, 0>()).as_string());
         auto&& node = Variable{std::move(value)};
+        node.location() = location_from_json(obj);
         return create(std::move(node));
     }
     if (kind == traits::get_node_info<Scan, traits::NAME>())
     {
         auto&& node = Scan{};
+        node.location() = location_from_json(obj);
         return create(std::move(node));
     }
     if (kind == traits::get_node_info<Print, traits::NAME>())
@@ -81,6 +103,7 @@ BasicNode node_from_json(const boost::json::value& jv)
         for (auto&& arg_jv : obj.at(traits::get_node_info<Print, traits::FIELD, 0>()).as_array())
             args.push_back(node_from_json(arg_jv));
         auto&& node = Print{std::move(args)};
+        node.location() = location_from_json(obj);
         return create(std::move(node));
     }
     if (kind == traits::get_node_info<UnaryOperator, traits::NAME>())
@@ -88,6 +111,7 @@ BasicNode node_from_json(const boost::json::value& jv)
         auto&& type = string_to_un_op(obj.at(traits::get_node_info<UnaryOperator, traits::FIELD, 0>()).as_string());
         auto&& arg = node_from_json(obj.at(traits::get_node_info<UnaryOperator, traits::FIELD, 1>()));
         auto&& node = UnaryOperator{type, std::move(arg)};
+        node.location() = location_from_json(obj);
         return create(std::move(node));
     }
     if (kind == traits::get_node_info<BinaryOperator, traits::NAME>())
@@ -96,6 +120,7 @@ BasicNode node_from_json(const boost::json::value& jv)
         auto&& left = node_from_json(obj.at(traits::get_node_info<BinaryOperator, traits::FIELD, 1>()));
         auto&& right = node_from_json(obj.at(traits::get_node_info<BinaryOperator, traits::FIELD, 2>()));
         auto&& node = BinaryOperator{type, std::move(left), std::move(right)};
+        node.location() = location_from_json(obj);
         return create(std::move(node));
     }
     if (kind == traits::get_node_info<While, traits::NAME>())
@@ -103,6 +128,7 @@ BasicNode node_from_json(const boost::json::value& jv)
         auto&& condition = node_from_json(obj.at(traits::get_node_info<While, traits::FIELD, 0>()));
         auto&& body = node_from_json(obj.at(traits::get_node_info<While, traits::FIELD, 1>()));
         auto&& node = While{std::move(condition), std::move(body)};
+        node.location() = location_from_json(obj);
         return create(std::move(node));
     }
     if (kind == traits::get_node_info<If, traits::NAME>())
@@ -110,12 +136,14 @@ BasicNode node_from_json(const boost::json::value& jv)
         auto&& condition = node_from_json(obj.at(traits::get_node_info<If, traits::FIELD, 0>()));
         auto&& body = node_from_json(obj.at(traits::get_node_info<If, traits::FIELD, 1>()));
         auto&& node = If{std::move(condition), std::move(body)};
+        node.location() = location_from_json(obj);
         return create(std::move(node));
     }
     if (kind == traits::get_node_info<Else, traits::NAME>())
     {
         auto&& body = node_from_json(obj.at(traits::get_node_info<Else, traits::FIELD, 0>()));
         auto&& node = Else{std::move(body)};
+        node.location() = location_from_json(obj);
         return create(std::move(node));
     }
     if (kind == traits::get_node_info<Scope, traits::NAME>())
@@ -124,6 +152,7 @@ BasicNode node_from_json(const boost::json::value& jv)
         for (auto&& stmt_jv : obj.at(traits::get_node_info<Scope, traits::FIELD, 0>()).as_array())
             statements.push_back(node_from_json(stmt_jv));
         auto&& node = Scope{std::move(statements)};
+        node.location() = location_from_json(obj);
         return create(std::move(node));
     }
     if (kind == traits::get_node_info<Condition, traits::NAME>())
@@ -138,11 +167,14 @@ BasicNode node_from_json(const boost::json::value& jv)
             node.set_else(std::move(else_node));
         }
 
+        node.location() = location_from_json(obj);
         return create(std::move(node));
     }
     if (kind == traits::get_node_info<Return, traits::NAME>())
     {
+        auto&& node = Return{};
         auto&& expression = node_from_json(obj.at(traits::get_node_info<Return, traits::FIELD, 0>()));
+        node.location() = location_from_json(obj);
         return create(Return{std::move(expression)});
     }
     if (kind == traits::get_node_info<FunctionDeclaration, traits::NAME>())
@@ -150,13 +182,14 @@ BasicNode node_from_json(const boost::json::value& jv)
         auto&& node = FunctionDeclaration{};
         auto&& name = static_cast<std::string>(obj.at(traits::get_node_info<FunctionDeclaration, traits::FIELD, 0>()).as_string());
         node.set_name(std::move(name));
-    
+
         for (auto&& arg: obj.at(traits::get_node_info<FunctionDeclaration, traits::FIELD, 1>()).as_array())
             node.add_arg(static_cast<std::string>(arg.as_string()));
-        
+
         auto&& body = node_from_json(obj.at(traits::get_node_info<FunctionDeclaration, traits::FIELD, 2>()));
         node.set_body(std::move(body));
 
+        node.location() = location_from_json(obj);
         return create(std::move(node));
     }
     if (kind == traits::get_node_info<FunctionCall, traits::NAME>())
@@ -164,10 +197,11 @@ BasicNode node_from_json(const boost::json::value& jv)
         auto&& node = FunctionCall{};
         auto&& name = static_cast<std::string>(obj.at(traits::get_node_info<FunctionCall, traits::FIELD, 0>()).as_string());
         node.set_name(std::move(name));
-    
+
         for (auto&& arg: obj.at(traits::get_node_info<FunctionCall, traits::FIELD, 1>()).as_array())
             node.add_arg(node_from_json(arg));
-        
+
+        node.location() = location_from_json(obj);
         return create(std::move(node));
     }
 

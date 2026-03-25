@@ -2,8 +2,9 @@ module;
 
 //---------------------------------------------------------------------------------------------------------------
 
-#include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Module.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/GlobalVariable.h>
 
 #include <ranges>
 #include <stdexcept>
@@ -21,21 +22,25 @@ module;
 export module nametable;
 
 //---------------------------------------------------------------------------------------------------------------
-
-namespace compiler::llvm_ir_translator::nametable
+namespace compiler::llvm_ir_translator
 {
+//---------------------------------------------------------------------------------------------------------------
+
+export
+enum ValueStatus { global, local };
 
 //---------------------------------------------------------------------------------------------------------------
 
 export class Nametable final
 {
   private:
+    llvm::Module& module_;
     llvm::IRBuilder<> &builder_;
 
-    std::vector<std::unordered_map<std::string_view, llvm::Value *>> scopes_;
+    std::vector<std::unordered_map<std::string_view, std::pair<llvm::Value *, ValueStatus>>> scopes_;
 
     llvm::Value *lookup_(std::string_view name);
-    void declare_(std::string_view name, llvm::Value * = nullptr);
+    void declare_(std::string_view name, llvm::Value *, ValueStatus status);
 
   private:
     static bool is_function(llvm::Value const* value)
@@ -44,15 +49,17 @@ export class Nametable final
     }
 
   public:
-    Nametable(llvm::IRBuilder<> &builder);
+    Nametable(llvm::Module& module, llvm::IRBuilder<> &builder);
 
     void new_scope();
     void leave_scope();
 
     llvm::Value *get(std::string_view name);
 
-    void set(std::string_view name, llvm::Value *value);
+    void set(std::string_view name, llvm::Value *value, ValueStatus status = local);
     void force_declare(std::string_view name, llvm::Value *value);
+    ValueStatus status(std::string_view name) const;
+    bool from_current_scope(std::string_view name) const;
 
     friend void dump(Nametable const & nt)
     {
@@ -61,7 +68,7 @@ export class Nametable final
         for (auto&& scope: nt.scopes_)
         {
             for (auto&& name: scope)
-                std::cout << "\t(" << name.first << ", " << name.second->getType()->getTypeID() << ")" << std::endl;
+                std::cout << "\t(" << name.first << ", " << name.second.first->getType()->getTypeID() << ")" << std::endl;
             std::cout << std::endl;;
         }
         std::cout << "}" << std::endl;
@@ -74,8 +81,8 @@ export void dump(Nametable const &);
 
 //---------------------------------------------------------------------------------------------------------------
 
-Nametable::Nametable(llvm::IRBuilder<> &builder)
-    : builder_(builder), scopes_(1 /* global scope */)
+Nametable::Nametable(llvm::Module& module, llvm::IRBuilder<> &builder)
+    : module_(module), builder_(builder), scopes_(1 /* global scope */)
 {
 }
 
@@ -108,7 +115,7 @@ llvm::Value *Nametable::get(std::string_view name)
 
 //---------------------------------------------------------------------------------------------------------------
 
-void Nametable::set(std::string_view name, llvm::Value *value)
+void Nametable::set(std::string_view name, llvm::Value *value, ValueStatus status)
 {
     LOGINFO("paracl: compiler: nametable: set \"{}\"", name);
 
@@ -116,7 +123,7 @@ void Nametable::set(std::string_view name, llvm::Value *value)
         throw std::runtime_error("cannot set '" + std::string(name) + "': no active scopes");
 
     auto&& var = lookup_(name);
-    if (not var) return declare_(name, value);
+    if (not var) return declare_(name, value, status);
 
     if (is_function(value))
     {
@@ -126,15 +133,40 @@ void Nametable::set(std::string_view name, llvm::Value *value)
         {
             auto&& found = scope.find(name);
             if (found == scope.end()) continue;
-            found->second = value;
+            found->second.first = value;
+            found->second.second = status;
         }
     
         return;
     }
 
-    /* if (not is_function(value))*/
-
     builder_.CreateStore(value, var);
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+ValueStatus Nametable::status(std::string_view name) const
+{
+    for (auto&& scope : scopes_ | std::views::reverse)
+    {
+        auto&& found = scope.find(name);
+        if (found == scope.end()) continue;
+        return found->second.second;
+    }
+
+#if defined(NDEBUG)
+    __builtin_unreachable();
+#endif /* defined(NDEBUG) */
+
+    throw std::runtime_error("requests status of undeclarated variable '" + std::string(name) + "'");
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+bool Nametable::from_current_scope(std::string_view name) const
+{
+    if (scopes_.empty()) return false;
+    return (scopes_.back().find(name) != scopes_.back().end());
 }
 
 // private
@@ -148,7 +180,7 @@ llvm::Value *Nametable::lookup_(std::string_view name)
     {
         auto&& found = scope.find(name);
         if (found == scope.end()) continue;
-        return found->second;
+        return found->second.first;
     }
 
     return nullptr;
@@ -156,7 +188,7 @@ llvm::Value *Nametable::lookup_(std::string_view name)
 
 //---------------------------------------------------------------------------------------------------------------
 
-void Nametable::declare_(std::string_view name, llvm::Value *value)
+void Nametable::declare_(std::string_view name, llvm::Value *value, ValueStatus status)
 {
     LOGINFO("paracl: compiler: nametable: declare_ \"{}\"", name);
 
@@ -165,13 +197,20 @@ void Nametable::declare_(std::string_view name, llvm::Value *value)
 
     if (is_function(value))
     {
-        scopes_.back()[name] = value;
+        scopes_.back()[name].first = value;
         return;
     }
 
-    auto&& variable = (scopes_.back()[name] = builder_.CreateAlloca(value->getType(), nullptr, name));
+    auto&& variable = scopes_.back()[name];
 
-    builder_.CreateStore(value, variable);
+    if (status == local)
+        variable.first = builder_.CreateAlloca(value->getType(), nullptr, name);
+    else
+        variable.first = new llvm::GlobalVariable(module_, value->getType(), false, llvm::GlobalValue::InternalLinkage, llvm::Constant::getNullValue(value->getType()), name);
+
+    variable.second = status;
+
+    builder_.CreateStore(value, variable.first);
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -186,10 +225,10 @@ void Nametable::force_declare(std::string_view name, llvm::Value *value)
     if (scopes_.back().find(name) != scopes_.back().end())
         throw std::runtime_error("cannot declare_ '" + std::string(name) + "', cause it already exists in current scope");
 
-    declare_(name, value);
+    declare_(name, value, ValueStatus::local);
 }
 
 //---------------------------------------------------------------------------------------------------------------
-} /* namespace compiler::llvm_ir_translator::nametable */
+} /* namespace compiler::llvm_ir_translator */
 //---------------------------------------------------------------------------------------------------------------
 

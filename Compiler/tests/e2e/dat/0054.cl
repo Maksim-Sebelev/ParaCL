@@ -14,7 +14,7 @@ func(begin, end) : fibonacci
         print "fib(", begin, ") = ", fibonacci(begin);
         begin += 1;
     }
-    0;
+    0; // just chill
 }
 
 fibonacci(0, 40);

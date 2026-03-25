@@ -1,5 +1,6 @@
 module;
 
+#include <sstream>
 #include <memory>
 #include <filesystem>
 #include <fstream>
@@ -50,6 +51,16 @@ void dump_and_link_with_parent(std::ofstream& os, unique_node_id_t parent, Basic
 {
     dump(node, get_node_unique_id(node), os);
     link_nodes(os, parent, get_node_unique_id(node), label);
+}
+
+std::string dump_code_location(last::node::CodeLocation const & location)
+{
+    auto&& dump = std::ostringstream{};
+    dump << location.file()
+         << ":" << location.line_begin()
+         << ":" << location.column_begin();
+
+    return dump.str();
 }
 
 } /* namespace graphic_dump */
@@ -117,7 +128,7 @@ void visit([[maybe_unused]] Scan const& node, unique_node_id_t unique_node_id, s
 template <>
 void visit(Variable const& node, unique_node_id_t unique_node_id, std::ofstream& os)
 {
-    std::string label = "Variable: " + std::string(node.name());
+    std::string label = "Variable: " + std::string(node.name()) + "\n" + graphic_dump::dump_code_location(node.location());
     graphic_dump::create_node(os, unique_node_id,
                               label, "style=filled, fillcolor=\"lightblue\"");
 }
@@ -125,14 +136,14 @@ void visit(Variable const& node, unique_node_id_t unique_node_id, std::ofstream&
 template <>
 void visit(NumberLiteral const& node, unique_node_id_t unique_node_id, std::ofstream& os)
 {
-    std::string label = "Number: " + std::to_string(node.value());
+    std::string label = "Number Literal: " + std::to_string(node.value()) + "\n" + graphic_dump::dump_code_location(node.location());
     graphic_dump::create_node(os, unique_node_id, label);
 }
 
 template <>
 void visit(StringLiteral const& node, unique_node_id_t unique_node_id, std::ofstream& os)
 {
-    std::string label = "String: \\\"" + std::string(node.value()) + "\\\"";
+    std::string label = "String Literal: \\\"" + std::string(node.value()) + "\\\"";
     graphic_dump::create_node(os, unique_node_id, label);
 }
 
@@ -146,7 +157,7 @@ void visit(UnaryOperator const& node, unique_node_id_t unique_node_id, std::ofst
         case UnaryOperator::PLUS:  op_name = "+"; break;
         case UnaryOperator::NOT:   op_name = "not"; break;
     }
-    std::string label = "Unary: " + op_name;
+    std::string label = "Unary Operator" + op_name + "\n" + graphic_dump::dump_code_location(node.location());
     graphic_dump::create_node(os, unique_node_id, label, "style=filled, fillcolor=\"lightyellow\"");
 
     graphic_dump::dump_and_link_with_parent(os, unique_node_id, node.arg(), "arg");
@@ -155,7 +166,7 @@ void visit(UnaryOperator const& node, unique_node_id_t unique_node_id, std::ofst
 template <>
 void visit(BinaryOperator const& node, unique_node_id_t unique_node_id, std::ofstream& os)
 {
-    std::string label = "Binary: ";
+    std::string label = "Binary Operator ";
     switch (node.type())
     {
         case BinaryOperator::AND:     label += "&&"; break;
@@ -179,6 +190,8 @@ void visit(BinaryOperator const& node, unique_node_id_t unique_node_id, std::ofs
         case BinaryOperator::REMASGN: label += "%="; break;
         default:                      label += "??"; break;
     }
+
+    label += "\n" + graphic_dump::dump_code_location(node.location());
 
     graphic_dump::create_node(os, unique_node_id, label, "style=filled, fillcolor=\"lightyellow\"");
 
@@ -250,6 +263,7 @@ void visit(FunctionDeclaration const& node, unique_node_id_t unique_node_id, std
             label += (", " + args[it]);
     }
     label += ")'";
+    label += "\n" + graphic_dump::dump_code_location(node.location());
     graphic_dump::create_node(os, unique_node_id, label, "style=filled, fillcolor=\"greenyellow\"");
     graphic_dump::dump_and_link_with_parent(os, unique_node_id, node.body(), "body");
 }
@@ -259,7 +273,7 @@ void visit(FunctionCall const& node, unique_node_id_t unique_node_id, std::ofstr
 {
     auto&& label = "call: '" + std::string(node.name()) + "'";
     graphic_dump::create_node(os, unique_node_id, label, "style=filled, fillcolor=\"indianred2\"");
-
+    label += "\n" + graphic_dump::dump_code_location(node.location());
     auto&& args = node.args();
     if (args.size() != 0)
     {

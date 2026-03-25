@@ -47,6 +47,25 @@ message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 # =================================================================================================
+
+function(add_llvm_to_target target)
+    target_compile_definitions(${target}
+    PUBLIC
+        ${LLVM_DEFINITIONS}
+    )
+    target_include_directories(${target}
+    PUBLIC
+        ${LLVM_INCLUDE_DIRS}
+    )
+    target_link_libraries(${target}
+    PUBLIC
+        LLVM
+        ${LLVM_LIBRARIES}
+    )
+endfunction(add_llvm_to_target )
+
+
+# =================================================================================================
 # compiler options
 
 
@@ -66,21 +85,33 @@ target_sources(${COMPILER_OPTIONS_LIB}
       ${COMPILER_OPTIONS_SRC}
 )
 
-target_compile_definitions(${COMPILER_OPTIONS_LIB}
-  PRIVATE
-    ${LLVM_DEFINITIONS}
+add_llvm_to_target(${COMPILER_OPTIONS_LIB})
+
+# =================================================================================================
+# compiler exceptions
+
+set(COMPILER_EXCEPTIONS_LIB exceptions)
+add_library(${COMPILER_EXCEPTIONS_LIB} EXCLUDE_FROM_ALL)
+
+set(COMPILER_EXCEPTIONS_SRC_DIR ${COMPILE_SRC_DIR}/exceptions)
+set(COMPILER_EXCEPTIONS_SRC
+    ${COMPILER_EXCEPTIONS_SRC_DIR}/exceptions.cppm
 )
 
-target_include_directories(${COMPILER_OPTIONS_LIB}
-  PRIVATE
-    ${LLVM_INCLUDE_DIRS}
+target_sources(${COMPILER_EXCEPTIONS_LIB}
+  PUBLIC
+    FILE_SET CXX_MODULES
+    TYPE CXX_MODULES
+    FILES
+      ${COMPILER_EXCEPTIONS_SRC}
 )
 
-target_link_libraries(${COMPILER_OPTIONS_LIB}
+target_link_libraries(${COMPILER_EXCEPTIONS_LIB}
   PRIVATE
-    ${LLVM_LIBRARIES}
+    TheLast::TheLast
 )
 
+add_llvm_to_target(${COMPILER_EXCEPTIONS_LIB})
 
 # =================================================================================================
 # nametable library for compiler
@@ -102,21 +133,12 @@ target_sources(${COMPILER_NAMETABLE_LIB}
         ${COMPILER_NAMETABLE_SRC}
 )
 
-target_compile_definitions(${COMPILER_NAMETABLE_LIB}
-    PRIVATE
-        ${LLVM_DEFINITIONS}
-)
-
-target_include_directories(${COMPILER_NAMETABLE_LIB}
-    PRIVATE
-        ${LLVM_INCLUDE_DIRS}
-)
-
 target_link_libraries(${COMPILER_NAMETABLE_LIB}
     PUBLIC
-        ${LLVM_LIBRARIES}
         TheLast::TheLast
 )
+
+add_llvm_to_target(${COMPILER_NAMETABLE_LIB})
 
 # =================================================================================================
 # libc standard functions library
@@ -137,15 +159,7 @@ target_sources(${LIBC_STANDART_FUNCTIONS_LIB}
         ${LIBC_STANDART_FUNCTIONS_SRC}
 )
 
-target_compile_definitions(${LIBC_STANDART_FUNCTIONS_LIB}
-    PRIVATE
-        ${LLVM_DEFINITIONS}
-)
-
-target_include_directories(${LIBC_STANDART_FUNCTIONS_LIB}
-    PRIVATE
-        ${LLVM_INCLUDE_DIRS}
-)
+add_llvm_to_target(${LIBC_STANDART_FUNCTIONS_LIB})
 
 # =================================================================================================
 # llvm ir translator library
@@ -169,23 +183,19 @@ target_sources(${LLVM_IR_TRANSLATOR_LIB}
 target_link_libraries(${LLVM_IR_TRANSLATOR_LIB}
 PRIVATE
     TheLast::TheLast
-    LLVM
     ${COMPILER_NAMETABLE_LIB}
     ${LIBC_STANDART_FUNCTIONS_LIB}
     ${LLVM_LIBRARIES}
+    ${COMPILER_EXCEPTIONS_LIB}
 )
 
-target_compile_definitions(${LLVM_IR_TRANSLATOR_LIB}
-    PRIVATE
-        ${LLVM_DEFINITIONS}
-)
 
 target_include_directories(${LLVM_IR_TRANSLATOR_LIB}
     PUBLIC
         ${INC_DIR}
-    PRIVATE
-        ${LLVM_INCLUDE_DIRS}
 )
+
+add_llvm_to_target(${LLVM_IR_TRANSLATOR_LIB})
 
 # =================================================================================================
 # compiler library (main compiler logic)
@@ -225,16 +235,16 @@ add_executable(paracl-compiler
 )
 
 target_link_libraries(paracl-compiler
-    PRIVATE
-        ${EXECUTABLE_BUILDER_LIB}
-        ${COMPILER_LIB}
-        ${LLVM_IR_TRANSLATOR_LIB}
+PRIVATE
+    ${EXECUTABLE_BUILDER_LIB}
+    ${COMPILER_LIB}
+    ${LLVM_IR_TRANSLATOR_LIB}
+    ${COMPILER_EXCEPTIONS_LIB}
 )
 
 target_include_directories(paracl-compiler
-    PRIVATE
-        ${INC_DIR}
-        ${LLVM_INCLUDE_DIRS}
+PRIVATE
+    ${INC_DIR}
 )
 
 # =================================================================================================

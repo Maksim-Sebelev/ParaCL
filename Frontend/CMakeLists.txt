@@ -13,7 +13,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-
 find_package(Boost REQUIRED COMPONENTS json)
 # find_package(Boost REQUIRED COMPONENTS json 1.70)
 
@@ -47,8 +46,9 @@ add_custom_command(
     COMMAND ${BISON_EXECUTABLE}
         -d
         -o ${BISON_OUTPUT_DIR}/${BISON_PARSER_CPP_OUT}
-        ${BISON_INPUT_FILE}
         # -Wcounterexamples
+        -v
+        ${BISON_INPUT_FILE}
     DEPENDS ${BISON_INPUT_FILE}
     COMMENT "Generating Bison parser (${BISON_PARSER_CPP_OUT})"
     VERBATIM
@@ -60,7 +60,6 @@ target_sources(parser
     PRIVATE
         ${BISON_OUTPUT_DIR}/${BISON_PARSER_CPP_OUT}
         ${PARSER_SRC_DIR}/parse_error.cpp
-        ${PARSER_SRC_DIR}/check_variables.cpp
 )
 
 target_include_directories(parser

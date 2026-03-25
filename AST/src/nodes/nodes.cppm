@@ -12,8 +12,109 @@ export module ast_nodes;
 
 export import node_type_erasure;
 
+//--------------------------------------------------------------------------------------------------------------------------------------
 namespace last::node
 {
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+export
+class CodeLocation final
+{
+private:
+    using code_place_uint_t = unsigned int;
+private:
+    std::string file_;
+
+    code_place_uint_t line_begin_   = 0;
+    code_place_uint_t line_end_     = 0;
+    code_place_uint_t column_begin_ = 0;
+    code_place_uint_t column_end_   = 0;
+
+    std::string       code_excerpt_ = "";
+
+public: /* getters */
+    std::string_view file() const noexcept
+    { return file_; }
+
+    code_place_uint_t column_begin() const noexcept
+    { return column_begin_; }
+    code_place_uint_t column_end() const noexcept
+    { return column_end_; }
+    code_place_uint_t line_begin() const noexcept
+    { return line_begin_; }
+    code_place_uint_t line_end() const noexcept
+    { return line_end_; }
+
+    std::string_view code_excerpt() const & noexcept
+    { return code_excerpt_;  }
+
+    std::string&& code_excerpt() && noexcept
+    { return std::move(code_excerpt_); }
+
+public: /* setters */
+    void set_file(std::string_view file)
+    { file_ = file; }
+
+    void set_line_begin(code_place_uint_t line_begin) noexcept
+    { line_begin_ = line_begin; }
+
+    void set_line_end(code_place_uint_t line_end) noexcept
+    { line_end_ = line_end; }
+
+    void set_column_begin(code_place_uint_t column_begin) noexcept
+    { column_begin_ = column_begin; }
+
+    void set_column_end(code_place_uint_t column_end) noexcept
+    { column_end_ = column_end; }
+
+    void set_code_excerpt(std::string_view code_excerpt) 
+    { code_excerpt_ = code_excerpt; }
+
+    void set_position(code_place_uint_t line_begin, code_place_uint_t line_end,
+                                code_place_uint_t column_begin, code_place_uint_t column_end) noexcept
+    {
+        line_begin_ = line_begin;
+        line_end_ = line_end;
+        column_begin_ = column_begin;
+        column_end_ = column_end;
+    }
+
+    void set_all(std::string_view file, code_place_uint_t line_begin, code_place_uint_t line_end,
+                           code_place_uint_t column_begin, code_place_uint_t column_end,
+                           std::string_view code_excerpt)
+    {
+        file_ = file;
+        line_begin_ = line_begin;
+        line_end_ = line_end;
+        column_begin_ = column_begin;
+        column_end_ = column_end;
+        code_excerpt_ = code_excerpt;
+    }
+
+public:
+    template <typename... Args>
+    CodeLocation(Args...)
+    {
+        static_assert(false, "using unsecialized CodeLocation tmeplate constructor");
+    }
+
+    template <>
+    CodeLocation()
+    {}
+
+    template <>
+    CodeLocation(std::string_view file, code_place_uint_t lb, code_place_uint_t le, code_place_uint_t cb, code_place_uint_t ce) :
+        file_(file),
+        line_begin_(lb), line_end_(le), column_begin_(cb), column_end_(ce),
+        code_excerpt_()
+    {}
+    template <>
+    CodeLocation(std::string_view file, code_place_uint_t lb, code_place_uint_t le, code_place_uint_t cb, code_place_uint_t ce, std::string_view code_excerpt) :
+        file_(file),
+        line_begin_(lb), line_end_(le), column_begin_(cb), column_end_(ce),
+        code_excerpt_(code_excerpt)
+    {}
+};
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
@@ -26,19 +127,32 @@ public:
     using std::vector<BasicNode>::begin;
     using std::vector<BasicNode>::end;
     using std::vector<BasicNode>::size;
-    using std::vector<BasicNode>::back;
     using std::vector<BasicNode>::operator[];
+    using std::vector<BasicNode>::back;
 
 public:
     Scope() = default;
+
     Scope(size_t size) : std::vector<BasicNode>(size)
     {}
 
-    Scope(std::vector<BasicNode>&& nodes) : std::vector<BasicNode>(nodes)
+    Scope(std::vector<BasicNode>&& nodes) : std::vector<BasicNode>(std::move(nodes))
     {}
 
-    Scope(std::initializer_list<BasicNode> il) : std::vector<BasicNode>(il)
+    Scope(std::vector<BasicNode> const & nodes) : std::vector<BasicNode>(nodes)
     {}
+
+    Scope(std::initializer_list<BasicNode> il) : std::vector<BasicNode>(std::move(il))
+    {}
+
+private:
+    mutable CodeLocation location_;
+public:
+    CodeLocation & location() & noexcept
+    { return location_; }
+
+    CodeLocation const & location() const & noexcept
+    { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -49,14 +163,20 @@ class Variable final
 private:
     std::string name_;
 public:
-    Variable(std::string&& name) : name_(std::move(name)) /* variale must own his value */
+    Variable(std::string&& name) : name_(std::move(name)) /* variale must own his name */
     {}
 public:
     std::string_view name() const & noexcept
     { return name_; }
-    
-    std::string & name() & noexcept
-    { return name_; }
+
+private:
+    mutable CodeLocation location_;
+public:
+    CodeLocation & location() & noexcept
+    { return location_; }
+
+    CodeLocation const & location() const & noexcept
+    { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -78,8 +198,17 @@ public:
     Print() = default;
     Print(std::vector<BasicNode>&& args) : std::vector<BasicNode>(std::move(args))
     {}
-    Print(std::initializer_list<BasicNode> il) : std::vector<BasicNode>(il)
-    {}    
+    Print(std::initializer_list<BasicNode> il) : std::vector<BasicNode>(std::move(il))
+    {}
+
+private:
+    mutable CodeLocation location_;
+public:
+    CodeLocation & location() & noexcept
+    { return location_; }
+
+    CodeLocation const & location() const & noexcept
+    { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -89,6 +218,15 @@ class Scan final
 {
 public:
     Scan() = default;
+
+private:
+    mutable CodeLocation location_;
+public:
+    CodeLocation & location() & noexcept
+    { return location_; }
+
+    CodeLocation const & location() const & noexcept
+    { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -117,9 +255,18 @@ public:
 
     BasicNode const &arg() const & noexcept
     { return arg_; }
-    
+
     BasicNode &arg() & noexcept
     { return arg_; }
+
+private:
+    mutable CodeLocation location_;
+public:
+    CodeLocation & location() & noexcept
+    { return location_; }
+
+    CodeLocation const & location() const & noexcept
+    { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -176,16 +323,25 @@ public:
 public:
     BinaryOperatorT type() const noexcept
     { return type_; }
-    
+
     BasicNode const &larg() const & noexcept
     { return larg_; }
     BasicNode &larg() & noexcept
     { return larg_; }
-    
+
     BasicNode const &rarg() const & noexcept
     { return rarg_; }
     BasicNode &rarg() & noexcept
     { return rarg_; }
+
+private:
+    mutable CodeLocation location_;
+public:
+    CodeLocation & location() & noexcept
+    { return location_; }
+
+    CodeLocation const & location() const & noexcept
+    { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -202,15 +358,21 @@ public:
 public:
     int value() const noexcept
     { return value_; };
-    
-    int value() noexcept
-    { return value_; };
 
     NumberLiteral(const NumberLiteral& other) : value_(other.value_)
     {}
 
     NumberLiteral(NumberLiteral&& other): value_(other.value_)
     {}
+
+private:
+    mutable CodeLocation location_;
+public:
+    CodeLocation & location() & noexcept
+    { return location_; }
+
+    CodeLocation const & location() const & noexcept
+    { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -226,7 +388,16 @@ public:
     {}
 public:
     std::string_view value() const & noexcept
-    { return value_; }    
+    { return value_; }
+
+private:
+    mutable CodeLocation location_;
+public:
+    CodeLocation & location() & noexcept
+    { return location_; }
+
+    CodeLocation const & location() const & noexcept
+    { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -260,11 +431,14 @@ public:
     { return condition_; }
     BasicNode &condition() & noexcept
     { return condition_; }
-    
+
     BasicNode const &body() const & noexcept
-    { return body_; };
+    { return body_; }
     BasicNode &body() & noexcept
-    { return body_; };
+    { return body_; }
+
+protected:
+    mutable CodeLocation location_;
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -274,6 +448,14 @@ class While final : public ConditionWithBody
 {
 public:
     using ConditionWithBody::ConditionWithBody;
+
+private:
+public:
+    CodeLocation & location() & noexcept
+    { return location_; }
+
+    CodeLocation const & location() const & noexcept
+    { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -282,7 +464,14 @@ export
 class If final : public ConditionWithBody
 {
 public:
-    using ConditionWithBody::ConditionWithBody;    
+    using ConditionWithBody::ConditionWithBody;
+
+public:
+    CodeLocation & location() & noexcept
+    { return location_; }
+
+    CodeLocation const & location() const & noexcept
+    { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -303,7 +492,7 @@ public:
 public:
     BasicNode const &body() const & noexcept
     { return body_; }
-    
+
     BasicNode &body() & noexcept
     { return body_; }
 
@@ -311,6 +500,15 @@ public:
 
 private:
     Else() = default;
+
+private:
+    mutable CodeLocation location_;
+public:
+    CodeLocation & location() & noexcept
+    { return location_; }
+
+    CodeLocation const & location() const & noexcept
+    { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -360,6 +558,15 @@ public:
     { return else_; }
     BasicNode &get_else() & noexcept
     { return else_; }
+
+private:
+    mutable CodeLocation location_;
+public:
+    CodeLocation & location() & noexcept
+    { return location_; }
+
+    CodeLocation const & location() const & noexcept
+    { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -383,6 +590,15 @@ public:
     Return(BasicNode const & expression) :
         expression_(expression)
     {}
+
+private:
+    mutable CodeLocation location_;
+public:
+    CodeLocation & location() & noexcept
+    { return location_; }
+
+    CodeLocation const & location() const & noexcept
+    { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -448,6 +664,15 @@ FunctionDeclaration(std::string&& name, std::vector<std::string>&& args, BasicNo
 
     void set_body(BasicNode const & new_body)
     { body_ = new_body; }
+
+private:
+    mutable CodeLocation location_;
+public:
+    CodeLocation & location() & noexcept
+    { return location_; }
+
+    CodeLocation const & location() const & noexcept
+    { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -486,6 +711,15 @@ public:
 
     void set_name(std::string&& name)
     { name_ = std::move(name); }
+
+private:
+    mutable CodeLocation location_;
+public:
+    CodeLocation & location() & noexcept
+    { return location_; }
+
+    CodeLocation const & location() const & noexcept
+    { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------

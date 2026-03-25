@@ -27,6 +27,25 @@ auto write(BasicNode const & node)
     return visit<boost::json::value>(node);
 }
 
+
+boost::json::value write(const CodeLocation& location)
+{
+    auto&& obj = boost::json::object{};
+    obj["file"] = location.file();
+    obj["line_begin"] = location.line_begin();
+    obj["line_end"] = location.line_end();
+    obj["column_begin"] = location.column_begin();
+    obj["column_end"] = location.column_end();
+    obj["code_excerpt"] = location.code_excerpt();
+
+    return obj;
+}
+
+void set_location(boost::json::object& obj, const CodeLocation& location)
+{
+    obj["location"] = write(location);
+}
+
 namespace visit_specializations
 {
 
@@ -36,6 +55,7 @@ boost::json::value visit(const NumberLiteral& node)
     auto&& obj = boost::json::object{};
     obj["kind"]  = traits::get_node_info<NumberLiteral, traits::NAME>();
     obj[traits::get_node_info<NumberLiteral, traits::FIELD, 0>()] = node.value();
+    set_location(obj, node.location());
     return obj;
 }
 
@@ -45,6 +65,8 @@ boost::json::value visit(const StringLiteral& node)
     auto&& obj = boost::json::object{};
     obj["kind"]  = traits::get_node_info<StringLiteral, traits::NAME>();
     obj[traits::get_node_info<StringLiteral, traits::FIELD, 0>()] = std::string{node.value()};
+    set_location(obj, node.location());
+
     return obj;
 }
 
@@ -54,14 +76,18 @@ boost::json::value visit(const Variable& node)
     auto&& obj = boost::json::object{};
     obj["kind"] = traits::get_node_info<Variable, traits::NAME>();
     obj[traits::get_node_info<Variable, traits::FIELD, 0>()] = std::string{node.name()};
+    set_location(obj, node.location());
+
     return obj;
 }
 
 template <>
-boost::json::value visit(const Scan& /*node*/)
+boost::json::value visit(const Scan& node)
 {
     auto&& obj = boost::json::object{};
     obj["kind"] = traits::get_node_info<Scan, traits::NAME>();
+    set_location(obj, node.location());
+
     return obj;
 }
 
@@ -76,6 +102,8 @@ boost::json::value visit(const Print& node)
         args_arr.emplace_back(write(arg));
 
     obj[traits::get_node_info<Print, traits::FIELD, 0>()] = std::move(args_arr);
+    set_location(obj, node.location());
+
     return obj;
 }
 
@@ -94,6 +122,8 @@ boost::json::value visit(const UnaryOperator& node)
     }
     obj[traits::get_node_info<UnaryOperator, traits::FIELD, 0>()] = op;
     obj[traits::get_node_info<UnaryOperator, traits::FIELD, 1>()] = write(node.arg());
+    set_location(obj, node.location());
+
     return obj;
 }
 
@@ -130,6 +160,8 @@ boost::json::value visit(const BinaryOperator& node)
     obj[traits::get_node_info<BinaryOperator, traits::FIELD, 0>()] = op;
     obj[traits::get_node_info<BinaryOperator, traits::FIELD, 1>()] = write(node.larg());
     obj[traits::get_node_info<BinaryOperator, traits::FIELD, 2>()] = write(node.rarg());
+    set_location(obj, node.location());
+
     return obj;
 }
 
@@ -140,6 +172,8 @@ boost::json::value visit(const While& node)
     obj["kind"]      = traits::get_node_info<While, traits::NAME>();
     obj[traits::get_node_info<While, traits::FIELD, 0>()] = write(node.condition());
     obj[traits::get_node_info<While, traits::FIELD, 1>()] = write(node.body());
+    set_location(obj, node.location());
+
     return obj;
 }
 
@@ -150,6 +184,8 @@ boost::json::value visit(const If& node)
     obj["kind"]      = traits::get_node_info<If, traits::NAME>();
     obj[traits::get_node_info<If, traits::FIELD, 0>()] = write(node.condition());
     obj[traits::get_node_info<If, traits::FIELD, 1>()] = write(node.body());
+    set_location(obj, node.location());
+
     return obj;
 }
 
@@ -159,6 +195,8 @@ boost::json::value visit(const Else& node)
     auto&& obj = boost::json::object{};
     obj["kind"] = traits::get_node_info<Else, traits::NAME>();
     obj[traits::get_node_info<Else, traits::FIELD, 0>()] = write(node.body());
+    set_location(obj, node.location());
+
     return obj;
 }
 
@@ -177,6 +215,8 @@ boost::json::value visit(const Condition& node)
     if (node.has_else())
         obj[traits::get_node_info<Condition, traits::FIELD, 1>()] = write(node.get_else());
 
+    set_location(obj, node.location());
+
     return obj;
 }
 
@@ -192,6 +232,8 @@ boost::json::value visit(const Scope& node)
         stmts.emplace_back(write(stmt));
 
     obj[traits::get_node_info<Scope, traits::FIELD, 0>()] = std::move(stmts);
+    set_location(obj, node.location());
+
     return obj;
 }
 
@@ -202,6 +244,8 @@ boost::json::value visit(const Return& node)
     obj["kind"] = traits::get_node_info<Return, traits::NAME>();
 
     obj[traits::get_node_info<Return, traits::FIELD, 0>()] = write(node.expression());
+    set_location(obj, node.location());
+
     return obj;
 }
 
@@ -222,6 +266,8 @@ boost::json::value visit(const FunctionDeclaration& node)
     obj[traits::get_node_info<FunctionDeclaration, traits::FIELD, 1>()] = std::move(args);
 
     obj[traits::get_node_info<FunctionDeclaration, traits::FIELD, 2>()] = write(node.body());
+    set_location(obj, node.location());
+
     return obj;
 }
 
@@ -239,6 +285,8 @@ boost::json::value visit(const FunctionCall& node)
         args.push_back(write(arg));
 
     obj[traits::get_node_info<FunctionCall, traits::FIELD, 1>()] = std::move(args);
+
+    set_location(obj, node.location());
 
     return obj;
 }

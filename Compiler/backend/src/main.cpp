@@ -20,12 +20,12 @@ int main(int argc, char* argv[]) try
 }
 catch (std::exception const & e)
 {
-    std::cerr << "Exception cathched: " << e.what() << "\n";
+    std::cerr << e.what() << "\n";
     return 1;
 }
 catch (...)
 {
-    std::cerr << "Undefined exceptions catched.\n";
+    std::cerr << "Undefined error.\n";
     return 1;
 }
 

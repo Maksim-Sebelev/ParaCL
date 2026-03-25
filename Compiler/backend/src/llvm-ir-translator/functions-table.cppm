@@ -122,7 +122,7 @@ private:
 public:
     static std::string mangle_name(std::string_view base_name, declaration_args_t const & args)
     {
-        return "_" + std::string(base_name) + "_" + std::to_string(args.args_quantity());
+        return "__" + std::string(base_name) + "_" + std::to_string(args.args_quantity());
     }
 
 public:

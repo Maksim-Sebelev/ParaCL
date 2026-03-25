@@ -45,11 +45,11 @@ int main(int argc, char* argv[]) try
 }
 catch (std::exception const & e)
 {
-    std::cerr << "Exception catched: " << e.what() << "\n";
+    std::cerr << "paracl: error: " << e.what() << "\n";
     return EXIT_FAILURE;
 }
 catch(...)
 {
-    std::cerr << "Undefined exception.\n";
+    std::cerr << "Undefined error.\n";
     return EXIT_FAILURE;
 }

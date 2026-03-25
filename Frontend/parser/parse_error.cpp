@@ -15,7 +15,7 @@ extern std::string current_file;
 
 void yy::parser::error(const location &loc, const std::string &msg)
 {
-    ErrorHandler::throwError(loc, msg, {false, true, false});
+    ErrorHandler::showError(loc, msg, {false, true, false});
 }
 
 namespace ErrorHandler
@@ -31,7 +31,7 @@ std::string extract_token_at_position(const yy::location &loc);
 
 } /* namespace Detail */
 
-void throwError(const yy::location &loc, std::string_view msg, const ErrorParseOptions &options)
+void showError(const yy::location &loc, std::string_view msg, const ErrorParseOptions &options)
 {
     std::cerr << current_file << ":" << loc.begin.line << ":" << loc.begin.column
               << ": paracl: error:"
@@ -141,6 +141,7 @@ std::string find_possible_token(const char *unexpected)
     static const std::vector<std::string> known_tokens = {
         "if", "else if", "else", "while", "print", "&&", "||", "!",  "and", "or", "not", "+", "-", "*", "/", "%", "==",
         "!=", ">",       ">=",   "<",     "<=",    "=",  "+=", "-=", "*=",  "/=", "%=",  "(", ")", "{", "}", ";", "?",
+        "return", "func",
     };
 
     std::string best_match;

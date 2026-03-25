@@ -268,25 +268,28 @@ public:
     /* implicit */ operator bool() const noexcept
     { return static_cast<bool>(self_); }
 
+    std::type_info const & type() const
+    { return self_->type_(); }
+
     /* convert to a real data */
     template <typename T>
-    requires (not std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, bool>)
+    requires (not std::is_same_v<std::remove_cvref_t<T>, bool>)
     operator const T &() const
     {
         if (not is_a<T>())
-            throw std::bad_cast{};
+            throw std::runtime_error("Bad last::node::BasicNode cast: real type: '" + std::string(self_->type_().name()) + "', casted type: '" + typeid(T).name() + std::string("'"));
 
-        return (static_cast<const NodeImpl<T>*>(self_.get()))->data_;
+        return (static_cast<NodeImpl<T> const *>(self_.get()))->data_;
     }
 
     template <typename T>
-    requires (not std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>, bool>)
-    operator T () const
+    requires (not std::is_same_v<std::remove_cvref_t<T>, bool>)
+    operator T& ()
     {
         if (not is_a<T>())
-            throw std::bad_cast{};
+            throw std::runtime_error("Bad last::node::BasicNode cast: real type: '" + std::string(self_->type_().name()) + "', casted type: '" + typeid(T).name() + std::string("'"));
 
-        return (static_cast<const NodeImpl<T>*>(self_.get()))->data_;
+        return (static_cast<NodeImpl<T>*>(self_.get()))->data_;
     }
 };
 

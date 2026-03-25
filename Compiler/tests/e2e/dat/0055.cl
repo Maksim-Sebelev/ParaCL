@@ -2,7 +2,7 @@ foo = func() { 5; }
 bar = func() { foo(); }
 buz = func() { foo() + bar(); }
 
-print buz(); // 10
+print "buz() = ", buz(); // 10
 
 foo = func(x) { x; }
 bar = func(x) { foo(x); }

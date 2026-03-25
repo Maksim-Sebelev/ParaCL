@@ -28,65 +28,100 @@
 %code {
     #include "parse_error.hpp"
     #include "lexer.hpp"
-    #include "check_variables.hpp"
-
 
     last::AST program;
-    ParaCL::ParserNameTable name_table;
 
     int yylex(yy::parser::semantic_type* yylval, yy::parser::location_type* yylloc);
+
+std::string get_token_line(const yy::location &loc)
+{
+    if (!yyin)
+        return "";
+
+    long current_file_pos = ftell(yyin);
+
+    rewind(yyin);
+
+    char buffer[1024];
+    int current_line = 1;
+    std::string target_line;
+
+    while (current_line < loc.begin.line && fgets(buffer, sizeof(buffer), yyin))
+    {
+        ++current_line;
+    }
+
+    if (current_line == loc.begin.line && fgets(buffer, sizeof(buffer), yyin))
+        target_line = buffer;
+
+    target_line.pop_back();
+
+    fseek(yyin, current_file_pos, SEEK_SET);
+
+    return target_line;
 }
 
-%precedence OR
-%precedence AND
-%precedence ISEQ ISNE
-%precedence ISAB ISABE ISLS ISLSE
-%precedence ADD SUB
-%precedence MUL DIV REM
-%precedence NEG NOT
-%right AS
-%right ADDASGN SUBASGN MULASGN DIVASGN
-%precedence THEN
-%precedence ELIF
-%precedence ELSE
+    template <>
+    last::node::CodeLocation::CodeLocation(yy::location loc) :
+        file_(current_file),
+        line_begin_(loc.begin.line),
+        line_end_(loc.end.line),
+        column_begin_(loc.begin.column),
+        column_end_(loc.end.column),
+        code_excerpt_(get_token_line(loc))
+    {}
+}
 
-%token <int> NUM
-%token <std::string> NAME
-%token LCIB RCIB LCUB RCUB
-%token WH IN PRINT IF
-%token SC COMMA
+
+%right AS ADDASGN SUBASGN MULASGN DIVASGN
+%left OR
+%left AND
+%left ISEQ ISNE
+%left ISAB ISABE ISLS ISLSE
+%left ADD SUB
+%left MUL DIV
+%left REM
+%right NEG NOT
+
+%precedence IN
+%precedence <int> NUM
 %token <std::string> STRING
-%token DECLFUNC RET
-%token COLON
+%precedence <std::string> NAME
 
-%type <std::vector<last::node::BasicNode>> statements function_call_args
-%type <last::node::BasicNode> statement assignment
-%type <last::node::BasicNode> print_expression while_statement condition_statement
-%type <last::node::BasicNode> expression assignment_expression logical_or_expression primary_expression
-%type <last::node::BasicNode> logical_and_expression equality_expression relational_expression
-%type <last::node::BasicNode> additive_expression multiplicative_expression unary_expression return_statement
-%type <last::node::BasicNode> scope one_stmt_scope if_statement else_statement
-%type <std::vector<last::node::BasicNode>> elif_statements
-%type <last::node::BasicNode> function_declaration function_call
+%nonassoc IF
+%nonassoc ELIF
+%nonassoc ELSE
+
+%token WHILE
+%token PRINT
+%token SC COMMA
+%token COLON DECLFUNC RET
+
+%token LCIB RCIB LCUB RCUB
+
+
+// statements
+%type <std::vector<last::node::BasicNode>> statements
+%type <last::node::BasicNode> statement scope one_statement_scope
+%type <last::node::BasicNode> condition while if else
+%type <std::vector<last::node::BasicNode>> elifs
+// expressionss
+%type <last::node::BasicNode> expression binary_operator unary_operator variable number string scan brackets
+%type <last::node::BasicNode> special_expression print
+// functions
+%type <last::node::BasicNode> function_assignment function_declaration function_call return
+%type <std::vector<last::node::BasicNode>> function_call_args
 %type <std::vector<std::string>> function_decl_args
-%type <last::node::BasicNode> special_expression function_assignment scope_assignment
+
 
 %start program
 %%
 
 program:
-    create_global_scope statements leave_global_scope {
-        auto&& root_scope = last::node::Scope(std::move($2));
+    statements {
+        auto&& root_scope = last::node::Scope(std::move($1));
         program = last::AST(last::node::create(std::move(root_scope)));
     }
-    ;
-
-create_global_scope:
-    %empty { name_table.new_scope(); }
-    ;
-
-leave_global_scope:
-    %empty { name_table.leave_scope(); }
     ;
 
 statements:
@@ -95,427 +130,483 @@ statements:
         $1.push_back(std::move($2));
         $$ = std::move($1);
     }
-    | statements LCUB scope RCUB {
-        $1.push_back(std::move($3));
-        $$ = std::move($1);
-    }
     ;
 
 statement:
-    assignment SC { $$ = std::move($1); }
-    | while_statement { $$ = std::move($1); }
-    | condition_statement { $$ = std::move($1); }
-    | SC { $$ = last::node::create(last::node::Scope{}); }
-    | return_statement SC { $$ = std::move($1); }
-    | special_expression { $$ = std::move($1); }
-    | expression SC { $$ = std::move($1); }
+    condition               { $$ = std::move($1); }
+    | while                 { $$ = std::move($1); }
+    | special_expression    { $$ = std::move($1); }
+    | expression         SC { $$ = std::move($1); }
+    | print              SC { $$ = std::move($1); }
+    | return             SC { $$ = std::move($1); }
+    |                    SC { $$ = last::node::create(last::node::Scope{}); }
     ;
 
-assignment:
-    NAME AS expression {
-        name_table.declare_or_do_nothing_if_already_declared($1);
-
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::ASGN,
-            last::node::create(last::node::Variable(std::move($1))),
-            std::move($3)
-        );
-
-        $$ = last::node::create(std::move(binop));
-    }
-    | NAME AS error {
-        ErrorHandler::throwError(@3, "expected expression after assignment");
-        YYABORT;
-    }
-    ;
-
-print_expression:
-    PRINT function_call_args {
-        auto&& p = last::node::Print(std::move($2));
-        $$ = last::node::create(std::move(p));
-    }
-    | PRINT error {
-        ErrorHandler::throwError(@2, "expected expressions after print");
-        YYABORT;
-    }
-    ;
-
-function_call_args:
-    %empty { $$ = std::vector<last::node::BasicNode>(); }
-    | function_call_args expression { $1.push_back(std::move($2)); $$ = std::move($1); }
-    | function_call_args COMMA expression { $1.push_back(std::move($3)); $$ = std::move($1); }
-    ;
-
-
-function_decl_args:
-    %empty { 
-        $$ = std::vector<std::string>(); 
-        name_table.new_scope(); 
-    }
-    | function_decl_args NAME {
-        name_table.declare_or_do_nothing_if_already_declared($2);
-        $1.push_back(std::move($2));
-        $$ = std::move($1);
-    }
-    | function_decl_args COMMA NAME {
-        name_table.declare_or_do_nothing_if_already_declared($3);
-        $1.push_back(std::move($3));
-        $$ = std::move($1);
-    }
-    ;
-
-while_statement:
-    WH LCIB expression RCIB LCUB scope RCUB {
-        auto&& w = last::node::While(std::move($3), std::move($6));
+while:
+    WHILE brackets one_statement_scope {
+        auto&& w = last::node::While(std::move($2), std::move($3));
+        w.location() = @1;
         $$ = last::node::create(std::move(w));
     }
-    | WH LCIB expression RCIB one_stmt_scope {
-        auto&& w = last::node::While(std::move($3), std::move($5));
-        $$ = last::node::create(std::move(w));
-    }
-    | WH LCIB error RCIB LCUB scope RCUB { ErrorHandler::throwError(@3, "expected condition in while"); YYABORT; }
-    | WH LCIB expression error LCUB scope RCUB { ErrorHandler::throwError(@4, "expected ')' after while condition"); YYABORT; }
-    | WH LCIB expression RCIB error { ErrorHandler::throwError(@5, "expected scope after while"); YYABORT; }
-    | WH error { ErrorHandler::throwError(@2, "expected '(' after while"); YYABORT; }
+    | WHILE LCIB error RCIB scope { ErrorHandler::showError(@3, "expected expression"); YYABORT; }
+    | WHILE LCIB expression error scope { ErrorHandler::showError(@4, "expected ')'"); YYABORT; }
+    | WHILE brackets error { ErrorHandler::showError(@3, "expected scope or statement"); YYABORT; }
+    | WHILE error { ErrorHandler::showError(@2, "expected '(' after while"); YYABORT; }
     ;
 
-condition_statement:
-    if_statement elif_statements else_statement {
-        last::node::Condition cond;
+condition:
+    if %prec IF {
+        auto&& cond = last::node::Condition{};
+        cond.add_condition(std::move($1));
+        cond.location() = @1;
+        $$ = last::node::create(std::move(cond));
+    }
+    | if elifs %prec IF {
+        auto&& cond = last::node::Condition{};
         cond.add_condition(std::move($1));
         for (auto&& e : $2) cond.add_condition(std::move(e));
-        if ($3) cond.set_else(std::move($3));
+        cond.location() = @1;
+        $$ = last::node::create(std::move(cond));
+    }
+    | if else %prec IF {
+        auto&& cond = last::node::Condition{};
+        cond.add_condition(std::move($1));
+        cond.set_else(std::move($2));
+        cond.location() = @1;
+        $$ = last::node::create(std::move(cond));
+    }
+    | if elifs else %prec IF {
+        auto&& cond = last::node::Condition{};
+        cond.add_condition(std::move($1));
+        for (auto&& e : $2) cond.add_condition(std::move(e));
+        cond.set_else(std::move($3));
+        cond.location() = @1;
         $$ = last::node::create(std::move(cond));
     }
     ;
 
-if_statement:
-    IF LCIB expression RCIB LCUB scope RCUB {
-        auto&& i = last::node::If(std::move($3), std::move($6));
+if:
+    IF brackets one_statement_scope %prec IF {
+        auto&& i = last::node::If(std::move($2), std::move($3));
+        i.location() = @1;
         $$ = last::node::create(std::move(i));
     }
-    | IF LCIB expression RCIB one_stmt_scope %prec THEN {
-        auto&& i = last::node::If(std::move($3), std::move($5));
-        $$ = last::node::create(std::move(i));
+    | IF LCIB error RCIB one_statement_scope %prec IF {
+        ErrorHandler::showError(@3, "expected condition in if");
+        YYABORT;
     }
-    | IF LCIB error RCIB LCUB scope RCUB { ErrorHandler::throwError(@3, "expected condition in if"); YYABORT; }
-    | IF LCIB expression error LCUB scope RCUB { ErrorHandler::throwError(@4, "expected ')' after if"); YYABORT; }
-    | IF LCIB expression RCIB error { ErrorHandler::throwError(@5, "expected scope after if"); YYABORT; }
-    | IF error { ErrorHandler::throwError(@2, "expected '(' after if"); YYABORT; }
-    ;
-
-elif_statements:
-    %empty { $$ = std::vector<last::node::BasicNode>(); }
-    | elif_statements ELIF LCIB expression RCIB LCUB scope RCUB %prec ELIF {
-        auto&& e = last::node::If(std::move($4), std::move($7));
-        $1.push_back(last::node::create(std::move(e)));
-        $$ = std::move($1);
+    | IF LCIB expression error one_statement_scope %prec IF {
+        ErrorHandler::showError(@4, "expected ')' after if");
+        YYABORT;
     }
-    | elif_statements ELIF LCIB expression RCIB one_stmt_scope %prec ELIF {
-        auto&& e = last::node::If(std::move($4), std::move($6));
-        $1.push_back(last::node::create(std::move(e)));
-        $$ = std::move($1);
+    | IF brackets error %prec IF {
+        ErrorHandler::showError(@3, "expected scope after if");
+        YYABORT;
+    }
+    | IF error %prec IF {
+        ErrorHandler::showError(@2, "expected '(' after if");
+        YYABORT;
     }
     ;
 
-else_statement:
-    %empty { $$ = last::node::BasicNode{}; }
-    | ELSE LCUB scope RCUB %prec ELSE {
-        auto&& e = last::node::Else(std::move($3));
-        $$ = last::node::create(std::move(e));
+elifs:
+    ELIF brackets one_statement_scope %prec ELIF {
+        auto&& vec = std::vector<last::node::BasicNode>{};
+        auto&& node = last::node::If(std::move($2), std::move($3));
+        node.location() = @1;
+        vec.push_back(last::node::create(std::move(node)));
+        $$ = std::move(vec);
     }
-    | ELSE one_stmt_scope %prec ELSE {
+    | elifs ELIF brackets one_statement_scope %prec ELIF {
+        auto&& e = last::node::If(std::move($3), std::move($4));
+        e.location() = @2;
+        $1.push_back(last::node::create(std::move(e)));
+        $$ = std::move($1);
+    }
+    ;
+
+else:
+    ELSE one_statement_scope %prec ELSE {
         auto&& e = last::node::Else(std::move($2));
+        e.location() = @1;
         $$ = last::node::create(std::move(e));
     }
-    | ELSE error { ErrorHandler::throwError(@2, "expected scope after else"); YYABORT; }
-    ;
-primary_expression:
-    NUM { $$ = last::node::create(last::node::NumberLiteral($1)); }
-    | NAME {
-        if (name_table.is_not_force_declare($1)) {
-            ErrorHandler::throwError(@1, "using unforce_declared variable: " + $1);
-            YYABORT;
-        }
-        $$ = last::node::create(last::node::Variable(std::move($1)));
-    }
-    | LCIB expression RCIB { $$ = std::move($2); }
-    | IN { $$ = last::node::create(last::node::Scan{}); }
-    | STRING { $$ = last::node::create(last::node::StringLiteral(std::move($1))); }
-    | function_call { $$ = std::move($1); }
-    ;
-
-unary_expression:
-    primary_expression { $$ = std::move($1); }
-    | SUB unary_expression %prec NEG {
-        auto&& unop = last::node::UnaryOperator(
-            last::node::UnaryOperator::UnaryOperatorT::MINUS,
-            std::move($2)
-        );
-        $$ = last::node::create(std::move(unop));
-    }
-    | NOT unary_expression %prec NOT {
-        auto&& unop = last::node::UnaryOperator(
-            last::node::UnaryOperator::UnaryOperatorT::NOT,
-            std::move($2)
-        );
-        $$ = last::node::create(std::move(unop));
-    }
-    | ADD unary_expression %prec NEG { $$ = std::move($2); }
-    ;
-
-multiplicative_expression:
-    unary_expression { $$ = std::move($1); }
-    | multiplicative_expression MUL unary_expression %prec MUL {
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::MUL,
-            std::move($1), std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | multiplicative_expression DIV unary_expression %prec DIV {
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::DIV,
-            std::move($1), std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | multiplicative_expression REM unary_expression %prec REM {
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::REM,
-            std::move($1), std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    ;
-
-additive_expression:
-    multiplicative_expression { $$ = std::move($1); }
-    | additive_expression ADD multiplicative_expression %prec ADD {
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::ADD,
-            std::move($1), std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | additive_expression SUB multiplicative_expression %prec SUB {
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::SUB,
-            std::move($1), std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    ;
-
-relational_expression:
-    additive_expression { $$ = std::move($1); }
-    | relational_expression ISAB additive_expression %prec ISAB {
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::ISAB,
-            std::move($1), std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | relational_expression ISABE additive_expression %prec ISABE {
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::ISABE,
-            std::move($1), std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | relational_expression ISLS additive_expression %prec ISLS {
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::ISLS,
-            std::move($1), std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | relational_expression ISLSE additive_expression %prec ISLSE {
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::ISLSE,
-            std::move($1), std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    ;
-
-equality_expression:
-    relational_expression { $$ = std::move($1); }
-    | equality_expression ISEQ relational_expression %prec ISEQ {
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::ISEQ,
-            std::move($1), std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | equality_expression ISNE relational_expression %prec ISNE {
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::ISNE,
-            std::move($1), std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    ;
-
-logical_and_expression:
-    equality_expression { $$ = std::move($1); }
-    | logical_and_expression AND equality_expression %prec AND {
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::AND,
-            std::move($1), std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    ;
-
-logical_or_expression:
-    logical_and_expression { $$ = std::move($1); }
-    | logical_or_expression OR logical_and_expression %prec OR {
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::OR,
-            std::move($1), std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    ;
-
-assignment_expression:
-    logical_or_expression { $$ = std::move($1); }
-    | NAME AS assignment_expression %prec AS {
-        name_table.declare_or_do_nothing_if_already_declared($1);
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::ASGN,
-            last::node::create(last::node::Variable(std::move($1))),
-            std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | NAME ADDASGN assignment_expression %prec ADDASGN {
-        if (name_table.is_not_force_declare($1)) {
-            ErrorHandler::throwError(@1, "using unforce_declared variable: " + $1);
-            YYABORT;
-        }
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::ADDASGN,
-            last::node::create(last::node::Variable(std::move($1))),
-            std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | NAME SUBASGN assignment_expression %prec SUBASGN {
-        if (name_table.is_not_force_declare($1)) {
-            ErrorHandler::throwError(@1, "using unforce_declared variable: " + $1);
-            YYABORT;
-        }
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::SUBASGN,
-            last::node::create(last::node::Variable(std::move($1))),
-            std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | NAME MULASGN assignment_expression %prec MULASGN {
-        if (name_table.is_not_force_declare($1)) {
-            ErrorHandler::throwError(@1, "using unforce_declared variable: " + $1);
-            YYABORT;
-        }
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::MULASGN,
-            last::node::create(last::node::Variable(std::move($1))),
-            std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    | NAME DIVASGN assignment_expression %prec DIVASGN {
-        if (name_table.is_not_force_declare($1)) {
-            ErrorHandler::throwError(@1, "using unforce_declared variable: " + $1);
-            YYABORT;
-        }
-        auto&& binop = last::node::BinaryOperator(
-            last::node::BinaryOperator::BinaryOperatorT::DIVASGN,
-            last::node::create(last::node::Variable(std::move($1))),
-            std::move($3)
-        );
-        $$ = last::node::create(std::move(binop));
-    }
-    ;
-
-expression:
-    assignment_expression { $$ = std::move($1); } |
-    LCUB scope RCUB { $$ = std::move($2); } |
-    print_expression { $$ = std::move($1); }
-    ;
-
-scope:
-    scope_enter_action statements scope_leave_action {
-        auto&& s = last::node::Scope(std::move($2));
-        $$ = last::node::create(std::move(s));
-    }
-    ;
-
-one_stmt_scope:
-    scope_enter_action statement scope_leave_action {
-        std::vector<last::node::BasicNode> vec{std::move($2)};
-        auto&& s = last::node::Scope(std::move(vec));
-        $$ = last::node::create(std::move(s));
-    }
-    ;
-
-return_statement:
-    RET expression {
-        $$ = create(last::node::Return{std::move($2)});
-    }
-    ;
-
-function_declaration:
-    DECLFUNC LCIB function_decl_args RCIB LCUB scope RCUB {
-        $$ = last::node::create(last::node::FunctionDeclaration{"", std::move($3), std::move($6)});
-    } |
-    DECLFUNC LCIB function_decl_args RCIB COLON NAME LCUB scope RCUB {
-        $$ = last::node::create(last::node::FunctionDeclaration{std::move($6), std::move($3), std::move($8)});
-    }
-    ;
-
-function_call:
-    NAME LCIB function_call_args RCIB {
-        $$ = last::node::create(last::node::FunctionCall{std::move($1), std::move($3)});
-    }
-    ;
-
-scope_assignment:
-    NAME AS LCUB scope RCUB {
-        name_table.declare_or_do_nothing_if_already_declared($1);
-        auto&& asgn = last::node::BinaryOperator{last::node::BinaryOperator::ASGN,
-            last::node::create(last::node::Variable(std::move($1))),
-            std::move($4)
-        };
-
-        $$ = last::node::create(std::move(asgn));
-    }
-    ;
-
-function_assignment:
-    NAME AS function_declaration {
-        name_table.declare_or_do_nothing_if_already_declared($1);
-        auto&& asgn = last::node::BinaryOperator{last::node::BinaryOperator::ASGN,
-            last::node::create(last::node::Variable(std::move($1))),
-            std::move($3)
-        };
-    
-        $$ = last::node::create(std::move(asgn));
+    | ELSE error %prec ELSE {
+        ErrorHandler::showError(@2, "expected scope or statement after 'else'"); 
+        YYABORT;
     }
     ;
 
 special_expression:
-    function_declaration
-    { $$ = std::move($1); }
-    | function_assignment
-    { $$ = std::move($1); }
-    | scope_assignment
-    { $$ = std::move($1); }
+    scope { $$ = std::move($1); }
+    | variable AS scope {
+        auto&& node = last::node::BinaryOperator{
+            last::node::BinaryOperator::ASGN,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | function_declaration { $$ = std::move($1); }
+    | function_assignment { $$ = std::move($1); }
     ;
 
-scope_enter_action: %empty { name_table.new_scope(); } ;
-scope_leave_action: %empty { name_table.leave_scope(); } ;
+expression:
+    brackets          { $$ = std::move($1); }
+    | binary_operator { $$ = std::move($1); }
+    | unary_operator  { $$ = std::move($1); }
+    | variable        { $$ = std::move($1); }
+    | number          { $$ = std::move($1); }
+    | string          { $$ = std::move($1); }
+    | scan            { $$ = std::move($1); }
+    | function_call   { $$ = std::move($1); }
+    ;
 
+number:
+    NUM {
+        auto&& node = last::node::NumberLiteral(std::move($1));
+        node.location() = @1;
+        $$ = last::node::create(std::move(node));
+    }
+    ;
+
+string:
+    STRING {
+        auto&& node = last::node::StringLiteral(std::move($1));
+        node.location() = @1;
+        $$ = last::node::create(std::move(node));
+    }
+    ;
+
+variable:
+    NAME {
+        auto&& node = last::node::Variable(std::move($1));
+        node.location() = @1;
+        node.location().set_code_excerpt(get_token_line(@1));
+        $$ = last::node::create(std::move(node));
+    }
+    ;
+
+brackets:
+    LCIB expression RCIB {
+        $$ = std::move($2);
+    }
+    ;
+
+scan:
+    IN {
+        auto&& node = last::node::Scan{};
+        node.location() = @1;
+        $$ = last::node::create(std::move(node));
+    }
+    ;
+
+binary_operator:
+    variable AS expression %prec AS {
+        auto&& node = last::node::BinaryOperator{
+            last::node::BinaryOperator::BinaryOperatorT::ASGN,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | variable ADDASGN expression %prec ADDASGN {
+        auto&& node = last::node::BinaryOperator{
+            last::node::BinaryOperator::BinaryOperatorT::ADDASGN,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | variable SUBASGN expression %prec SUBASGN {
+        auto&& node = last::node::BinaryOperator{
+            last::node::BinaryOperator::BinaryOperatorT::SUBASGN,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | variable MULASGN expression %prec MULASGN {
+        auto&& node = last::node::BinaryOperator{
+            last::node::BinaryOperator::BinaryOperatorT::MULASGN,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | variable DIVASGN expression %prec DIVASGN {
+        auto&& node = last::node::BinaryOperator{
+            last::node::BinaryOperator::BinaryOperatorT::DIVASGN,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | variable ADDASGN error { ErrorHandler::showError(@3, "expected expression after '+='"); YYABORT; }
+    | variable SUBASGN error { ErrorHandler::showError(@3, "expected expression after '-='"); YYABORT; }
+    | variable MULASGN error { ErrorHandler::showError(@3, "expected expression after '*='"); YYABORT; }
+    | variable DIVASGN error { ErrorHandler::showError(@3, "expected expression after '/='"); YYABORT; }
+    | variable AS      error { ErrorHandler::showError(@3, "expected expression after ='"); YYABORT; }
+    | expression ADD expression %prec ADD {
+        auto&& node = last::node::BinaryOperator
+        {
+            last::node::BinaryOperator::ADD,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | expression SUB expression %prec SUB {
+        auto&& node = last::node::BinaryOperator
+        {
+            last::node::BinaryOperator::SUB,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | expression MUL expression %prec MUL {
+        auto&& node = last::node::BinaryOperator
+        {
+            last::node::BinaryOperator::MUL,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | expression DIV expression %prec DIV {
+        auto&& node = last::node::BinaryOperator
+        {
+            last::node::BinaryOperator::DIV,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | expression REM expression %prec REM {
+        auto&& node = last::node::BinaryOperator
+        {
+            last::node::BinaryOperator::REM,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | expression ISEQ expression %prec ISEQ {
+        auto&& node = last::node::BinaryOperator
+        {
+            last::node::BinaryOperator::ISEQ,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | expression ISNE expression %prec ISNE {
+        auto&& node = last::node::BinaryOperator
+        {
+            last::node::BinaryOperator::ISNE,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | expression ISAB expression %prec ISAB {
+        auto&& node = last::node::BinaryOperator
+        {
+            last::node::BinaryOperator::ISAB,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | expression ISABE expression %prec ISABE {
+        auto&& node = last::node::BinaryOperator
+        {
+            last::node::BinaryOperator::ISABE,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | expression ISLS expression %prec ISLS {
+        auto&& node = last::node::BinaryOperator
+        {
+            last::node::BinaryOperator::ISLS,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | expression ISLSE expression %prec ISLSE {
+        auto&& node = last::node::BinaryOperator
+        {
+            last::node::BinaryOperator::ISLSE,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | expression OR expression %prec OR {
+        auto&& node = last::node::BinaryOperator
+        {
+            last::node::BinaryOperator::OR,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    | expression AND expression %prec AND {
+        auto&& node = last::node::BinaryOperator
+        {
+            last::node::BinaryOperator::AND,
+            std::move($1),
+            std::move($3)
+        };
+        node.location() = @2;
+        $$ = last::node::create(std::move(node));
+    }
+    ;
+
+print:
+    PRINT function_call_args {
+        auto&& p = last::node::Print(std::move($2));
+        p.location() = @1;
+        $$ = last::node::create(std::move(p));
+    }
+    | PRINT error {
+        ErrorHandler::showError(@2, "expected expression after 'variable'");
+        YYABORT;
+    }
+    ;
+
+unary_operator:
+    SUB expression %prec NEG {
+        auto&& node = last::node::UnaryOperator
+        {
+            last::node::UnaryOperator::MINUS,
+            std::move($2)
+        };
+        node.location() = @1;
+        $$ = last::node::create(std::move(node));
+    }
+    | NOT expression %prec NOT {
+        auto&& node = last::node::UnaryOperator
+        {
+            last::node::UnaryOperator::NOT,
+            std::move($2)
+        };
+        node.location() = @1;
+        $$ = last::node::create(std::move(node));
+    }
+    | ADD expression %prec ADD {
+        auto&& node = last::node::UnaryOperator
+        {
+            last::node::UnaryOperator::PLUS,
+            std::move($2)
+        };
+        node.location() = @1;
+        $$ = last::node::create(std::move(node));
+    }
+    ;
+
+scope:
+    LCUB statements RCUB {
+        auto&& node = last::node::Scope(std::move($2));
+        auto&& location = node.location();
+        location.set_all(current_file, @1.begin.line, @3.end.line, @1.begin.column, @3.end.column, "");
+        $$ = last::node::create(std::move(node));
+    }
+    ;
+
+one_statement_scope:
+    statement {
+        auto&& vec = std::vector<last::node::BasicNode>{std::move($1)};
+        if (vec.size() == 1 and vec[0].is_a<last::node::Scope>())
+            $$ = std::move(vec[0]);
+        else
+        {
+            auto&& node = last::node::Scope(std::move(vec));
+            node.location() = @1;
+            $$ = last::node::create(std::move(node));
+        }
+    }
+    ;
+
+function_assignment:
+    variable AS function_declaration {
+        auto&& asgn = last::node::BinaryOperator{last::node::BinaryOperator::ASGN,
+            std::move($1),
+            std::move($3)
+        };
+        asgn.location() = @2;
+        $$ = last::node::create(std::move(asgn));
+    }
+    ;
+
+function_declaration:
+    DECLFUNC LCIB function_decl_args RCIB scope {
+        auto&& node = last::node::FunctionDeclaration{"", std::move($3), std::move($5)};
+        node.location() = @1;
+        $$ = last::node::create(std::move(node));
+    }
+    | DECLFUNC LCIB function_decl_args RCIB COLON NAME scope {
+        auto&& node = last::node::FunctionDeclaration{std::move($6), std::move($3), std::move($7)};
+        node.location() = @1;
+        $$ = last::node::create(std::move(node));
+    }
+    ;
+
+function_decl_args:
+    %empty { 
+        $$ = std::vector<std::string>(); 
+    }
+    | function_decl_args NAME {
+        $1.push_back(std::move($2));
+        $$ = std::move($1);
+    }
+    | function_decl_args COMMA NAME {
+        $1.push_back(std::move($3));
+        $$ = std::move($1);
+    }
+    ;
+
+function_call_args:
+    %empty { $$ = std::vector<last::node::BasicNode>{}; }
+    | function_call_args COMMA expression { $1.push_back(std::move($3)); $$ = std::move($1); }
+    | expression { $$ = std::vector<last::node::BasicNode>{std::move($1)}; }
+    ;
+
+function_call:
+    NAME LCIB function_call_args RCIB {
+        auto&& node = last::node::FunctionCall{std::move($1), std::move($3)};
+        node.location() = @1;
+        $$ = last::node::create(std::move(node));
+    }
+    ;
+
+return:
+    RET expression {
+        auto&& node = last::node::Return{std::move($2)};
+        node.location() = @1;
+        $$ = create(std::move(node));
+    }
+    ;
 %%

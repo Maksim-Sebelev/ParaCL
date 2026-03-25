@@ -11,7 +11,7 @@ import llvm_ir_translator;
 
 namespace compiler
 {
-export void compile([[maybe_unused]] std::filesystem::path const & ast_json, std::filesystem::path const & executable)
+export void compile(std::filesystem::path const & ast_json, std::filesystem::path const & executable)
 {
     auto&& tmp_ir_file = std::filesystem::path{executable};
     tmp_ir_file.replace_extension(".ll");
@@ -25,7 +25,7 @@ export void compile([[maybe_unused]] std::filesystem::path const & ast_json, std
 
     if (compile_command_exit_code == EXIT_SUCCESS) return;
 
-    throw std::runtime_error("Failed generate '" + executable.string() + "' with exit code " + std::to_string(compile_command_exit_code));
+    throw std::runtime_error("Failed compile ir file '" + executable.string() + "' with exit code " + std::to_string(compile_command_exit_code));
 }
 
 } /* namespace compiler */
