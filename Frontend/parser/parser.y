@@ -283,7 +283,6 @@ variable:
     NAME {
         auto&& node = last::node::Variable(std::move($1));
         node.location() = @1;
-        node.location().set_code_excerpt(get_token_line(@1));
         $$ = last::node::create(std::move(node));
     }
     ;

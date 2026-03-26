@@ -14,9 +14,6 @@ module;
 #include <unordered_map>
 #include <vector>
 #include <iostream>
-// #include "log/log_api.hpp"
-#define LOGINFO(...)
-#define LOGERR(...)
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -29,7 +26,6 @@ namespace compiler::llvm_ir_translator
 
 export
 enum ValueStatus { global, local };
-
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -115,7 +111,6 @@ Nametable::Nametable(llvm::Module& module, llvm::IRBuilder<> &builder)
 
 void Nametable::new_scope()
 {
-    LOGINFO("paracl: compiler: nametable: create next scope");
     scopes_.emplace_back();
 }
 
@@ -123,7 +118,6 @@ void Nametable::new_scope()
 
 void Nametable::leave_scope()
 {
-    LOGINFO("paracl: compiler: nametable: exiting scope");
     if (scopes_.empty()) return;
     scopes_.pop_back();
 }
@@ -142,8 +136,6 @@ llvm::Value *Nametable::get(std::string_view name)
 
 void Nametable::set(std::string_view name, llvm::Value *value, ValueStatus status)
 {
-    LOGINFO("paracl: compiler: nametable: set \"{}\"", name);
-
     if (scopes_.empty())
         throw std::runtime_error("cannot set '" + std::string(name) + "': no active scopes");
 
@@ -243,8 +235,6 @@ llvm::Value const *Nametable::lookup_(std::string_view name) const
 
 void Nametable::declare_(std::string_view name, llvm::Value *value, ValueStatus status)
 {
-    LOGINFO("paracl: compiler: nametable: declare_ \"{}\"", name);
-
     if (scopes_.empty())
         throw std::runtime_error("cannot declare_ variable: no active scopes");
 
@@ -269,8 +259,6 @@ void Nametable::declare_(std::string_view name, llvm::Value *value, ValueStatus 
 
 void Nametable::force_declare(std::string_view name, llvm::Value *value)
 {
-    LOGINFO("paracl: compiler: nametable: declare_ \"{}\"", name);
-
     if (scopes_.empty())
         throw std::runtime_error("cannot declare_ variable: no active scopes");
 

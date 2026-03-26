@@ -32,29 +32,24 @@ std::string mark_error(last::node::CodeLocation const & location)
         (location.column_end() - location.column_begin()) :
         (location.code_excerpt().length() - location.column_begin()); assert(location.code_excerpt().length() >= location.column_begin());
 
-    auto&& mark = std::string(string_begin_offset, ' ');
-    mark += "^";
-    if (token_length > 1)
-        mark += std::string(token_length - 1, '~');
+    auto&& mark = std::ostringstream{};
+    mark << std::string(string_begin_offset, ' ') << "^";
 
-    return mark;
+    if (token_length > 1)
+        mark << std::string(token_length - 1, '~');
+
+    return mark.str();
 }
 
 std::string show_error(std::string msg, last::node::CodeLocation const & location)
 {
-    auto&& explain = to_string(location);
-    explain += ": ";
-    explain += msg;
-    explain += "\n";
+    auto&& explain = std::ostringstream{};
+    explain << to_string(location) << ": " << msg << "\n";
+
     auto&& indent = " " + std::to_string(location.line_begin()) + " | ";
     auto&& indent_length = indent.length();
-    explain += indent;
-    explain += location.code_excerpt();
-    explain += "\n";
-    explain += std::string(indent_length - 2, ' ') + "| ";
-    explain += mark_error(location);
-
-    return explain;
+    explain << indent << location.code_excerpt() << "\n" << std::string(indent_length - 2, ' ') << "| " << mark_error(location);
+    return explain.str();
 }
 
 class error : public std::exception

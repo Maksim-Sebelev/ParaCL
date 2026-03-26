@@ -9,8 +9,6 @@ import thelast;
 
 int main(int argc, char** argv) try
 {
-    ParaCL::general::init_logging();
-
     auto&& [inputs, outputs] = ParaCL::general::handleCompileOpts(argc, argv);
 
     for (size_t it = 0, ite = inputs.size(); it != ite; ++it)

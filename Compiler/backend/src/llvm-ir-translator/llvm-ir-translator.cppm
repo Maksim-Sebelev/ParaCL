@@ -27,9 +27,6 @@ module;
 // TODO: remove iostream
 #include <iostream>
 
-#define LOGINFO(...)
-#define LOGERR(...)
-
 //---------------------------------------------------------------------------------------------------------------
 
 export module llvm_ir_translator;
@@ -88,7 +85,6 @@ llvm::Value* create_null_Int32(llvmIrTranslatorData& data)
 llvm::Value* convert_to_Int1(llvmIrTranslatorData& data, llvm::Value *value)
 {
     assert(value);
-    LOGINFO("paracl: ir translator: converting value to i1 type");
     auto&& value_type = value->getType();
     auto&& zero = llvm::ConstantInt::get(value_type, 0, true);
     return data.builder.CreateICmpNE(value, zero, "__toBool");
@@ -146,7 +142,6 @@ namespace visit_specializations
 template <>
 llvm::Value* visit(NumberLiteral const& node, llvmIrTranslatorData& data)
 {
-    LOGINFO("paracl: ir translator: number literal: {}", node.value());
     auto&& tmp = llvm::ConstantInt::get(data.builder.getInt32Ty(), node.value());
     return tmp;
 }
@@ -163,7 +158,6 @@ void visit(NumberLiteral const& node, llvmIrTranslatorData& data)
 template <>
 llvm::Value* visit(StringLiteral const& node, llvmIrTranslatorData& data)
 {
-    LOGINFO("paracl: ir translator: string literal: \"{}\"", node.value());
     return data.builder.CreateGlobalStringPtr(node.value(), "__stringLiteral");
 }
 
@@ -179,7 +173,6 @@ void visit(StringLiteral const& node, llvmIrTranslatorData& data)
 template <>
 llvm::Value* visit(Variable const& node, llvmIrTranslatorData& data)
 {
-    LOGINFO("paracl: ir translator: variable access: '{}'", node.name());
     auto&& variable = data.nametable.get(node.name());
     if (not variable) throw compiler::exceptions::using_undeclarated_variable_error(node);
 
@@ -201,8 +194,6 @@ void visit(Variable const& node, llvmIrTranslatorData& data)
 template <>
 llvm::Value* visit(Scan const& node, llvmIrTranslatorData& data)
 {
-    LOGINFO("paracl: ir translator: scan expression");
-
     auto&& scanf_res_alloca = data.builder.CreateAlloca(data.builder.getInt32Ty(), nullptr, "__scanfResAlloca");
     auto&& fmt = data.builder.CreateGlobalStringPtr("%d", "__scanfFormat");
     auto&& scanf_args = std::vector<llvm::Value*>{fmt, scanf_res_alloca};
@@ -224,8 +215,6 @@ void visit(Scan const& node, llvmIrTranslatorData& data)
 template <>
 llvm::Value* visit(UnaryOperator const& node, llvmIrTranslatorData& data)
 {
-    LOGINFO("paracl: ir translator: unary operation");
-
     auto&& arg = generate_expression(node.arg(), data);
 
     switch (node.type())
@@ -244,7 +233,10 @@ llvm::Value* visit(UnaryOperator const& node, llvmIrTranslatorData& data)
             return compiler::llvm_ir_translator::convert_Int1_to_Int32(data, cmp, "__unaryNot");
         }
         default:
+#if defined(NDEBUG)
             __builtin_unreachable();
+#endif /* defined(NDEBUG) */
+            throw std::runtime_error("Undefined UnaryOperator type");
     }
 }
 
@@ -261,8 +253,6 @@ void visit(UnaryOperator const& node, llvmIrTranslatorData& data)
 template <>
 llvm::Value* visit(BinaryOperator const& node, llvmIrTranslatorData& data)
 {
-    LOGINFO("paracl: ir translator: binary operation");
-
     if (node.type() == BinaryOperator::ASGN)
     {
         auto&& variable = static_cast<Variable const &>(node.larg());
@@ -343,7 +333,11 @@ llvm::Value* visit(BinaryOperator const& node, llvmIrTranslatorData& data)
         case BinaryOperator::MULASGN: right = data.builder.CreateMul (value, right, "__mulAsgnResult"); break;
         case BinaryOperator::DIVASGN: right = data.builder.CreateSDiv(value, right, "__divAsgnResult"); break;
         case BinaryOperator::REMASGN: right = data.builder.CreateSRem(value, right, "__remAsgnResult"); break;
-        default: __builtin_unreachable();
+        default:
+#if defined(NDEBUG)
+            __builtin_unreachable();
+#endif /* defined(NDEBUG) */
+            throw std::runtime_error("Undefined UnaryOperator type");
     }
 
     data.nametable.set(name, right, data.current_scope_status);
@@ -362,8 +356,6 @@ void visit(BinaryOperator const& node, llvmIrTranslatorData& data)
 template <>
 llvm::Value* visit(Print const& node, llvmIrTranslatorData& data)
 {
-    LOGINFO("paracl: ir translator: generating print statement");
-
     auto&& fmt = std::ostringstream{};
     auto&& printf_args = std::vector<llvm::Value*>{};
 
@@ -408,8 +400,6 @@ void visit(Print const& node, llvmIrTranslatorData& data)
 template <>
 void visit(While const& node, llvmIrTranslatorData& data)
 {
-    LOGINFO("paracl: ir translator: generating while loop");
-
     auto&& current_func = data.current_function->getParent();
 
     auto&& cond_block = llvm::BasicBlock::Create(data.context, "while", current_func);
@@ -441,8 +431,6 @@ void visit(If const& node, llvmIrTranslatorData& data, llvm::BasicBlock* self_co
 {
     /* expect, thah SetInsertPoint already done */
 
-    LOGINFO("paracl: ir translator: generating if condition with status");
-
     data.builder.SetInsertPoint(self_condition);
     auto&& if_condition = generate_expression(node.condition(), data);
 
@@ -462,7 +450,6 @@ void visit(If const& node, llvmIrTranslatorData& data, llvm::BasicBlock* self_co
 template <>
 void visit(Else const& node, llvmIrTranslatorData& data)
 {
-    LOGINFO("paracl: ir translator: generating else statement");
     generate_statement(node.body(), data);
 }
 
@@ -473,8 +460,6 @@ void visit(Else const& node, llvmIrTranslatorData& data)
 template <>
 void visit(Condition const& node, llvmIrTranslatorData& data)
 {
-    LOGINFO("paracl: ir translator: generating condition (if-else if-else)");
-
     auto&& current_func = data.current_function->getParent();
 
     auto&& ifs = node.get_ifs();    
@@ -530,8 +515,6 @@ void visit(Condition const& node, llvmIrTranslatorData& data)
 template <>
 llvm::Value* visit(Scope const& node, llvmIrTranslatorData& data)
 {
-    LOGINFO("paracl: ir translator: generating scope");
-
     data.nametable.new_scope();
 
     auto&& size = node.size();
@@ -573,8 +556,6 @@ void visit(Scope const& node, llvmIrTranslatorData& data)
 template <>
 void visit(Return const & node, llvmIrTranslatorData& data)
 {
-    LOGINFO("paracl: ir translator: return");
-
     auto&& returning_value = generate_expression(node.expression(), data);
     data.builder.CreateRet(returning_value);
 }
@@ -586,7 +567,6 @@ void visit(Return const & node, llvmIrTranslatorData& data)
 template <>
 llvm::Value* visit(FunctionDeclaration const & node, llvmIrTranslatorData& data)
 {
-    LOGINFO("paracl: ir translator: func decl");
     auto&& old_status = ValueStatus{data.current_scope_status};
     data.current_scope_status = ValueStatus::local;
 
@@ -661,8 +641,6 @@ void visit(FunctionDeclaration const & node, llvmIrTranslatorData& data)
 template <>
 llvm::Value* visit(FunctionCall const & node, llvmIrTranslatorData& data)
 {
-    LOGINFO("paracl: ir translator: func call");
-
     auto&& args = node.args();
     auto&& name = node.name();
     auto&& completed_args = std::vector<llvm::Value*>{};
@@ -701,7 +679,6 @@ void visit(FunctionCall const & node, llvmIrTranslatorData& data)
 }
 
 //-----------------------------------------------------------------------------
-
 } /* namespace visit_specializations */
 //-----------------------------------------------------------------------------
 } /* namespace last::node */
@@ -737,12 +714,8 @@ export
 void generate_llvm_ir(std::filesystem::path const & ast_text_representation, 
                       std::filesystem::path const & ir_file)
 {
-    LOGINFO("paracl: ir translator: starting translation from AST to LLVM IR");
-
     auto&& ast = last::read(ast_text_representation); last::dump(ast, "ast.dot", "ast.svg");
     auto&& data = llvmIrTranslatorData{ast_text_representation};
-
-    LOGINFO("paracl: ir translator: generating main function");
 
     auto&& main_type = llvm::FunctionType::get(data.builder.getInt32Ty(), false);
     auto&& current_function = llvm::Function::Create(main_type, llvm::Function::ExternalLinkage, "main", data.module);
@@ -755,22 +728,12 @@ void generate_llvm_ir(std::filesystem::path const & ast_text_representation,
 
     data.builder.CreateRet(compiler::llvm_ir_translator::create_null_Int32(data));
 
-    // if (llvm::verifyModule(data.module, &llvm::errs()))
-    // {
-    //     LOGERR("paracl: ir translator: module verification failed");
-    //     throw std::runtime_error("IR module verification failed");
-    // }
-
-    LOGINFO("paracl: ir translator: writing IR to file: {}", ir_file.string());
-
     auto&& ec = std::error_code{};
     llvm::ToolOutputFile out(ir_file.string(), ec, llvm::sys::fs::OF_None);
     if (ec) throw std::runtime_error("failed to open IR file: " + ec.message());
 
     data.module.print(out.os(), nullptr);
     out.keep();
-
-    LOGINFO("paracl: ir translator: compiling IR to object file: {}", object_file.string());
 }
 
 //-----------------------------------------------------------------------------
