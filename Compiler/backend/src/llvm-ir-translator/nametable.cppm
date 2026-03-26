@@ -7,6 +7,7 @@ module;
 #include <llvm/IR/GlobalVariable.h>
 
 #include <ranges>
+#include <ios>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -29,6 +30,28 @@ namespace compiler::llvm_ir_translator
 export
 enum ValueStatus { global, local };
 
+
+//---------------------------------------------------------------------------------------------------------------
+
+llvm::Function const* get_function_of_value(llvm::Value const* value)
+{
+    if (!value) return nullptr;
+
+    if (auto&& inst = llvm::dyn_cast<llvm::Instruction>(value))
+        return inst->getFunction();
+
+    if (auto&& arg = llvm::dyn_cast<llvm::Argument>(value))
+        return arg->getParent();
+
+    if (auto&& basicBlock = llvm::dyn_cast<llvm::BasicBlock>(value))
+        return basicBlock->getParent();
+
+    if (auto&& func = llvm::dyn_cast<llvm::Function>(value))
+        return func;
+
+    return nullptr;
+}
+
 //---------------------------------------------------------------------------------------------------------------
 
 export class Nametable final
@@ -40,6 +63,7 @@ export class Nametable final
     std::vector<std::unordered_map<std::string_view, std::pair<llvm::Value *, ValueStatus>>> scopes_;
 
     llvm::Value *lookup_(std::string_view name);
+    llvm::Value const *lookup_(std::string_view name) const;
     void declare_(std::string_view name, llvm::Value *, ValueStatus status);
 
   private:
@@ -60,6 +84,7 @@ export class Nametable final
     void force_declare(std::string_view name, llvm::Value *value);
     ValueStatus status(std::string_view name) const;
     bool from_current_scope(std::string_view name) const;
+    bool is_visible_from(std::string_view name, llvm::Function* function) const;
 
     friend void dump(Nametable const & nt)
     {
@@ -169,12 +194,40 @@ bool Nametable::from_current_scope(std::string_view name) const
     return (scopes_.back().find(name) != scopes_.back().end());
 }
 
+//---------------------------------------------------------------------------------------------------------------
+
+bool Nametable::is_visible_from(std::string_view name, llvm::Function* function) const
+{
+    auto&& variable = lookup_(name);
+    if (not variable) return false;
+
+    return
+        (status(name) == ValueStatus::global)
+        or
+        (get_function_of_value(variable) == function);
+}
+
+
 // private
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
 llvm::Value *Nametable::lookup_(std::string_view name)
+{
+    for (auto&& scope : scopes_ | std::views::reverse)
+    {
+        auto&& found = scope.find(name);
+        if (found == scope.end()) continue;
+        return found->second.first;
+    }
+
+    return nullptr;
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+llvm::Value const *Nametable::lookup_(std::string_view name) const
 {
     for (auto&& scope : scopes_ | std::views::reverse)
     {
@@ -195,20 +248,19 @@ void Nametable::declare_(std::string_view name, llvm::Value *value, ValueStatus 
     if (scopes_.empty())
         throw std::runtime_error("cannot declare_ variable: no active scopes");
 
+    auto&& variable = scopes_.back()[name];
+    variable.second = status;
+
     if (is_function(value))
     {
-        scopes_.back()[name].first = value;
+        variable.first = value;
         return;
     }
 
-    auto&& variable = scopes_.back()[name];
-
-    if (status == local)
-        variable.first = builder_.CreateAlloca(value->getType(), nullptr, name);
-    else
+    if (status == global)
         variable.first = new llvm::GlobalVariable(module_, value->getType(), false, llvm::GlobalValue::InternalLinkage, llvm::Constant::getNullValue(value->getType()), name);
-
-    variable.second = status;
+    else
+        variable.first = builder_.CreateAlloca(value->getType(), nullptr, name);
 
     builder_.CreateStore(value, variable.first);
 }

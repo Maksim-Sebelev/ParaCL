@@ -103,26 +103,6 @@ llvm::Value* convert_Int1_to_Int32(llvmIrTranslatorData& data, llvm::Value* valu
 }
 
 //---------------------------------------------------------------------------------------------------------------
-
-llvm::Function* get_function_of_value(llvm::Value* value) {
-    if (!value) return nullptr;
-    
-    if (auto* inst = llvm::dyn_cast<llvm::Instruction>(value)) {
-        return inst->getFunction();
-    }
-    
-    if (auto* arg = llvm::dyn_cast<llvm::Argument>(value)) {
-        return arg->getParent();
-    }
-    
-    if (auto* basicBlock = llvm::dyn_cast<llvm::BasicBlock>(value)) {
-        return basicBlock->getParent();
-    }
-    
-    // Константы, глобальные переменные, функции и т.д. не принадлежат функциям
-    return nullptr;
-}
-//---------------------------------------------------------------------------------------------------------------
 } /* namespace compiler::llvm_ir_translator */
 //---------------------------------------------------------------------------------------------------------------
 
@@ -203,13 +183,8 @@ llvm::Value* visit(Variable const& node, llvmIrTranslatorData& data)
     auto&& variable = data.nametable.get(node.name());
     if (not variable) throw compiler::exceptions::using_undeclarated_variable_error(node);
 
-    // auto&& variable_status = data.nametable.status(node.name());
-    // auto&& variable_function = compiler::llvm_ir_translator::get_function_of_value(variable);
-    // auto&& current_function = data.current_function->getParent();
-    
-    // if (variable_status == ValueStatus::local && variable_function && variable_function != current_function) {
-    //     throw compiler::exceptions::using_variable_from_parent_function_scope_error(node);
-    // }
+    if (not data.nametable.is_visible_from(node.name(), data.current_function->getParent()))
+        throw compiler::exceptions::using_variable_from_parent_function_scope_error(node);
 
     return variable;
 }
@@ -293,6 +268,7 @@ llvm::Value* visit(BinaryOperator const& node, llvmIrTranslatorData& data)
         auto&& variable = static_cast<Variable const &>(node.larg());
         auto&& right = generate_expression(node.rarg(), data);
         data.nametable.set(variable.name(), right, data.current_scope_status);
+
         return right;
     }
 
@@ -434,7 +410,7 @@ void visit(While const& node, llvmIrTranslatorData& data)
 {
     LOGINFO("paracl: ir translator: generating while loop");
 
-    auto&& current_func = data.builder.GetInsertBlock()->getParent();
+    auto&& current_func = data.current_function->getParent();
 
     auto&& cond_block = llvm::BasicBlock::Create(data.context, "while", current_func);
     auto&& body_block = llvm::BasicBlock::Create(data.context, "do", current_func);
@@ -499,7 +475,7 @@ void visit(Condition const& node, llvmIrTranslatorData& data)
 {
     LOGINFO("paracl: ir translator: generating condition (if-else if-else)");
 
-    auto&& current_func = data.builder.GetInsertBlock()->getParent();
+    auto&& current_func = data.current_function->getParent();
 
     auto&& ifs = node.get_ifs();    
     size_t ifs_size = ifs.size();
