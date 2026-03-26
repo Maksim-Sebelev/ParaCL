@@ -240,7 +240,8 @@ else:
 special_expression:
     scope { $$ = std::move($1); }
     | variable AS scope {
-        auto&& node = last::node::BinaryOperator{
+        auto&& node = last::node::BinaryOperator
+        {
             last::node::BinaryOperator::ASGN,
             std::move($1),
             std::move($3)

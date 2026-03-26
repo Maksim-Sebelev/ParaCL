@@ -174,7 +174,11 @@ template <>
 llvm::Value* visit(Variable const& node, llvmIrTranslatorData& data)
 {
     auto&& variable = data.nametable.get(node.name());
-    if (not variable) throw compiler::exceptions::using_undeclarated_variable_error(node);
+    if (not variable)
+        throw compiler::exceptions::using_undeclarated_variable_error(node);
+
+    if (data.nametable.is_function(node.name()))
+        throw compiler::exceptions::using_function_as_int(node);
 
     if (not data.nametable.is_visible_from(node.name(), data.current_function->getParent()))
         throw compiler::exceptions::using_variable_from_parent_function_scope_error(node);

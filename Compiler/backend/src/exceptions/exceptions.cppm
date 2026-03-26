@@ -97,6 +97,17 @@ public:
 };
 
 export
+class using_function_as_int : public error
+{
+public:
+    using_function_as_int(last::node::Variable const & node)
+    {
+        auto&& explain = "Using '" + std::string(node.name()) + "' as integer, but it has function type.";
+        msg_ = show_error(explain, node.location());
+    }
+};
+
+export
 class using_undeclarated_function : public error
 {
 public:

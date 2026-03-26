@@ -81,6 +81,7 @@ export class Nametable final
     ValueStatus status(std::string_view name) const;
     bool from_current_scope(std::string_view name) const;
     bool is_visible_from(std::string_view name, llvm::Function* function) const;
+    bool is_function(std::string_view name) const;
 
     friend void dump(Nametable const & nt)
     {
@@ -199,6 +200,17 @@ bool Nametable::is_visible_from(std::string_view name, llvm::Function* function)
         (get_function_of_value(variable) == function);
 }
 
+//---------------------------------------------------------------------------------------------------------------
+
+bool Nametable::is_function(std::string_view name) const
+{
+    auto&& variable = lookup_(name);
+    if (not variable) return false;
+
+    return is_function(variable);
+}
+
+//---------------------------------------------------------------------------------------------------------------
 
 // private
 //---------------------------------------------------------------------------------------------------------------
