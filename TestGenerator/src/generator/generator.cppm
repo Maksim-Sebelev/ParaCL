@@ -34,12 +34,17 @@ Global plan:
 
 class Context
 {
+private:
+
 
 };
 
 class ASTBuilder
 {
 
+public:
+    last::node::BasicNode generate_new_variable();
+    last::node::BasicNode generate_existing_variable(unique_name_id_t id);
 };
 
 

@@ -18,7 +18,7 @@ import ast_serializer;
 import global_create_settings;
 
 //---------------------------------------------------------------------------------------------------------------
-namespace test_generator::names_generator
+namespace test_generator
 {
 //---------------------------------------------------------------------------------------------------------------
 
@@ -47,7 +47,7 @@ public:
 };
 
 //---------------------------------------------------------------------------------------------------------------
-} /* namespace test_generator::names_generator */
+} /* namespace test_generator */
 //---------------------------------------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------------------------------------------
@@ -56,11 +56,11 @@ namespace last::node::visit_specializations
 //---------------------------------------------------------------------------------------------------------------
 
 template <>
-void visit(test_generator::names_generator::UninitializedNameDeclaration const&)
+void visit(test_generator::UninitializedNameDeclaration const&)
 {}
 
 template <>
-void visit(test_generator::names_generator::UninitializedNameReUse const&)
+void visit(test_generator::UninitializedNameReUse const&)
 {}
 
 //---------------------------------------------------------------------------------------------------------------
@@ -69,11 +69,11 @@ void visit(test_generator::names_generator::UninitializedNameReUse const&)
 
 //---------------------------------------------------------------------------------------------------------------
 
-SPECIALIZE_CREATE(test_generator::names_generator::UninitializedNameDeclaration)
-SPECIALIZE_CREATE(test_generator::names_generator::UninitializedNameReUse)
+SPECIALIZE_CREATE(test_generator::UninitializedNameDeclaration)
+SPECIALIZE_CREATE(test_generator::UninitializedNameReUse)
 
 //--------------------------------------------- ------------------------------------------------------------------
-namespace test_generator::names_generator
+namespace test_generator
 {
 //---------------------------------------------------------------------------------------------------------------
 
@@ -163,5 +163,5 @@ public:
 };
 
 //---------------------------------------------------------------------------------------------------------------
-} /* namespace test_generator::names_generator */
+} /* namespace test_generator */
 //---------------------------------------------------------------------------------------------------------------
