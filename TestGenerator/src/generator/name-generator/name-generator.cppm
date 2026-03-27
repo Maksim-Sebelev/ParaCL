@@ -157,6 +157,8 @@ public:
             node =  generate_new_variable();
         else if (node.is_a<UninitializedNameReUse>())
             node = generate_existing_variable(static_cast<UninitializedNameReUse const &>(node).id());
+        else
+            return;
     }
 };
 

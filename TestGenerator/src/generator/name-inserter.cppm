@@ -92,7 +92,6 @@ void visit(last::node::While& node, name_generator::NameGenerator& name_generato
     test_generator::name_inserter::insert_names(node.body(), name_generator);
 }
 
-
 template <>
 void visit(last::node::If& node, name_generator::NameGenerator& name_generator)
 {
@@ -102,7 +101,6 @@ void visit(last::node::If& node, name_generator::NameGenerator& name_generator)
     test_generator::name_inserter::insert_names(node.condition(), name_generator);
     test_generator::name_inserter::insert_names(node.body(), name_generator);
 }
-
 
 template <>
 void visit(last::node::Else& node, name_generator::NameGenerator& name_generator)
@@ -128,11 +126,8 @@ void visit(last::node::Condition& node, name_generator::NameGenerator& name_gene
 }
 
 template <>
-[[noreturn]]
 void visit(test_generator::name_generator::Variable & node, name_generator::NameGenerator& name_generator)
-{
-    /* if we are here, we have already set this variable, so do nothing */
-}
+{}
 
 template <> void visit(test_generator::name_generator::UninitializedNameDeclaration & node, name_generator::NameGenerator& name_generator) = delete;
 template <> void visit(test_generator::name_generator::UninitializedNameReUse       & node, name_generator::NameGenerator& name_generator) = delete;

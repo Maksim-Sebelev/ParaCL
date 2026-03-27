@@ -23,13 +23,6 @@ namespace test_generator
 //---------------------------------------------------------------------------------------------------------------
 
 
-struct NodeValue
-{
-    last::node::BasicNode node;
-    int value;
-    std::string print_output; 
-};
-
 /*
 
 Global plan:
@@ -39,12 +32,21 @@ Global plan:
 
 */
 
+class Context
+{
+
+};
+
+class ASTBuilder
+{
+
+};
 
 
 class AstGenerator
 {
 private:
-    using NodeCreaterSignature = NodeValue(std::mt19937&, nametable::Nametable&);
+    using NodeCreaterSignature = last::node::BasicNode(std::mt19937&, nametable::Nametable&);
     using NodeCreator = std::function<NodeCreaterSignature>;
 
 private:
@@ -110,10 +112,20 @@ int compute_binary_op(last::node::BinaryOperator::BinaryOperatorT op, int left, 
     }
 }
 
+
+enum NodeID
+{
+    NumberLiteral = 0,
+    StringLiteral,
+    Variable,
+    BinaryOperator,
+    Print,
+};
+
 void initialize_generators()
 {
     node_generators[0] = 
-        [](auto& rng, auto& nametable) -> NodeValue
+        [](auto& rng, auto& nametable) -> last::node::BasicNode
     {
         int value = std::uniform_int_distribution<int>{-100, 100}(rng);
         return {
@@ -124,7 +136,7 @@ void initialize_generators()
     };
 
     node_generators[1] = 
-        [](auto& rng, auto& nametable) -> NodeValue
+        [](auto& rng, auto& nametable) -> last::node::BasicNode
     {
         std::string strLiteral{"Text"};
         for (size_t i = 0, factor = std::uniform_int_distribution<size_t>{0, 2}(rng);
@@ -140,7 +152,7 @@ void initialize_generators()
     };
     
     node_generators[2] = 
-        [](auto& rng, auto& nametable) -> NodeValue
+        [](auto& rng, auto& nametable) -> last::node::BasicNode
     {
         std::string var_name = "var_" + std::to_string(
             std::uniform_int_distribution<int>{0, 2}(rng)
@@ -165,7 +177,7 @@ void initialize_generators()
     };
     
     node_generators[3] = 
-        [](auto& rng, auto& nametable) -> NodeValue
+        [](auto& rng, auto& nametable) -> last::node::BasicNode
     {
         
         std::array<last::node::BinaryOperator::BinaryOperatorT, 13> valid_ops = {
@@ -201,7 +213,7 @@ void initialize_generators()
     };
     
     node_generators[4] = 
-        [](auto& rng, auto& nametable) -> NodeValue
+        [](auto& rng, auto& nametable) -> last::node::BasicNode
     {
         std::vector<last::node::BasicNode> args;
         std::ostringstream print_stream;
@@ -210,7 +222,7 @@ void initialize_generators()
         for (size_t i = 0; i < num_args; ++i)
         {
             size_t arg_type = std::uniform_int_distribution<size_t>{0, 2}(rng);
-            NodeValue arg_nv;
+            last::node::BasicNode arg_nv;
             
             if (arg_type == 0 || arg_type == 1)
             {
@@ -238,7 +250,6 @@ void initialize_generators()
 
 NodeValue generate_assignment(std::mt19937& rng, nametable::Nametable& nametable)
 {
-    
     std::string var_name = "var_" + std::to_string(
         std::uniform_int_distribution<int>{0, 2}(rng)
     );
@@ -246,7 +257,7 @@ NodeValue generate_assignment(std::mt19937& rng, nametable::Nametable& nametable
     nametable.set_value(var_name, 0);
 
     size_t right_type = std::uniform_int_distribution<size_t>{0, 3}(rng);
-    NodeValue right_nv = node_generators[right_type](rng, nametable);
+    last::node::BasicNode right_nv = node_generators[right_type](rng, nametable);
     
     
     int new_value = right_nv.value;
@@ -296,7 +307,7 @@ last::AST generate_random_ast()
         
         for (size_t i = 0; i < numberOfStatements; ++i)
         {
-            NodeValue stmt_nv;
+            last::node::BasicNode stmt_nv;
 
             size_t stmt_type = std::uniform_int_distribution<size_t>{0, 100}(global_rng);
 
