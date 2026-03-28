@@ -137,7 +137,6 @@ statement:
     | while                 { $$ = std::move($1); }
     | special_expression    { $$ = std::move($1); }
     | expression         SC { $$ = std::move($1); }
-    | print              SC { $$ = std::move($1); }
     | return             SC { $$ = std::move($1); }
     |                    SC { $$ = last::node::create(last::node::Scope{}); }
     ;
@@ -262,6 +261,7 @@ expression:
     | string          { $$ = std::move($1); }
     | scan            { $$ = std::move($1); }
     | function_call   { $$ = std::move($1); }
+    | print           { $$ = std::move($1); }
     ;
 
 number:
