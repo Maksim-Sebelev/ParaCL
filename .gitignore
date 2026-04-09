@@ -3,7 +3,6 @@ build/
 .venv/
 tmp/
 third-party/
-Snippy/
 *.ast.json
 *.ll
 CMakeUserPresets.json
