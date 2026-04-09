@@ -19,7 +19,7 @@ export void compile(std::filesystem::path const & ast_json, std::filesystem::pat
     llvm_ir_translator::generate_llvm_ir(ast_json, tmp_ir_file);
 
     auto&& compile_commmand = std::ostringstream{};
-    compile_commmand << "clang++ -O3 " << tmp_ir_file.string() << " -o " << executable.string();
+    compile_commmand << "clang -O3 " << tmp_ir_file.string() << " -o " << executable.string();
 
     auto&& compile_command_exit_code = std::system(compile_commmand.str().c_str());
 

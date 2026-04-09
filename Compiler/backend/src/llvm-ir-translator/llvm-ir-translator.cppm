@@ -53,7 +53,7 @@ struct llvmIrTranslatorData
     llvm::IRBuilder<> builder;
     Nametable nametable;
     functions_table::FunctionsTable functable;
-    llvm::BasicBlock* current_function;
+    llvm::BasicBlock* current_block;
     ValueStatus current_scope_status;
 
     LibcStandartFunctions libc_standart_functions;
@@ -61,14 +61,14 @@ struct llvmIrTranslatorData
     llvmIrTranslatorData(std::filesystem::path const &source) :
         context(), module(source.string(), context), builder(context),
         nametable(module, builder), functable(builder), libc_standart_functions(module, builder),
-        current_function(nullptr), current_scope_status(ValueStatus::global)
+        current_block(nullptr), current_scope_status(ValueStatus::global)
     {
         module.setTargetTriple(llvm::sys::getDefaultTargetTriple());
     }
 
-    void set_function(llvm::BasicBlock* function)
+    void set_current_block(llvm::BasicBlock* function)
     {
-        current_function = function;
+        current_block = function;
         builder.SetInsertPoint(function);
     }
 };
@@ -180,7 +180,7 @@ llvm::Value* visit(Variable const& node, llvmIrTranslatorData& data)
     if (data.nametable.is_function(node.name()))
         throw compiler::exceptions::using_function_as_int(node);
 
-    if (not data.nametable.is_visible_from(node.name(), data.current_function->getParent()))
+    if (not data.nametable.is_visible_from(node.name(), data.current_block->getParent()))
         throw compiler::exceptions::using_variable_from_parent_function_scope_error(node);
 
     return variable;
@@ -404,14 +404,15 @@ void visit(Print const& node, llvmIrTranslatorData& data)
 template <>
 void visit(While const& node, llvmIrTranslatorData& data)
 {
-    auto&& current_func = data.current_function->getParent();
+    auto&& current_func = data.current_block->getParent();
 
     auto&& cond_block = llvm::BasicBlock::Create(data.context, "while", current_func);
     auto&& body_block = llvm::BasicBlock::Create(data.context, "do", current_func);
     auto&& end_block = llvm::BasicBlock::Create(data.context, "done", current_func);
 
     data.builder.CreateBr(cond_block);
-    data.builder.SetInsertPoint(cond_block);
+
+    data.set_current_block(cond_block);
 
     auto&& cond_val = generate_expression(node.condition(), data);
     auto&& cond_i1 = data.builder.CreateICmpNE(cond_val, 
@@ -419,11 +420,11 @@ void visit(While const& node, llvmIrTranslatorData& data)
 
     data.builder.CreateCondBr(cond_i1, body_block, end_block);
 
-    data.builder.SetInsertPoint(body_block);
+    data.set_current_block(body_block);
     generate_statement(node.body(), data);
     data.builder.CreateBr(cond_block);
 
-    data.builder.SetInsertPoint(end_block);
+    data.set_current_block(end_block);
 }
 
 //-----------------------------------------------------------------------------
@@ -433,9 +434,7 @@ void visit(While const& node, llvmIrTranslatorData& data)
 template <>
 void visit(If const& node, llvmIrTranslatorData& data, llvm::BasicBlock* self_condition, llvm::BasicBlock* self_body, llvm::BasicBlock* next, llvm::BasicBlock* end)
 {
-    /* expect, thah SetInsertPoint already done */
-
-    data.builder.SetInsertPoint(self_condition);
+    data.set_current_block(self_condition);
     auto&& if_condition = generate_expression(node.condition(), data);
 
     auto&& if_condition_bool = data.builder.CreateICmpNE(if_condition, 
@@ -443,9 +442,12 @@ void visit(If const& node, llvmIrTranslatorData& data, llvm::BasicBlock* self_co
 
     data.builder.CreateCondBr(if_condition_bool, self_body, next ? next : end);
 
-    data.builder.SetInsertPoint(self_body);
+    data.set_current_block(self_body);
+
     generate_statement(node.body(), data);
+
     data.builder.CreateBr(end);
+    data.set_current_block(end);
 }
 
 //-----------------------------------------------------------------------------
@@ -464,7 +466,7 @@ void visit(Else const& node, llvmIrTranslatorData& data)
 template <>
 void visit(Condition const& node, llvmIrTranslatorData& data)
 {
-    auto&& current_func = data.current_function->getParent();
+    auto&& current_func = data.current_block->getParent();
 
     auto&& ifs = node.get_ifs();    
     size_t ifs_size = ifs.size();
@@ -505,12 +507,12 @@ void visit(Condition const& node, llvmIrTranslatorData& data)
     /* create else basic block always, cause its simply */
     if (else_block)
     {
-        data.builder.SetInsertPoint(else_block);
+        data.set_current_block(else_block);    
         generate_statement(node.get_else(), data);
         data.builder.CreateBr(condition_end);
     }
 
-    data.builder.SetInsertPoint(condition_end);
+    data.set_current_block(condition_end);
 }
 
 //-----------------------------------------------------------------------------
@@ -586,9 +588,9 @@ llvm::Value* visit(FunctionDeclaration const & node, llvmIrTranslatorData& data)
 
     auto&& function = llvm::Function::Create(std::move(type), llvm::Function::InternalLinkage, mangled_name, data.module);
 
-    auto&& old_function = static_cast<llvm::BasicBlock*>(data.current_function);
+    auto&& old_function = static_cast<llvm::BasicBlock*>(data.current_block);
     auto&& entry_block = llvm::BasicBlock::Create(data.context,  mangled_name + "-entry", function);
-    data.set_function(entry_block);
+    data.set_current_block(entry_block);
 
     /* set  arguments name and put it in nametable */
     auto&& func_args = function->args(); assert(std::distance(func_args.begin(), func_args.end()) == args.size());
@@ -607,6 +609,11 @@ llvm::Value* visit(FunctionDeclaration const & node, llvmIrTranslatorData& data)
     }
 
     assert(node.body().is_a<Scope>());
+
+    auto&& last_statement = static_cast<Scope const&>(node.body()).back();
+    if ((not last_statement.is_a<Return>()) and (not last_statement.supports<generatable_expression>()))
+        throw compiler::exceptions::last_function_statement_is_not_return_and_cannot_be_converted_to_expression(node);
+
     auto&& body = generate_expression(node.body(), data);
 
     /*
@@ -622,8 +629,8 @@ llvm::Value* visit(FunctionDeclaration const & node, llvmIrTranslatorData& data)
     /* leave scope for function args */
     data.nametable.leave_scope();
 
-    /* back into the main */
-    data.set_function(old_function);
+    /* back into the previous */
+    data.set_current_block(old_function);
 
     data.current_scope_status = old_status;
 
@@ -722,11 +729,11 @@ void generate_llvm_ir(std::filesystem::path const & ast_text_representation,
     auto&& data = llvmIrTranslatorData{ast_text_representation};
 
     auto&& main_type = llvm::FunctionType::get(data.builder.getInt32Ty(), false);
-    auto&& current_function = llvm::Function::Create(main_type, llvm::Function::ExternalLinkage, "main", data.module);
+    auto&& main_function = llvm::Function::Create(main_type, llvm::Function::ExternalLinkage, "main", data.module);
 
-    auto&& entry_block = llvm::BasicBlock::Create(data.context, "entry", current_function);
-    data.current_function = entry_block;
-    data.builder.SetInsertPoint(entry_block);
+    auto&& entry_block = llvm::BasicBlock::Create(data.context, "entry", main_function);
+    
+    data.set_current_block(entry_block);
 
     last::node::generate_statement(ast.root(), data);
 

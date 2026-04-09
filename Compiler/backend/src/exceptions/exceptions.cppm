@@ -129,5 +129,15 @@ public:
     }
 };
 
+export
+class last_function_statement_is_not_return_and_cannot_be_converted_to_expression : public error
+{
+public:
+    last_function_statement_is_not_return_and_cannot_be_converted_to_expression(last::node::FunctionDeclaration const & node)
+    {
+        auto&& explain = "Last statement in '" + std::string(node.name()) + "' isn`t 'return' and cannot be converted to expression.";
+        msg_ = show_error(explain, node.location());
+    }
+};
 
 } /* namespace compiler::exceptions */
