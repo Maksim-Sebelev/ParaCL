@@ -88,14 +88,14 @@ target_sources(${COMPILER_OPTIONS_LIB}
 add_llvm_to_target(${COMPILER_OPTIONS_LIB})
 
 # =================================================================================================
-# compiler exceptions
+# compiler errors
 
-set(COMPILER_EXCEPTIONS_LIB exceptions)
+set(COMPILER_EXCEPTIONS_LIB errors)
 add_library(${COMPILER_EXCEPTIONS_LIB} EXCLUDE_FROM_ALL)
 
-set(COMPILER_EXCEPTIONS_SRC_DIR ${COMPILE_SRC_DIR}/exceptions)
+set(COMPILER_EXCEPTIONS_SRC_DIR ${COMPILE_SRC_DIR}/errors)
 set(COMPILER_EXCEPTIONS_SRC
-    ${COMPILER_EXCEPTIONS_SRC_DIR}/exceptions.cppm
+    ${COMPILER_EXCEPTIONS_SRC_DIR}/errors.cppm
 )
 
 target_sources(${COMPILER_EXCEPTIONS_LIB}

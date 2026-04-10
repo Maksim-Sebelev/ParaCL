@@ -83,10 +83,10 @@ std::string get_token_line(const yy::location &loc)
 %left REM
 %right NEG NOT
 
-%precedence IN
-%precedence <int> NUM
+%token <char> IN
+%token <int> NUM
 %token <std::string> STRING
-%precedence <std::string> NAME
+%token <std::string> NAME
 
 %nonassoc IF
 %nonassoc ELIF

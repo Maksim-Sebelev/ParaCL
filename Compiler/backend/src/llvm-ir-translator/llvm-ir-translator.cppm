@@ -142,13 +142,13 @@ namespace visit_specializations
 template <>
 llvm::Value* visit(NumberLiteral const& node, llvmIrTranslatorData& data)
 {
-    auto&& tmp = llvm::ConstantInt::get(data.builder.getInt32Ty(), node.value());
-    return tmp;
+    return llvm::ConstantInt::get(data.builder.getInt32Ty(), node.value());
 }
 
 template <>
 void visit(NumberLiteral const& node, llvmIrTranslatorData& data)
 {
+    compiler::warning::expression_result_unused(node.location());
     std::ignore = visit<NumberLiteral, llvm::Value*, llvmIrTranslatorData&>(node, data);
 }
 
@@ -164,6 +164,7 @@ llvm::Value* visit(StringLiteral const& node, llvmIrTranslatorData& data)
 template <>
 void visit(StringLiteral const& node, llvmIrTranslatorData& data)
 {
+    compiler::warning::expression_result_unused(node.location());
     std::ignore = visit<StringLiteral, llvm::Value*, llvmIrTranslatorData&>(node, data);
 }
 
@@ -175,13 +176,13 @@ llvm::Value* visit(Variable const& node, llvmIrTranslatorData& data)
 {
     auto&& variable = data.nametable.get(node.name());
     if (not variable)
-        throw compiler::exceptions::using_undeclarated_variable_error(node);
+        throw compiler::error::using_undeclarated_variable_error(node);
 
     if (data.nametable.is_function(node.name()))
-        throw compiler::exceptions::using_function_as_int(node);
+        throw compiler::error::using_function_as_int(node);
 
     if (not data.nametable.is_visible_from(node.name(), data.current_block->getParent()))
-        throw compiler::exceptions::using_variable_from_parent_function_scope_error(node);
+        throw compiler::error::using_variable_from_parent_function_scope_error(node);
 
     return variable;
 }
@@ -189,6 +190,7 @@ llvm::Value* visit(Variable const& node, llvmIrTranslatorData& data)
 template <>
 void visit(Variable const& node, llvmIrTranslatorData& data)
 {
+    compiler::warning::expression_result_unused(node.location());
     std::ignore = visit<Variable, llvm::Value*, llvmIrTranslatorData&>(node, data);
 }
 
@@ -210,6 +212,7 @@ llvm::Value* visit(Scan const& node, llvmIrTranslatorData& data)
 template <>
 void visit(Scan const& node, llvmIrTranslatorData& data)
 {
+    compiler::warning::expression_result_unused(node.location());
     std::ignore = visit<Scan, llvm::Value*, llvmIrTranslatorData&>(node, data);
 }
 
@@ -248,6 +251,7 @@ template <>
 void visit(UnaryOperator const& node, llvmIrTranslatorData& data)
 {
     std::ignore = visit<UnaryOperator, llvm::Value*, llvmIrTranslatorData&>(node, data);
+    compiler::warning::expression_result_unused(node.location());
 }
 
 //-----------------------------------------------------------------------------
@@ -257,7 +261,9 @@ void visit(UnaryOperator const& node, llvmIrTranslatorData& data)
 template <>
 llvm::Value* visit(BinaryOperator const& node, llvmIrTranslatorData& data)
 {
-    if (node.type() == BinaryOperator::ASGN)
+    auto&& type = node.type();
+
+    if (type == BinaryOperator::ASGN)
     {
         auto&& variable = static_cast<Variable const &>(node.larg());
         auto&& right = generate_expression(node.rarg(), data);
@@ -269,7 +275,7 @@ llvm::Value* visit(BinaryOperator const& node, llvmIrTranslatorData& data)
     auto&& left  = generate_expression(node.larg(), data);
     auto&& right = generate_expression(node.rarg(), data);
 
-    switch (node.type())
+    switch (type)
     {
         case BinaryOperator::ADD: return data.builder.CreateAdd (left, right, "__add");
         case BinaryOperator::SUB: return data.builder.CreateSub (left, right, "__sub");
@@ -329,9 +335,8 @@ llvm::Value* visit(BinaryOperator const& node, llvmIrTranslatorData& data)
     auto&& name     = variable.name();
     auto&& value    = data.nametable.get(name);
 
-    switch(node.type())
+    switch(type)
     {
-        case BinaryOperator::ASGN:    break;
         case BinaryOperator::ADDASGN: right = data.builder.CreateAdd (value, right, "__addAsgnResult"); break;
         case BinaryOperator::SUBASGN: right = data.builder.CreateSub (value, right, "__subAsgnResult"); break;
         case BinaryOperator::MULASGN: right = data.builder.CreateMul (value, right, "__mulAsgnResult"); break;
@@ -352,6 +357,17 @@ template <>
 void visit(BinaryOperator const& node, llvmIrTranslatorData& data)
 {
     std::ignore = visit<BinaryOperator, llvm::Value*, llvmIrTranslatorData&>(node, data);
+
+    switch (node.type())
+    {
+        case BinaryOperator::ASGN:
+        case BinaryOperator::ADDASGN:
+        case BinaryOperator::SUBASGN:
+        case BinaryOperator::MULASGN:
+        case BinaryOperator::DIVASGN:
+        case BinaryOperator::REMASGN: break;
+        default: compiler::warning::expression_result_unused(node.location()); break;
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -612,7 +628,7 @@ llvm::Value* visit(FunctionDeclaration const & node, llvmIrTranslatorData& data)
 
     auto&& last_statement = static_cast<Scope const&>(node.body()).back();
     if ((not last_statement.is_a<Return>()) and (not last_statement.supports<generatable_expression>()))
-        throw compiler::exceptions::last_function_statement_is_not_return_and_cannot_be_converted_to_expression(node);
+        throw compiler::error::last_function_statement_is_not_return_and_cannot_be_converted_to_expression(node);
 
     auto&& body = generate_expression(node.body(), data);
 
@@ -668,15 +684,15 @@ llvm::Value* visit(FunctionCall const & node, llvmIrTranslatorData& data)
 
     auto&& value = data.nametable.get(name);
     if (not value)
-        throw compiler::exceptions::using_undeclarated_function(node);
+        throw compiler::error::using_undeclarated_function(node);
 
     auto&& function = llvm::dyn_cast<llvm::Function>(value);
 
     if (not function)
-        throw compiler::exceptions::using_int_as_function_error(node);
+        throw compiler::error::using_int_as_function_error(node);
 
     if (function->arg_size() != completed_args.size())
-        throw compiler::exceptions::function_alias_arguments_mismatch_error(node, function, completed_args);
+        throw compiler::error::function_alias_arguments_mismatch_error(node, function, completed_args);
 
     return data.builder.CreateCall(function, completed_args, name);;
 }
@@ -686,6 +702,7 @@ llvm::Value* visit(FunctionCall const & node, llvmIrTranslatorData& data)
 template <>
 void visit(FunctionCall const & node, llvmIrTranslatorData& data)
 {
+    compiler::warning::expression_result_unused(node.location());
     std::ignore = visit<FunctionCall, llvm::Value*, llvmIrTranslatorData&>(node, data);
 }
 

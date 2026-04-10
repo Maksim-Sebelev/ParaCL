@@ -7,15 +7,26 @@ module;
 #include <string>
 #include <string_view>
 #include <cassert>
+#include <iostream>
 
 #include <llvm/IR/Function.h>
+
+#define RED "\e[0;31m"
+#define VIOLET "\e[0;35m"
+#define GREEN "\e[0;32m"
+
+#define BOLD "\033[1m"
+
+#define WARNING VIOLET BOLD
+#define ERROR   RED BOLD
+
+#define RESET "\e[0m"
 
 export module compiler_exceptions;
 
 export import thelast;
 
-
-namespace compiler::exceptions
+namespace compiler
 {
 
 std::string to_string(last::node::CodeLocation const & location)
@@ -33,24 +44,34 @@ std::string mark_error(last::node::CodeLocation const & location)
         (location.code_excerpt().length() - location.column_begin()); assert(location.code_excerpt().length() >= location.column_begin());
 
     auto&& mark = std::ostringstream{};
-    mark << std::string(string_begin_offset, ' ') << "^";
+    mark << GREEN BOLD << std::string(string_begin_offset, ' ') << "^";
 
     if (token_length > 1)
         mark << std::string(token_length - 1, '~');
 
+    mark << RESET;
+
     return mark.str();
 }
 
-std::string show_error(std::string msg, last::node::CodeLocation const & location)
+enum class ProblemStatus
+{
+    Warning, Error
+};
+
+std::string show_error(std::string msg, last::node::CodeLocation const & location, ProblemStatus status = ProblemStatus::Error)
 {
     auto&& explain = std::ostringstream{};
-    explain << to_string(location) << ": " << msg << "\n";
+    explain << BOLD << to_string(location) << ": " RESET << ((status == ProblemStatus::Error) ? ERROR "error:" : WARNING "warning:") << " " RESET BOLD << msg << RESET "\n";
 
     auto&& indent = " " + std::to_string(location.line_begin()) + " | ";
     auto&& indent_length = indent.length();
     explain << indent << location.code_excerpt() << "\n" << std::string(indent_length - 2, ' ') << "| " << mark_error(location);
     return explain.str();
 }
+
+namespace error
+{
 
 class error : public std::exception
 {
@@ -66,7 +87,7 @@ class using_undeclarated_variable_error : public error
 public:
     using_undeclarated_variable_error(last::node::Variable const & node)
     {
-        auto&& explain = "Using undeclarated variable: '" + std::string(node.name()) + "'";
+        auto&& explain = "use of undeclared identifier '" + std::string(node.name()) + "'";
         msg_ = show_error(explain, node.location());
     }
 };
@@ -113,7 +134,7 @@ class using_undeclarated_function : public error
 public:
     using_undeclarated_function(last::node::FunctionCall const & node)
     {
-        auto&& explain = "Call undeclarated function '" + std::string(node.name()) + "'";
+        auto&& explain = "call to undeclared function '" + std::string(node.name()) + "'";
         msg_ = show_error(explain, node.location());
     }
 };
@@ -135,9 +156,23 @@ class last_function_statement_is_not_return_and_cannot_be_converted_to_expressio
 public:
     last_function_statement_is_not_return_and_cannot_be_converted_to_expression(last::node::FunctionDeclaration const & node)
     {
-        auto&& explain = "Last statement in '" + std::string(node.name()) + "' isn`t 'return' and cannot be converted to expression.";
+        auto&& explain = "Last statement in function '" + std::string(node.name()) + "' isn`t 'return' and cannot be converted to expression";
         msg_ = show_error(explain, node.location());
     }
 };
 
-} /* namespace compiler::exceptions */
+}
+
+namespace warning
+{
+
+export
+void expression_result_unused(last::node::CodeLocation const & location, std::ostream& os = std::cerr)
+{
+    auto&& explain = "expression result unused";
+    os << show_error(explain, location, ProblemStatus::Warning) << "\n";
+}
+
+} /* namespace warning */
+
+} /* namespace compiler */

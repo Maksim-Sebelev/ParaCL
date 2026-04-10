@@ -359,12 +359,6 @@ public:
     int value() const noexcept
     { return value_; };
 
-    NumberLiteral(const NumberLiteral& other) : value_(other.value_)
-    {}
-
-    NumberLiteral(NumberLiteral&& other): value_(other.value_)
-    {}
-
 private:
     mutable CodeLocation location_;
 public:
