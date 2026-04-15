@@ -1,47 +1,64 @@
 cmake_minimum_required(VERSION 3.30)
 
 project(ParaCL
-    VERSION 5.1
+    LANGUAGES CXX
+    VERSION 6.0
 )
 
-set(PARACL_SRC_DIR ${PROJECT_SOURCE_DIR})
+# =================================================================================================
 
-set(PARACL_SNIPPY_SRC_DIR ${PARACL_SRC_DIR}/ParaCL-snippy)
-set(PARACL_FRONTEND_SRC_DIR ${PARACL_SRC_DIR}/Frontend)
-set(PARACL_COMPILER_SRC_DIR ${PARACL_SRC_DIR}/Compiler)
+if (NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 20)
+else()
+  if (CMAKE_CXX_STANDARD LESS 20)
+    message(FATAL_ERROR "CMAKE_CXX_STANDARD requires to be greater or equal than 20, but given ${CMAKE_CXX_STANDARD}")
+  endif(CMAKE_CXX_STANDARD LESS 20)
+endif()
 
-set(PARACL_SUBPROJECTS_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/subprojects)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(PARACL_SNIPPY_BINARY_DIR ${PARACL_SUBPROJECTS_BINARY_DIR}/TestGenerator)
-set(PARACL_FRONTEND_BINARY_DIR ${PARACL_SUBPROJECTS_BINARY_DIR}/Frontend)
-set(PARACL_COMPILER_BINARY_DIR ${PARACL_SUBPROJECTS_BINARY_DIR}/Compiler)
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
 
-set(PARACL_SNIPPY_EXE paracl-snippy)
-set(PARACL_FRONTEND_EXE paracl-front)
-set(PARACL_COMPILER_EXE paracl)
+# ===========================================================================
+
+set(PARACL_VERSION ${PROJECT_VERSION})
+
+
+set(PARACL_SRC_DIR ${PROJECT_SOURCE_DIR}/src)
+
+# ===========================================================================
+
+add_subdirectory(${PARACL_SRC_DIR}/options)
+add_subdirectory(${PARACL_SRC_DIR}/frontend)
+add_subdirectory(${PARACL_SRC_DIR}/backend)
+
+# ===========================================================================
+
+set(PARACL paracl)
+add_executable(${PARACL})
+
+target_sources(${PARACL}
+PRIVATE
+    ${PARACL_SRC_DIR}/paracl.cpp   
+)
+
+target_link_libraries(${PARACL}
+PRIVATE
+    paracl-options
+    paracl-options-reader
+    paracl-frontend
+    paracl-backend
+)
+
+# ===========================================================================
+# add test generator
+
+set(PARACL_SNIPPY_SRC_DIR ${PROJECT_SOURCE_DIR}/ParaCL-snippy)
+set(PARACL_SNIPPY_BINARY_DIR ${PROJECT_BINARY_DIR}/ParaCL-snippy)
 
 include(ExternalProject)
-
-ExternalProject_Add(
-    ParaCL-Frontend
-    BINARY_DIR ${PARACL_FRONTEND_BINARY_DIR}
-    SOURCE_DIR ${PARACL_FRONTEND_SRC_DIR}
-    BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR>
-    INSTALL_COMMAND ""
-    CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-    BUILD_ALWAYS ON
-)
-
-message(${PARACL_FRONTEND_BINARY_DIR}/${PARACL_FRONTEND_EXE})
-ExternalProject_Add(
-    ParaCL-Compiler
-    BINARY_DIR ${PARACL_COMPILER_BINARY_DIR}
-    SOURCE_DIR ${PARACL_COMPILER_SRC_DIR}
-    BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR>
-    INSTALL_COMMAND ${CMAKE_COMMAND} -E copy ${PARACL_COMPILER_BINARY_DIR}/${PARACL_COMPILER_EXE} ${CMAKE_CURRENT_BINARY_DIR}/paracl
-    CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DPARACL_FRONT=${PARACL_FRONTEND_BINARY_DIR}/${PARACL_FRONTEND_EXE} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-    BUILD_ALWAYS ON
-)
 
 ExternalProject_Add(
     ParaCL-snippy
@@ -51,16 +68,15 @@ ExternalProject_Add(
     BINARY_DIR ${PARACL_SNIPPY_BINARY_DIR}
     BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR>
     INSTALL_COMMAND ""
-    CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_EXPORT_COMPILE_COMMANDS=${CMAKE_EXPORT_COMPILE_COMMANDS}
     BUILD_ALWAYS OFF
 )
 
-# TESTS
-include(CTest)
-enable_testing()
+# ===========================================================================
 
-add_test(
-    NAME CompilerTests
-    COMMAND ${CMAKE_CTEST_COMMAND} --test-dir ${PARACL_COMPILER_BINARY_DIR}
-    LABELS ParaCL-Compiler
-)
+# TESTS
+
+enable_testing()
+include(CTest)
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
