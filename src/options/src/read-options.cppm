@@ -158,20 +158,20 @@ Suppoted options)"
 
     if (vm.count("help"))
     {
-        std::cout << desc << std::endl;
+        std::cout << desc << "\n" << visible << std::endl;
         std::exit(EXIT_SUCCESS);
     }
-    
+
     if (vm.count("version")) {
         std::cout << "ParaCL-" << PARACL_VERSION << std::endl;
         std::exit(EXIT_SUCCESS);
     }
-    
+
     if (not vm.count("input"))
         throw error::no_input_files_error();
-    
+
     auto&& options = Options{};
-    
+
     options.input_file = vm["input"].as<std::string>();
     if (options.input_file.extension() != ".cl")
         throw error::unsupported_file_format_error(options.input_file);
@@ -182,7 +182,7 @@ Suppoted options)"
         options.tmp_ir_file = options.tmp_directory / options.tmp_ir_file;
         options.tmp_ir_file.replace_extension(".ll");
     }
-    
+
     if (vm.count("optimize-level"))
     {
         std::string opt_level = vm["optimize-level"].as<std::string>();
@@ -204,7 +204,7 @@ Suppoted options)"
 
     if (vm.count("tmp-dir"))
         options.tmp_directory = vm["tmp-dir"].as<std::string>();
-    
+
     options.save_temps = vm.count("save-temps") > 0;
     options.ast_dump = vm.count("ast-dump") > 0;
     options.debug = vm.count("debug") > 0;

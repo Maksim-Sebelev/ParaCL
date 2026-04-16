@@ -1,5 +1,4 @@
 module;
-
 //---------------------------------------------------------------------------------------------------------------
 
 #include <llvm/IR/Module.h>
@@ -7,7 +6,6 @@ module;
 #include <llvm/IR/GlobalVariable.h>
 
 #include <ranges>
-#include <ios>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -16,8 +14,8 @@ module;
 #include <iostream>
 
 //---------------------------------------------------------------------------------------------------------------
-
 export module nametable;
+//---------------------------------------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------------------------------------------
 namespace ParaCL::frontend::llvm_ir_translator
@@ -154,7 +152,7 @@ void Nametable::set(std::string_view name, llvm::Value *value, ValueStatus statu
             found->second.first = value;
             found->second.second = status;
         }
-    
+
         return;
     }
 

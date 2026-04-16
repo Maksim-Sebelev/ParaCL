@@ -59,11 +59,9 @@ cmake --build build;
 ## Использование
 
 ```shell
-build/paracl <source>.cl [ -o <executbale> ];
+build/paracl <source>.cl [ options ];
 ./executable;
 ```
-
-
 
 ## Тестирование
 

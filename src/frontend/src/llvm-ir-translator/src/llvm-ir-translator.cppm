@@ -18,9 +18,6 @@ module;
 #include <utility>
 #include <cassert>
 
-// TODO: delete iostream
-#include <iostream>
-
 //---------------------------------------------------------------------------------------------------------------
 export module llvm_ir_translator;
 //---------------------------------------------------------------------------------------------------------------
@@ -218,9 +215,7 @@ llvm::Value* visit(BinaryOperator const& node, llvmIrTranslatorContext& context)
     if (type == BinaryOperator::ASGN)
     {
         auto&& variable = static_cast<Variable const &>(node.larg());
-        // std::cerr << std::boolalpha << "========= ASSIGN EXPRESSION: " << node.rarg().is_a<Scope>() << " ========== \n";
         auto&& right = generate_expression(node.rarg(), context);
-        // std::cerr << "=========== ASSIGN EXPRESSION END =========";
         context.nametable.set(variable.name(), right, context.current_scope_status);
         return right;
     }
@@ -530,8 +525,6 @@ llvm::Value* visit(Scope const& node, llvmIrTranslatorContext& context)
         generate_statement(last, context);
     else if (not last.supports<generatable_expression>())
         throw frontend::error::using_scope_as_expression_but_last_statement_isnt_expression(last);
-    // else if (in_function)
-        // context.builder.CreateRet(generate_expression(last, context));
     else
         return_value = generate_expression(last, context);
 
