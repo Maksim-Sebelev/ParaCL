@@ -53,27 +53,6 @@ PRIVATE
 )
 
 # ===========================================================================
-# add test generator
-
-set(PARACL_SNIPPY_SRC_DIR ${PROJECT_SOURCE_DIR}/ParaCL-snippy)
-set(PARACL_SNIPPY_BINARY_DIR ${PROJECT_BINARY_DIR}/ParaCL-snippy)
-
-include(ExternalProject)
-
-ExternalProject_Add(
-    ParaCL-snippy
-    GIT_REPOSITORY https://github.com/Maksim-Sebelev/ParaCL-snippy.git
-    GIT_TAG main
-    SOURCE_DIR ${PARACL_SNIPPY_SRC_DIR}
-    BINARY_DIR ${PARACL_SNIPPY_BINARY_DIR}
-    BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR>
-    INSTALL_COMMAND ""
-    CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_EXPORT_COMPILE_COMMANDS=${CMAKE_EXPORT_COMPILE_COMMANDS}
-    BUILD_ALWAYS OFF
-)
-
-# ===========================================================================
-
 # TESTS
 
 enable_testing()
