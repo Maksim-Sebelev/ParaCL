@@ -39,19 +39,22 @@ std::string to_string(ast::node::CodeLocation const & location)
 
 std::string mark_error(ast::node::CodeLocation const & location)
 {
+    auto&& mark = std::ostringstream{};
+
+    // for (auto&& it = location.line_begin(), ite = location.line_end(); it != ite; ++it)
+    // {
     auto&& string_begin_offset = location.column_begin() >= 1 ? location.column_begin() - 1 : 1;
     auto&& token_length = (location.line_begin() == location.line_begin()) ?
         (location.column_end() - location.column_begin()) :
         (location.code_excerpt().length() - location.column_begin());
 
-    auto&& mark = std::ostringstream{};
     mark << GREEN BOLD << std::string(string_begin_offset, ' ') << "^";
 
     if (token_length > 1)
         mark << std::string(token_length - 1, '~');
 
     mark << RESET;
-
+    // }
 
     return mark.str();
 }
@@ -326,6 +329,15 @@ export
 std::ostream& useless_semicolon(ast::node::Semicolon const & node, std::ostream& os = std::cerr)
 {
     auto&& explain = "this semicolon does not match any statement";
+    os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";
+
+    return os;
+}
+
+export
+std::ostream& useless_condition(ast::node::If const & node, std::ostream& os = std::cerr)
+{
+    auto&& explain = "this condition has no action";
     os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";
 
     return os;

@@ -21,7 +21,8 @@ struct Options
 
     std::filesystem::path input_file;
     std::filesystem::path output_file = "a.out";
-    std::filesystem::path tmp_ir_file = "a.ll";
+
+    std::filesystem::path tmp_ir_file;
 
     OptimizeLevel optimize_level = OptimizeLevel::O3;
 

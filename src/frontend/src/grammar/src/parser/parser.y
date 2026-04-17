@@ -113,7 +113,7 @@ program:
         root_scope.location()
             .set_file(current_file)
             .set_code_excerpt("< global scope >")
-            .set_line_begin(1).set_line_begin(1)
+            .set_line_begin(1).set_line_end(1)
             .set_column_begin(1).set_column_end(17)
             ;
         
@@ -516,6 +516,11 @@ unary_operator:
             std::move($2)
         };
         node.location() = parser_location_cast(@1);
+        node.location()
+            .set_line_begin(@1.begin.line).set_line_end(@2.end.line)
+            .set_column_begin(@1.begin.column).set_column_end(@2.end.column)
+            ;
+
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | NOT expression %prec NOT {

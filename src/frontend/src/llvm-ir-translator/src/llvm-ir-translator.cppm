@@ -422,7 +422,8 @@ void visit(If const& node, llvmIrTranslatorContext& context, llvm::BasicBlock* s
     auto&& body = node.body();
     if (not frontend::llvm_ir_translator::is_semicolon_or_empty_scope(body))
         generate_statement(body, context);
-
+    else
+        frontend::warning::useless_condition(node);
 
     context.builder.CreateBr(end);
     context.set_current_block(end);
