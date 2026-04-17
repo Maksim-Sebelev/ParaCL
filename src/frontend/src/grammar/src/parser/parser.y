@@ -62,6 +62,37 @@
     {
         return ParaCL::frontend::grammar::get_token_line(loc, yyin);
     }
+
+    ParaCL::ast::node::CodeLocation get_unary_operator_location(yy::location const & operator_location, yy::location const & arg_location)
+    {
+        return ParaCL::ast::node::CodeLocation
+        {
+            current_file,
+            static_cast<ParaCL::ast::node::CodeLocation::code_place_uint_t>(operator_location.begin.line),
+            static_cast<ParaCL::ast::node::CodeLocation::code_place_uint_t>(arg_location.end.line),
+            static_cast<ParaCL::ast::node::CodeLocation::code_place_uint_t>(operator_location.begin.column),
+            static_cast<ParaCL::ast::node::CodeLocation::code_place_uint_t>(arg_location.end.column),
+            parser_get_token_line(operator_location)
+        };
+    }
+
+    ParaCL::ast::node::CodeLocation get_binary_operator_location
+    (
+        yy::location const & left_location,
+        yy::location const & operator_location,
+        yy::location const & right_location
+    )
+    {
+        return ParaCL::ast::node::CodeLocation
+        {
+            current_file,
+            static_cast<ParaCL::ast::node::CodeLocation::code_place_uint_t>(left_location.begin.line),
+            static_cast<ParaCL::ast::node::CodeLocation::code_place_uint_t>(right_location.end.line),
+            static_cast<ParaCL::ast::node::CodeLocation::code_place_uint_t>(left_location.begin.column),
+            static_cast<ParaCL::ast::node::CodeLocation::code_place_uint_t>(right_location.end.column),
+            parser_get_token_line(operator_location)  // или можно left_location для строки начала выражения
+        };
+    }
 }
 
 %right AS ADDASGN SUBASGN MULASGN DIVASGN REMASGN
@@ -310,7 +341,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | variable ADDASGN expression %prec ADDASGN {
@@ -319,7 +350,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | variable SUBASGN expression %prec SUBASGN {
@@ -328,7 +359,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | variable MULASGN expression %prec MULASGN {
@@ -337,7 +368,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | variable DIVASGN expression %prec DIVASGN {
@@ -346,7 +377,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | variable REMASGN expression %prec REMASGN {
@@ -355,7 +386,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | variable ADDASGN error      { parser_show_error(@3, "expected expression after '+='"); YYABORT; }
@@ -371,7 +402,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | expression SUB expression %prec SUB {
@@ -381,7 +412,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | expression MUL expression %prec MUL {
@@ -391,7 +422,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | expression DIV expression %prec DIV {
@@ -401,7 +432,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | expression REM expression %prec REM {
@@ -411,7 +442,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | expression ISEQ expression %prec ISEQ {
@@ -421,7 +452,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | expression ISNE expression %prec ISNE {
@@ -431,7 +462,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | expression ISAB expression %prec ISAB {
@@ -441,7 +472,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | expression ISABE expression %prec ISABE {
@@ -451,7 +482,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | expression ISLS expression %prec ISLS {
@@ -461,7 +492,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | expression ISLSE expression %prec ISLSE {
@@ -471,7 +502,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | expression OR expression %prec OR {
@@ -481,7 +512,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | expression AND expression %prec AND {
@@ -491,7 +522,7 @@ binary_operator:
             std::move($1),
             std::move($3)
         };
-        node.location() = parser_location_cast(@2);
+        node.location() = get_binary_operator_location(@1, @2, @3);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     ;
@@ -515,12 +546,7 @@ unary_operator:
             ParaCL::ast::node::UnaryOperator::MINUS,
             std::move($2)
         };
-        node.location() = parser_location_cast(@1);
-        node.location()
-            .set_line_begin(@1.begin.line).set_line_end(@2.end.line)
-            .set_column_begin(@1.begin.column).set_column_end(@2.end.column)
-            ;
-
+        node.location() = get_unary_operator_location(@1, @2);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | NOT expression %prec NOT {
@@ -529,7 +555,7 @@ unary_operator:
             ParaCL::ast::node::UnaryOperator::NOT,
             std::move($2)
         };
-        node.location() = parser_location_cast(@1);
+        node.location() = get_unary_operator_location(@1, @2);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     | ADD expression %prec ADD {
@@ -538,7 +564,7 @@ unary_operator:
             ParaCL::ast::node::UnaryOperator::PLUS,
             std::move($2)
         };
-        node.location() = parser_location_cast(@1);
+        node.location() = get_unary_operator_location(@1, @2);
         $$ = ParaCL::ast::node::create(std::move(node));
     }
     ;

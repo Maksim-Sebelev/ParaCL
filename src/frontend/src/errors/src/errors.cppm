@@ -44,7 +44,7 @@ std::string mark_error(ast::node::CodeLocation const & location)
     // for (auto&& it = location.line_begin(), ite = location.line_end(); it != ite; ++it)
     // {
     auto&& string_begin_offset = location.column_begin() >= 1 ? location.column_begin() - 1 : 1;
-    auto&& token_length = (location.line_begin() == location.line_begin()) ?
+    auto&& token_length = (location.line_begin() == location.line_end()) ?
         (location.column_end() - location.column_begin()) :
         (location.code_excerpt().length() - location.column_begin());
 
