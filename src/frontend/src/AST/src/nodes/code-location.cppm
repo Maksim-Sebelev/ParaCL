@@ -45,34 +45,35 @@ public: /* getters */
     { return std::move(code_excerpt_); }
 
 public: /* setters */
-    void set_file(std::string_view file)
-    { file_ = file; }
+    CodeLocation& set_file(std::string_view file)
+    { file_ = file; return *this; }
 
-    void set_line_begin(code_place_uint_t line_begin) noexcept
-    { line_begin_ = line_begin; }
+    CodeLocation& set_line_begin(code_place_uint_t line_begin) noexcept
+    { line_begin_ = line_begin; return *this; }
 
-    void set_line_end(code_place_uint_t line_end) noexcept
-    { line_end_ = line_end; }
+    CodeLocation& set_line_end(code_place_uint_t line_end) noexcept
+    { line_end_ = line_end; return *this; }
 
-    void set_column_begin(code_place_uint_t column_begin) noexcept
-    { column_begin_ = column_begin; }
+    CodeLocation& set_column_begin(code_place_uint_t column_begin) noexcept
+    { column_begin_ = column_begin; return *this; }
 
-    void set_column_end(code_place_uint_t column_end) noexcept
-    { column_end_ = column_end; }
+    CodeLocation& set_column_end(code_place_uint_t column_end) noexcept
+    { column_end_ = column_end; return *this; }
 
-    void set_code_excerpt(std::string_view code_excerpt) 
-    { code_excerpt_ = code_excerpt; }
+    CodeLocation& set_code_excerpt(std::string_view code_excerpt) 
+    { code_excerpt_ = code_excerpt; return *this; }
 
-    void set_position(code_place_uint_t line_begin, code_place_uint_t line_end,
+    CodeLocation& set_position(code_place_uint_t line_begin, code_place_uint_t line_end,
                                 code_place_uint_t column_begin, code_place_uint_t column_end) noexcept
     {
         line_begin_ = line_begin;
         line_end_ = line_end;
         column_begin_ = column_begin;
         column_end_ = column_end;
+        return *this;
     }
 
-    void set_all(std::string_view file, code_place_uint_t line_begin, code_place_uint_t line_end,
+    CodeLocation& set_all(std::string_view file, code_place_uint_t line_begin, code_place_uint_t line_end,
                            code_place_uint_t column_begin, code_place_uint_t column_end,
                            std::string_view code_excerpt)
     {
@@ -82,6 +83,7 @@ public: /* setters */
         column_begin_ = column_begin;
         column_end_ = column_end;
         code_excerpt_ = code_excerpt;
+        return *this;
     }
 
 public:

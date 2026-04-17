@@ -310,7 +310,34 @@ std::ostream& instructions_after_return(ast::node::BasicNode const & node, std::
     auto&& explain = "instructions after this 'return' will never be reached";
     os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";
 
-    return os;   
+    return os;
+}
+
+export
+std::ostream& empty_scope(ast::node::Scope const & node, std::ostream& os = std::cerr)
+{
+    auto&& explain = "this scope has no actions";
+    os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";
+
+    return os;
+}
+
+export
+std::ostream& useless_semicolon(ast::node::Semicolon const & node, std::ostream& os = std::cerr)
+{
+    auto&& explain = "this semicolon does not match any statement";
+    os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";
+
+    return os;
+}
+
+export
+std::ostream& useless_else(ast::node::Else const & node, std::ostream& os = std::cerr)
+{
+    auto&& explain = "this 'else' has no action";
+    os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";
+
+    return os;
 }
 
 } /* namespace warning */

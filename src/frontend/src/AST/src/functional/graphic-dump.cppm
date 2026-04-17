@@ -110,6 +110,13 @@ void visit(Scope const& node, unique_node_id_t unique_node_id, std::ofstream& os
 }
 
 template <>
+void visit(Semicolon const& node, unique_node_id_t unique_node_id, std::ofstream& os)
+{
+    graphic_dump::create_node(os, unique_node_id, ";\n"+graphic_dump::dump_code_location(node.location()), "style=filled, fillcolor=\"lightgray\"");
+}
+
+
+template <>
 void visit(Print const& node, unique_node_id_t unique_node_id, std::ofstream& os)
 {
     graphic_dump::create_node(os, unique_node_id, "Print", "style=filled, fillcolor=\"lightyellow\"");

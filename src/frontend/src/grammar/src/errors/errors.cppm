@@ -14,7 +14,7 @@ export module grammar_errors_parsing;
 
 export import thelast;
 
-import frontend_errors;
+export import frontend_errors;
 
 namespace ParaCL::frontend::grammar
 {

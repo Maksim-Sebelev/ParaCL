@@ -19,6 +19,21 @@ namespace ParaCL::ast::node
 //--------------------------------------------------------------------------------------------------------------------------------------
 
 export
+class Semicolon
+{
+private:
+    mutable CodeLocation location_;
+public:
+    CodeLocation & location() & noexcept
+    { return location_; }
+
+    CodeLocation const & location() const & noexcept
+    { return location_; }
+};
+
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+export
 class Scope final : private std::vector<BasicNode>
 {
 public:

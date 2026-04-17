@@ -29,6 +29,7 @@ struct llvmIrTranslatorContext
     LibcStandartFunctions libc_standart_functions;
     llvm::BasicBlock* current_block = nullptr;
     ValueStatus current_scope_status = ValueStatus::global;    
+    bool depends_from_previous_statement : 1 = false;
 
     llvmIrTranslatorContext(std::filesystem::path const &source) :
         context(), module(source.string(), context), builder(context),

@@ -56,6 +56,14 @@ llvm::Value* convert_Int1_to_Int32(llvmIrTranslatorContext& context, llvm::Value
     return context.builder.CreateZExt(value, context.builder.getInt32Ty(), description);
 }
 
+
+//---------------------------------------------------------------------------------------------------------------
+
+bool is_semicolon_or_empty_scope(ast::node::BasicNode const & node)
+{
+    return node.is_a<ast::node::Semicolon>() or (node.is_a<ast::node::Scope>() and static_cast<ast::node::Scope const &>(node).empty());
+}
+
 //---------------------------------------------------------------------------------------------------------------
 } /* namespace ParaCL::frontend::llvm_ir_translator */
 //---------------------------------------------------------------------------------------------------------------
@@ -385,7 +393,11 @@ void visit(While const& node, llvmIrTranslatorContext& context)
     context.builder.CreateCondBr(cond_i1, body_block, end_block);
 
     context.set_current_block(body_block);
-    generate_statement(node.body(), context);
+
+    auto&& body = node.body();
+    if (not frontend::llvm_ir_translator::is_semicolon_or_empty_scope(body))
+        generate_statement(body, context);
+
     context.builder.CreateBr(cond_block);
 
     context.set_current_block(end_block);
@@ -408,7 +420,10 @@ void visit(If const& node, llvmIrTranslatorContext& context, llvm::BasicBlock* s
 
     context.set_current_block(self_body);
 
-    generate_statement(node.body(), context);
+    auto&& body = node.body();
+    if (not frontend::llvm_ir_translator::is_semicolon_or_empty_scope(body))
+        generate_statement(body, context);
+
 
     context.builder.CreateBr(end);
     context.set_current_block(end);
@@ -420,7 +435,11 @@ void visit(If const& node, llvmIrTranslatorContext& context, llvm::BasicBlock* s
 template <>
 void visit(Else const& node, llvmIrTranslatorContext& context)
 {
-    generate_statement(node.body(), context);
+    auto&& body = node.body();
+    if (not frontend::llvm_ir_translator::is_semicolon_or_empty_scope(body))
+        generate_statement(body, context);
+    else
+        frontend::warning::useless_else(node);
 }
 
 //-----------------------------------------------------------------------------
@@ -468,7 +487,6 @@ void visit(Condition const& node, llvmIrTranslatorContext& context)
         generate_if_statement(ifs[ifs_size - 1], context, if_condition_blocks[ifs_size - 1], if_body_blocks[ifs_size - 1], else_block, condition_end);
     }
 
-    /* create else basic block always, cause its simply */
     if (else_block)
     {
         context.set_current_block(else_block);    
@@ -487,7 +505,6 @@ template <>
 llvm::Value* visit(Scope const& node, llvmIrTranslatorContext& context)
 {
     auto&& in_function = (context.current_scope_status == ValueStatus::local);
-    // std::cerr << std::boolalpha << "SCOPE IS IN FUNCTION: " << in_function << "\n";
 
     context.nametable.new_scope();
 
@@ -538,11 +555,13 @@ llvm::Value* visit(Scope const& node, llvmIrTranslatorContext& context)
 template <>
 void visit(Scope const& node, llvmIrTranslatorContext& context)
 {
-    // std::ignore = visit<Scope, llvm::Value*, llvmIrTranslatorContext&>(node, context);
-
     auto&& size = node.size();
 
-    if (size == 0) return;
+    if (size == 0)
+    {
+        frontend::warning::empty_scope(node);
+        return;
+    }
 
     auto&& in_function = (context.current_scope_status == ValueStatus::local);
 
@@ -569,14 +588,20 @@ void visit(Scope const& node, llvmIrTranslatorContext& context)
 
     check_return_outside_of_function(last);
 
-    if (last.is_a<Return>())
-        generate_statement(last, context);
-    // else if (in_function and last.supports<generatable_expression>())
-        // context.builder.CreateRet(generate_expression(last, context));
-    else
-        generate_statement(last, context);
+    generate_statement(last, context);
 
     context.nametable.leave_scope();
+}
+
+//-----------------------------------------------------------------------------
+// SEMICOLON
+//-----------------------------------------------------------------------------
+
+
+template <>
+void visit(Semicolon const & node, llvmIrTranslatorContext& context)
+{
+    frontend::warning::useless_semicolon(node);
 }
 
 //-----------------------------------------------------------------------------

@@ -8,7 +8,6 @@
 
 %code requires {
     #include <cstdio>
-    #include <string>
 
     import thelast;
 
@@ -16,9 +15,9 @@
 }
 
 %code {
-    #include <cassert>
     #include <iostream>
     #include <vector>
+    #include <string>
 
     ParaCL::ast::AST program;
     std::string current_file;
@@ -47,6 +46,7 @@
     SPECIALIZE_CREATE(ParaCL::ast::node::FunctionDeclaration, ParaCL::ast::node::dumpable, ParaCL::ast::node::generatable_statement, ParaCL::ast::node::generatable_expression)
     SPECIALIZE_CREATE(ParaCL::ast::node::FunctionCall       , ParaCL::ast::node::dumpable, ParaCL::ast::node::generatable_statement, ParaCL::ast::node::generatable_expression)
     SPECIALIZE_CREATE(ParaCL::ast::node::Return             , ParaCL::ast::node::dumpable, ParaCL::ast::node::generatable_statement)
+    SPECIALIZE_CREATE(ParaCL::ast::node::Semicolon          , ParaCL::ast::node::dumpable, ParaCL::ast::node::generatable_statement)
 
     void parser_show_error(yy::location const & loc, std::string_view msg)
     {
@@ -62,7 +62,6 @@
     {
         return ParaCL::frontend::grammar::get_token_line(loc, yyin);
     }
-
 }
 
 %right AS ADDASGN SUBASGN MULASGN DIVASGN REMASGN
@@ -85,8 +84,8 @@
 
 %token WHILE
 %token PRINT
-%token SC COMMA
-%token COLON DECLFUNC RET
+%token <char> SC COMMA
+%token <char> COLON DECLFUNC RET
 
 %token LCIB RCIB LCUB RCUB
 
@@ -111,6 +110,13 @@
 program:
     statements {
         auto&& root_scope = ParaCL::ast::node::Scope(std::move($1));
+        root_scope.location()
+            .set_file(current_file)
+            .set_code_excerpt("< global scope >")
+            .set_line_begin(1).set_line_begin(1)
+            .set_column_begin(1).set_column_end(17)
+            ;
+        
         program = ParaCL::ast::AST(ParaCL::ast::node::create(std::move(root_scope)));
     }
     ;
@@ -130,8 +136,11 @@ statement:
     | expression         SC { $$ = std::move($1); }
     | return             SC { $$ = std::move($1); }
     | print              SC { $$ = std::move($1); }
-    |                    SC { $$ = ParaCL::ast::node::create(ParaCL::ast::node::Scope{}); }
-
+    |                    SC
+    {
+        $$ = ParaCL::ast::node::create(ParaCL::ast::node::Semicolon{});
+        $$.location() = parser_location_cast(@1);
+    }
     ;
 
 while:
@@ -539,14 +548,19 @@ scope:
 
 one_statement_scope:
     statement {
-        auto&& vec = std::vector<ParaCL::ast::node::BasicNode>{std::move($1)};
-        if (vec.size() == 1 and vec[0].is_a<ParaCL::ast::node::Scope>())
+        auto&& arg = std::move($1);
+        if (arg.is_a<ParaCL::ast::node::Scope>())
         {
-            $$ = std::move(vec[0]);
+            $$ = std::move(arg);
+        }
+        else if (arg.is_a<ParaCL::ast::node::Semicolon>())
+        {
+            $$ = std::move(arg);
         }
         else
         {
-            auto&& node = ParaCL::ast::node::Scope(std::move(vec));
+            auto&& node = ParaCL::ast::node::Scope{};
+            node.push_back(arg);
             node.location() = parser_location_cast(@1);
             $$ = ParaCL::ast::node::create(std::move(node));
         }
@@ -611,15 +625,9 @@ return:
         node.location() = parser_location_cast(@1);
         $$ = create(std::move (node));
     }
-
-    /*| RET one_statement_scope {
-        auto&& node = ParaCL::ast::node::Return{std::move($2)};
-        node.location() = parser_location_cast(@1);
-        $$ = create(std::move(node));
-    } | */
-    /* RET error {
-        parser_show_error(@2, "expected expression after 'return'");
+    | RET error {
+        parser_show_error(@1, "expected expression after 'return'");
         YYABORT;
-    } */
+    }
     ;
 %%

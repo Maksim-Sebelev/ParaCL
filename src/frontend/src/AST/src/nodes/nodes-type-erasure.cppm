@@ -43,7 +43,8 @@ private:
         virtual std::any invoke_(const std::type_info& sig, std::any* args) const = 0;
         virtual bool supports_signature_(const std::type_info& sig) const = 0;
 
-        virtual CodeLocation const & location_() = 0;
+        virtual CodeLocation const & location_() const & = 0;
+        virtual CodeLocation       & location_() & = 0;
     };
 
     template<typename NodeT, typename... Signatures>
@@ -52,7 +53,12 @@ private:
     {
         NodeT data_;
 
-        CodeLocation const & location_() override
+        CodeLocation const & location_() const & override
+        {
+            return data_.location();
+        }
+
+        CodeLocation& location_() & override
         {
             return data_.location();
         }
@@ -303,7 +309,12 @@ public:
         return (static_cast<NodeImpl<T>*>(self_.get()))->data_;
     }
 
-    CodeLocation const & location() const
+    CodeLocation const & location() const &
+    {
+        return self_->location_();
+    }
+
+    CodeLocation & location() &
     {
         return self_->location_();
     }
