@@ -75,7 +75,6 @@ namespace ParaCL::ast::node
 
 using frontend::llvm_ir_translator::llvmIrTranslatorContext;
 using frontend::llvm_ir_translator::ValueStatus;
-using frontend::llvm_ir_translator::FunctionScope;
 
 //-----------------------------------------------------------------------------
 
