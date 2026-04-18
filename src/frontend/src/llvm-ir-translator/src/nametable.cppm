@@ -11,7 +11,11 @@ module;
 #include <string_view>
 #include <unordered_map>
 #include <vector>
+
+#if not defined(NDEBUG)
 #include <iostream>
+#endif /* not defined(NDEBUG) */
+
 
 //---------------------------------------------------------------------------------------------------------------
 export module nametable;
@@ -81,6 +85,7 @@ export class Nametable final
     bool is_visible_from(std::string_view name, llvm::Function* function) const;
     bool is_function(std::string_view name) const;
 
+#if not defined(NDEBUG)
     friend void dump(Nametable const & nt)
     {
         static auto&& dump_counter = 0LU;
@@ -93,12 +98,13 @@ export class Nametable final
         }
         std::cout << "}" << std::endl;
     }
+#endif /* not defined(NDEBUG) */
 };
 
 //---------------------------------------------------------------------------------------------------------------
-
+#if not defined(NDEBUG)
 export void dump(Nametable const &);
-
+#endif /* not defined(NDEBUG) */
 //---------------------------------------------------------------------------------------------------------------
 
 Nametable::Nametable(llvm::Module& module, llvm::IRBuilder<> &builder)

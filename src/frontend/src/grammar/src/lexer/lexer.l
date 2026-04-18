@@ -1,9 +1,6 @@
 %{
 #include <string>
 #include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <sstream>
 #include "parser.tab.hpp"
 
 import frontend_errors;
@@ -15,7 +12,8 @@ import grammar_errors_parsing;
 {                                               \
     yylloc->begin.line   = yylloc->end.line;    \
     yylloc->begin.column = yylloc->end.column;  \
-    for (auto&& c : std::string(yytext)) {      \
+    for (auto&& c : std::string_view(yytext))   \
+    {                                           \
         if (c == '\n') {                        \
             yylloc->end.line++;                 \
             yylloc->end.column = 1;             \
@@ -29,7 +27,6 @@ import grammar_errors_parsing;
 
 void yy::parser::error(const yy::location & loc, const std::string &msg)
 {
-    // std::cerr << ParaCL::frontend::error::parser_error(ParaCL::lexer::location_cast(loc), msg) << "\n";
     ParaCL::frontend::grammar::show_error(loc, msg, yyin);
 }
 

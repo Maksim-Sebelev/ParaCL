@@ -18,6 +18,10 @@ module;
 #include <utility>
 #include <cassert>
 
+#if not defined(NDEBUG)
+#include <iostream>
+#endif /* not defined(NDEBUG) */
+
 //---------------------------------------------------------------------------------------------------------------
 export module llvm_ir_translator;
 //---------------------------------------------------------------------------------------------------------------
@@ -356,7 +360,20 @@ llvm::Value* visit(Print const& node, llvmIrTranslatorContext& context)
 
     fmt << "\n";
 
-    auto&& fmt_str = context.builder.CreateGlobalStringPtr(fmt.str(), "__printfFormat");
+    auto&& fmt_str = static_cast<llvm::Value*>(nullptr);
+
+    auto&& is_print_percent_d = ((node.size() == 1) and (node[0].is_a<Variable>() or node[0].is_a<Scan>()));
+
+    if (is_print_percent_d)
+    {
+        static auto&& fmt_percent_d = context.builder.CreateGlobalStringPtr(fmt.str(), "__printfFormat");
+        fmt_str = fmt_percent_d;
+    }
+    else
+    {
+        fmt_str = context.builder.CreateGlobalStringPtr(fmt.str(), "__printfFormat");
+    }
+
     printf_args.insert(printf_args.begin(), fmt_str);
 
     return context.builder.CreateCall(context.libc_standart_functions.libc_printf(), printf_args, "__printfExitCode");

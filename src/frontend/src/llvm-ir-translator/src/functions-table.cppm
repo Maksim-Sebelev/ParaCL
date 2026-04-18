@@ -14,8 +14,9 @@ module;
 #include <string>
 #include <stdexcept>
 
-// TODO: remove iostream
+#if not defined(NDEBUG)
 #include <iostream>
+#endif /* not defined(NDEBUG) */
 
 export module functions_table;
 
