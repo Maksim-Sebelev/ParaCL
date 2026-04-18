@@ -156,8 +156,9 @@ void visit(Variable const& node, llvmIrTranslatorContext& context)
 template <>
 llvm::Value* visit(Scan const& node, llvmIrTranslatorContext& context)
 {
+    static auto&& fmt = context.builder.CreateGlobalStringPtr("%d", "__scanfFormat");
+
     auto&& scanf_res_alloca = context.builder.CreateAlloca(context.builder.getInt32Ty(), nullptr, "__scanfResAlloca");
-    auto&& fmt = context.builder.CreateGlobalStringPtr("%d", "__scanfFormat");
     auto&& scanf_args = std::vector<llvm::Value*>{fmt, scanf_res_alloca};
 
     context.builder.CreateCall(context.libc_standart_functions.libc_scanf(), scanf_args, "__scanfExitCode");
