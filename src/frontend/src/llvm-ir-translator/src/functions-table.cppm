@@ -90,17 +90,20 @@ export
 class FunctionsTable final
 {
 private:
-    using function_overload_set = std::unordered_map
-                                  <
-                                    declaration_args_t /* functoin args */,
-                                    llvm::Function* /* function llvm representation */
-                                  >;
+    using function_overload_set =
+    std::unordered_map
+    <
+      declaration_args_t /* functoin args */,
+      llvm::Function* /* function llvm representation */
+    >;
 
-    using functions_table = std::unordered_map
-                            <
-                                std::string_view /* function name */,
-                                function_overload_set /* all functions with the same name*/
-                            >;
+    using functions_table =
+    std::unordered_map
+    <
+        std::string_view /* function name */,
+        function_overload_set /* all functions with the same name*/
+    >;
+
 private:
     functions_table functions_;
     llvm::IRBuilder<>& builder_;

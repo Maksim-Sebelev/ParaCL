@@ -11,6 +11,7 @@ module;
 #include <string_view>
 #include <unordered_map>
 #include <vector>
+#include <algorithm>
 
 #if not defined(NDEBUG)
 #include <iostream>
@@ -275,8 +276,10 @@ void Nametable::declare_(std::string_view name, llvm::Value *value, ValueStatus 
 
 void Nametable::force_declare(std::string_view name, llvm::Value *value)
 {
+#if not defined(NDEBUG)
     if (scopes_.empty())
         throw std::runtime_error("cannot declare_ variable: no active scopes");
+#endif /* not defined(NDEBUG) */
 
     if (scopes_.back().find(name) != scopes_.back().end())
         throw std::runtime_error("cannot declare_ '" + std::string(name) + "', cause it already exists in current scope");

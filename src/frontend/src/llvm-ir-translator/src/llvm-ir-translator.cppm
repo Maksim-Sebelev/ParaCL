@@ -17,6 +17,7 @@ module;
 #include <stdexcept>
 #include <utility>
 #include <cassert>
+#include <set>
 
 #if not defined(NDEBUG)
 #include <iostream>
@@ -59,7 +60,6 @@ llvm::Value* convert_Int1_to_Int32(llvmIrTranslatorContext& context, llvm::Value
     assert(value);
     return context.builder.CreateZExt(value, context.builder.getInt32Ty(), description);
 }
-
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -200,12 +200,12 @@ llvm::Value* visit(UnaryOperator const& node, llvmIrTranslatorContext& context)
             auto&& cmp = context.builder.CreateICmpEQ(arg, zero, "__tmpUnaryNotCmpWithZero");
             return frontend::llvm_ir_translator::convert_Int1_to_Int32(context, cmp, "__unaryNot");
         }
-        default:
-#if defined(NDEBUG)
-            __builtin_unreachable();
-#endif /* defined(NDEBUG) */
-            throw std::runtime_error("Undefined UnaryOperator type");
+        default: break;
     }
+#if defined(NDEBUG)
+    __builtin_unreachable();
+#endif /* defined(NDEBUG) */
+    throw std::runtime_error("Undefined UnaryOperator type");
 }
 
 template <>
@@ -244,7 +244,7 @@ llvm::Value* visit(BinaryOperator const& node, llvmIrTranslatorContext& context)
         case BinaryOperator::REM: return context.builder.CreateSRem(left, right, "__rem");
         case BinaryOperator::AND:
         {
-            auto&&  left_Int1 = frontend::llvm_ir_translator::convert_to_Int1(context, left );
+            auto&&  left_Int1 = frontend::llvm_ir_translator::convert_to_Int1(context, left);
             auto&& right_Int1 = frontend::llvm_ir_translator::convert_to_Int1(context, right);
 
             auto&& and_result = context.builder.CreateAnd(left_Int1, right_Int1, "__andBool");
@@ -470,39 +470,50 @@ void visit(Condition const& node, llvmIrTranslatorContext& context)
     auto&& current_func = context.current_block->getParent();
 
     auto&& ifs = node.get_ifs();    
-    size_t ifs_size = ifs.size();
+    auto&& ifs_size = ifs.size();
+
+    assert(ifs_size != 0 && "empty condition");
+
+    struct ConditionAndBody
+    {
+        llvm::BasicBlock* condition;
+        llvm::BasicBlock* body;
+    };
+
+    auto&& if_blocks = std::vector<ConditionAndBody>{}; if_blocks.reserve(ifs_size);
 
     auto&& if_condition_blocks = std::vector<llvm::BasicBlock*>{}; if_condition_blocks.reserve(ifs_size);
     auto&& if_body_blocks = std::vector<llvm::BasicBlock*>{}; if_body_blocks.reserve(ifs_size);
 
+    auto&& push_condition = [&](std::string_view name) -> void
+    {
+        if_blocks.emplace_back
+        (
+            llvm::BasicBlock::Create(context.context, name, current_func),
+            llvm::BasicBlock::Create(context.context, "then", current_func)
+        );
+    };
 
-    if_condition_blocks.push_back(llvm::BasicBlock::Create(context.context, "if", current_func));
-    if_body_blocks.push_back(llvm::BasicBlock::Create(context.context, "then", current_func));
+    push_condition("if");
 
     for (auto&& it = 1LU, ite = ifs_size; it != ite; ++it)
-    {
-        if_condition_blocks.push_back(llvm::BasicBlock::Create(context.context, "else-if", current_func));
-        if_body_blocks.push_back(llvm::BasicBlock::Create(context.context, "then", current_func));
-    }
+        push_condition("else-if");
 
     auto&& else_block = node.has_else() ? llvm::BasicBlock::Create(context.context, "else", current_func) : nullptr;
     auto&& condition_end = llvm::BasicBlock::Create(context.context, "fi", current_func);
 
-    if (ifs_size == 0)
-        throw std::logic_error("No if-block in condition");
-
-    context.builder.CreateBr(if_condition_blocks[0]);
+    context.builder.CreateBr(if_blocks[0].condition);
 
     if (ifs_size == 1)
     {
-        generate_if_statement(ifs[0], context, if_condition_blocks[0], if_body_blocks[0], else_block, condition_end);
+        generate_if_statement(ifs[0], context, if_blocks[0].condition, if_blocks[0].body, else_block, condition_end);
     }
     else
     {
         for (auto&& it = 0LU, ite = ifs_size - 1; it != ite; ++it)
-            generate_if_statement(ifs[it], context, if_condition_blocks[it], if_body_blocks[it], if_condition_blocks[it + 1], condition_end);
+            generate_if_statement(ifs[it], context, if_blocks[it].condition, if_blocks[it].body, if_blocks[it+1].condition, condition_end);
 
-        generate_if_statement(ifs[ifs_size - 1], context, if_condition_blocks[ifs_size - 1], if_body_blocks[ifs_size - 1], else_block, condition_end);
+        generate_if_statement(ifs[ifs_size - 1], context, if_blocks[ifs_size-1].condition, if_blocks[ifs_size - 1].body, else_block, condition_end);
     }
 
     if (else_block)
@@ -639,10 +650,17 @@ void visit(Return const & node, llvmIrTranslatorContext& context)
 template <>
 llvm::Value* visit(FunctionDeclaration const & node, llvmIrTranslatorContext& context)
 {
+    auto&& args = node.args();
+
+    auto&& all_args_have_unique_names = 
+        ( std::set<std::string_view>{args.begin(), args.end()}.size() == args.size() );
+
+    if (not all_args_have_unique_names)
+        throw frontend::error::function_arguments_with_same_names_error(node);
+
     auto&& old_status = ValueStatus{context.current_scope_status};
     context.current_scope_status = ValueStatus::local;
 
-    auto&& args = node.args();
     /* all function return int32 */
     auto&& return_type = context.builder.getInt32Ty();
     /* all args types are int32 */

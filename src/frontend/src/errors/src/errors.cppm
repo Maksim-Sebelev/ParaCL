@@ -269,6 +269,17 @@ public:
     }
 };
 
+export
+class function_arguments_with_same_names_error : public error
+{
+public:
+    function_arguments_with_same_names_error(ast::node::FunctionDeclaration const & node)
+    {
+        auto&& explain = "function arguments must have different names";
+        msg_ = show_code_error(explain, node.location());
+    }
+};
+
 } /* namespace error */
 
 namespace warning
