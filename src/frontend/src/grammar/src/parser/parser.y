@@ -152,7 +152,7 @@ program:
     ;
 
 statements:
-    %empty { std::cout << "0" << std::endl;  $$ = std::vector<ParaCL::ast::node::BasicNode>(); }
+    %empty { $$ = std::vector<ParaCL::ast::node::BasicNode>(); }
     | statements statement {
         $1.push_back(std::move($2));
         $$ = std::move($1);
