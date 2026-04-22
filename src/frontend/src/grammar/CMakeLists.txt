@@ -68,7 +68,7 @@ else ()
 endif()
 
 # ====================== BISON (Parser) ======================
-set(PARSER_SRC_DIR          ${CMAKE_CURRENT_SOURCE_DIR}/src/parser)
+set(PARSER_SRC_DIR          ${PROJECT_SOURCE_DIR}/src/parser)
 set(BISON_PARSER_CPP_OUT    parser.tab.cpp)
 set(BISON_PARSER_HPP_OUT    parser.tab.hpp)
 set(BISON_INPUT_FILE        ${PARSER_SRC_DIR}/parser.y)
@@ -150,7 +150,7 @@ PRIVATE
 )
 
 # ====================== FLEX (Lexer) ======================
-set(LEXER_SRC_DIR          ${CMAKE_CURRENT_SOURCE_DIR}/src/lexer)
+set(LEXER_SRC_DIR          ${PROJECT_SOURCE_DIR}/src/lexer)
 set(FLEX_LEXER_CPP_OUT     lexer.yy.cpp)
 set(FLEX_INPUT_FILE        ${LEXER_SRC_DIR}/lexer.l)
 set(FLEX_OUTPUT_DIR        ${CMAKE_BINARY_DIR}/generated/flex)

@@ -267,9 +267,12 @@ void visit(FunctionDeclaration const& node, unique_node_id_t unique_node_id, std
     auto&& args = node.args();
     if (args.size() != 0)
     {
-        label += static_cast<Variable>(args[0]).name();
-        // for (auto&& it = 1LU, ite = args.size(); it != ite; ++it) 
-            // label += (std::string(", ") + static_cast<Variable>(args[it]).name());
+        label += static_cast<Variable const &>(args[0]).name();
+        for (auto&& it = 1LU, ite = args.size(); it != ite; ++it)
+        {
+            label += ", ";
+            label += static_cast<Variable const &>(args[it]).name();
+        }
     }
     label += ")'";
     label += "\n" + graphic_dump::dump_code_location(node.location());
