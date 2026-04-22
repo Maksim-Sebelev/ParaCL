@@ -540,20 +540,11 @@ llvm::Value* visit(Scope const& node, llvmIrTranslatorContext& context)
     auto&& size = node.size();
 
     if (size == 0)
-    {
         throw frontend::error::using_scope_as_expression_but_its_empty(node);
-    }
-
-    auto&& check_return_outside_of_function = [&](BasicNode const & node) -> void
-    {
-        if (not in_function and node.is_a<Return>()) throw frontend::error::return_in_not_function_scope_error(node);
-    };
 
     for (auto&& it = 0LU, ite = size - 1; it != ite; ++it)
     {
         auto&& statement = node[it];
-
-        check_return_outside_of_function(statement);
 
         if (statement.is_a<Return>())
             frontend::warning::instructions_after_return(statement);
@@ -562,8 +553,6 @@ llvm::Value* visit(Scope const& node, llvmIrTranslatorContext& context)
     }
 
     auto&& last = node.back();
-
-    check_return_outside_of_function(last);
 
     auto&& return_value = static_cast<llvm::Value*>(nullptr);
 
@@ -596,16 +585,9 @@ void visit(Scope const& node, llvmIrTranslatorContext& context)
 
     context.nametable.new_scope();
 
-    auto&& check_return_outside_of_function = [&](BasicNode const & node) -> void
-    {
-        if (not in_function and node.is_a<Return>()) throw frontend::error::return_in_not_function_scope_error(node);
-    };
-
     for (auto&& it = 0LU, ite = size - 1; it != ite; ++it)
     {
         auto&& statement = node[it];
-
-        check_return_outside_of_function(statement);
 
         if (statement.is_a<Return>())
             frontend::warning::instructions_after_return(statement);
@@ -613,11 +595,7 @@ void visit(Scope const& node, llvmIrTranslatorContext& context)
         generate_statement(statement, context);
     }
 
-    auto&& last = node.back();
-
-    check_return_outside_of_function(last);
-
-    generate_statement(last, context);
+    generate_statement(node.back(), context);
 
     context.nametable.leave_scope();
 }
@@ -639,6 +617,10 @@ void visit(Semicolon const & node, llvmIrTranslatorContext& context)
 template <>
 void visit(Return const & node, llvmIrTranslatorContext& context)
 {
+    auto&& not_in_function = (context.current_scope_status == ValueStatus::global);
+
+    if (not_in_function) throw frontend::error::return_in_not_function_scope_error(node);
+
     auto&& returning_value = generate_expression(node.expression(), context);
     context.builder.CreateRet(returning_value);
 }

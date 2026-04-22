@@ -262,7 +262,7 @@ export
 class return_in_not_function_scope_error : public error
 {
 public:
-    return_in_not_function_scope_error(ast::node::BasicNode const & node)
+    return_in_not_function_scope_error(ast::node::Return const & node)
     {
         auto&& explain = "using 'return' outside of a function";
         msg_ = show_code_error(explain, node.location());

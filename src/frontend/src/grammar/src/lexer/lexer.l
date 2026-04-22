@@ -97,8 +97,6 @@ STRING    \"[^"]*\"
 "return"               { return yy::parser::token::RET; }
 
 {STRING} {
-
-
     yytext[yyleng - 1] = '\0';
     yylval->build<std::string>(yytext + 1);
     return yy::parser::token::STRING;
