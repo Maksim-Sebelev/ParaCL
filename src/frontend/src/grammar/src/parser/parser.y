@@ -119,11 +119,12 @@
 
 %token LCIB RCIB LCUB RCUB
 
+%token YYEOF
 
 // statements
 %type <std::vector<ParaCL::ast::node::BasicNode>> statements
-%type <ParaCL::ast::node::BasicNode> statement scope one_statement_scope
-%type <ParaCL::ast::node::BasicNode> condition while if else
+%type <ParaCL::ast::node::BasicNode> statement no_separated_with_semicolon_statement separated_with_semicolon_statement separated_with_semicolon_statement_no_semicolon scope one_statement_scope
+%type <ParaCL::ast::node::BasicNode> condition while if else semicolon
 %type <std::vector<ParaCL::ast::node::BasicNode>> elifs
 // expressionss
 %type <ParaCL::ast::node::BasicNode> expression binary_operator unary_operator variable number string scan brackets
@@ -144,29 +145,57 @@ program:
             .set_file(current_file)
             .set_code_excerpt("< global scope >")
             .set_line_begin(1).set_line_end(1)
-            .set_column_begin(1).set_column_end(17)
+            .set_column_begin(1).set_column_end(sizeof("< global scope >"))
             ;
-        
         program = ParaCL::ast::AST(ParaCL::ast::node::create(std::move(root_scope)));
     }
     ;
 
 statements:
-    %empty { $$ = std::vector<ParaCL::ast::node::BasicNode>(); }
+    %empty { std::cout << "0" << std::endl;  $$ = std::vector<ParaCL::ast::node::BasicNode>(); }
     | statements statement {
         $1.push_back(std::move($2));
         $$ = std::move($1);
-    }
+    } 
     ;
 
 statement:
-    condition               { $$ = std::move($1); }
-    | while                 { $$ = std::move($1); }
-    | special_expression    { $$ = std::move($1); }
-    | expression         SC { $$ = std::move($1); }
-    | return             SC { $$ = std::move($1); }
-    | print              SC { $$ = std::move($1); }
-    |                    SC
+    separated_with_semicolon_statement
+    { $$ = std::move($1); }
+    | no_separated_with_semicolon_statement
+    { $$ = std::move($1); }
+    ;
+
+no_separated_with_semicolon_statement:
+    condition                  { $$ = std::move($1); }
+    | while                    { $$ = std::move($1); }
+    | special_expression       { $$ = std::move($1); }
+    | semicolon                { $$ = std::move($1); }
+    ;
+
+separated_with_semicolon_statement:
+    separated_with_semicolon_statement_no_semicolon SC
+    { $$ = std::move($1); }
+    | separated_with_semicolon_statement_no_semicolon error
+    {
+        parser_show_error(@1, "expected ';' after this statement");
+        YYABORT;
+    }
+    | separated_with_semicolon_statement_no_semicolon YYEOF
+    {
+        parser_show_error(@1, "expected ';' after this statement");
+        YYABORT;
+    }
+    ;
+
+separated_with_semicolon_statement_no_semicolon:
+    expression             { $$ = std::move($1); }
+    | return               { $$ = std::move($1); }
+    | print                { $$ = std::move($1); }
+    ;
+
+semicolon:
+    SC
     {
         $$ = ParaCL::ast::node::create(ParaCL::ast::node::Semicolon{});
         $$.location() = parser_location_cast(@1);
@@ -531,10 +560,6 @@ print:
         auto&& p = ParaCL::ast::node::Print{std::move($2)};
         p.location() = parser_location_cast(@1);
         $$ = ParaCL::ast::node::create(std::move(p));
-    }
-    | PRINT error {
-        parser_show_error(@2, "expected expression after 'print'");
-        YYABORT;
     }
     ;
 
