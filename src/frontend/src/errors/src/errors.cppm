@@ -273,10 +273,14 @@ export
 class function_arguments_with_same_names_error : public error
 {
 public:
-    function_arguments_with_same_names_error(ast::node::FunctionDeclaration const & node)
+    function_arguments_with_same_names_error
+    (
+        ast::node::Variable const & /* FIXME: when show eror will shows more than 1 location, add this argument*/,
+        ast::node::Variable const & snd
+    )
     {
         auto&& explain = "function arguments must have different names";
-        msg_ = show_code_error(explain, node.location());
+        msg_ = show_code_error(explain, snd.location());
     }
 };
 
@@ -363,6 +367,14 @@ std::ostream& useless_else(ast::node::Else const & node, std::ostream& os = std:
     return os;
 }
 
+export
+std::ostream& unused_variable(ast::node::Variable const & node, std::ostream& os = std::cerr)
+{
+    auto&& explain = "unused variable";
+    os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";
+
+    return os;
+}
 } /* namespace warning */
 
 } /* namespace ParaCL::frontend */

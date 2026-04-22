@@ -131,9 +131,7 @@
 %type <ParaCL::ast::node::BasicNode> special_expression print
 // functions
 %type <ParaCL::ast::node::BasicNode> function_assignment function_declaration function_call return
-%type <std::vector<ParaCL::ast::node::BasicNode>> function_call_args
-%type <std::vector<std::string>> function_decl_args
-
+%type <std::vector<ParaCL::ast::node::BasicNode>> function_call_args function_decl_args
 
 %start program
 %%
@@ -648,13 +646,13 @@ function_declaration:
 
 function_decl_args:
     %empty { 
-        $$ = std::vector<std::string>(); 
+        $$ = std::vector<ParaCL::ast::node::BasicNode>{}; 
     }
-    | function_decl_args NAME {
+    | function_decl_args variable {
         $1.push_back(std::move($2));
         $$ = std::move($1);
     }
-    | function_decl_args COMMA NAME {
+    | function_decl_args COMMA variable {
         $1.push_back(std::move($3));
         $$ = std::move($1);
     }

@@ -13,6 +13,7 @@ module;
 #include <string_view>
 #include <string>
 #include <stdexcept>
+#include <iterator>
 
 #if not defined(NDEBUG)
 #include <iostream>
@@ -35,8 +36,10 @@ private:
 public:
     declaration_args_t() = default;
 
-    declaration_args_t(std::vector<std::string> const & declargs) :
-        args_quantity_(declargs.size())
+    template <typename It>
+    requires (std::forward_iterator<It>)
+    declaration_args_t(It begin, It end) :
+        args_quantity_(std::distance(begin, end))
     {}
 
     declaration_args_t(ast::node::FunctionDeclaration const & funcdecl) :

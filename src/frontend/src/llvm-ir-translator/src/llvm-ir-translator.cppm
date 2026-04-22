@@ -17,6 +17,7 @@ module;
 #include <stdexcept>
 #include <utility>
 #include <cassert>
+#include <iterator>
 #include <set>
 
 #if not defined(NDEBUG)
@@ -228,7 +229,7 @@ llvm::Value* visit(BinaryOperator const& node, llvmIrTranslatorContext& context)
     {
         auto&& variable = static_cast<Variable const &>(node.larg());
         auto&& right = generate_expression(node.rarg(), context);
-        context.nametable.set(variable.name(), right, context.current_scope_status);
+        context.nametable.set(variable.name(), right, variable, context.current_scope_status);
         return right;
     }
 
@@ -309,7 +310,7 @@ llvm::Value* visit(BinaryOperator const& node, llvmIrTranslatorContext& context)
             throw std::runtime_error("Undefined UnaryOperator type");
     }
 
-    context.nametable.set(name, right, context.current_scope_status);
+    context.nametable.set(name, right, variable, context.current_scope_status);
     return right;
 }
 
@@ -634,12 +635,6 @@ llvm::Value* visit(FunctionDeclaration const & node, llvmIrTranslatorContext& co
 {
     auto&& args = node.args();
 
-    auto&& all_args_have_unique_names = 
-        ( std::set<std::string_view>{args.begin(), args.end()}.size() == args.size() );
-
-    if (not all_args_have_unique_names)
-        throw frontend::error::function_arguments_with_same_names_error(node);
-
     auto&& old_status = ValueStatus{context.current_scope_status};
     context.current_scope_status = ValueStatus::local;
 
@@ -650,7 +645,7 @@ llvm::Value* visit(FunctionDeclaration const & node, llvmIrTranslatorContext& co
     /* all functions return int32 */
     auto&& type = llvm::FunctionType::get(std::move(return_type), std::move(args_types), false);
     /* force_declare function in ir with mangled name, cause function overload must be supported */
-    auto&& mangled_name = frontend::llvm_ir_translator::functions_table::FunctionsTable::mangle_name(node.name(), args);
+    auto&& mangled_name = frontend::llvm_ir_translator::functions_table::FunctionsTable::mangle_name(node.name(), {args.begin(), args.end()});
 
     auto&& function = llvm::Function::Create(std::move(type), llvm::Function::InternalLinkage, mangled_name, context.module);
 
@@ -670,8 +665,13 @@ llvm::Value* visit(FunctionDeclaration const & node, llvmIrTranslatorContext& co
     for (auto&& it = 0LU, ite = args.size(); it != ite; ++it)
     {
         auto&& func_args_it = func_args.begin() + it;
-        func_args_it->setName(args[it]);
-        context.nametable.force_declare(args[it], func_args_it);
+        //std::advance(func_args.begin(), it);
+
+        auto&& args_it = args[it];
+        auto&& name = static_cast<Variable const &>(args_it).name();
+
+        func_args_it->setName(name);
+        context.nametable.force_declare(name, func_args_it, args_it);
     }
 
     assert(node.body().is_a<Scope>());

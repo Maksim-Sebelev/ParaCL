@@ -261,7 +261,7 @@ boost::json::value visit(const FunctionDeclaration& node)
     args.reserve(node.args().size());
 
     for (auto&& arg: node.args())
-        args.emplace_back(arg);
+        args.emplace_back(static_cast<Variable>(arg).name());
 
     obj[traits::get_node_info<FunctionDeclaration, traits::FIELD, 1>()] = std::move(args);
 

@@ -517,17 +517,17 @@ class FunctionDeclaration final
 {
 private:
     std::string name_;
-    std::vector<std::string> args_;
+    std::vector<BasicNode> args_;
     BasicNode body_;
 private:
 public:
     std::string_view name() const & noexcept
     { return name_; }
 
-    std::vector<std::string> const & args() const & noexcept
+    std::vector<BasicNode> const & args() const & noexcept
     { return args_; } 
 
-    std::vector<std::string>       & args()       & noexcept
+    std::vector<BasicNode>       & args()       & noexcept
     { return args_; } 
 
     BasicNode const & body() const & noexcept
@@ -538,41 +538,29 @@ public:
 
     FunctionDeclaration() = default;
 
-FunctionDeclaration(std::string&& name, std::vector<std::string>&& args, BasicNode&& body) :
+    FunctionDeclaration(std::string&& name, std::vector<BasicNode>&& args, BasicNode&& body) :
         name_(std::move(name)),
         args_(std::move(args)),
         body_(std::move(body))
     {}
 
-    FunctionDeclaration(std::string&& name, std::vector<std::string>&& args, BasicNode const& body) :
+    FunctionDeclaration(std::string&& name, std::vector<BasicNode>&& args, BasicNode const& body) :
         name_(std::move(name)),
         args_(std::move(args)),
         body_(body)
     {}
 
-    FunctionDeclaration(std::string&& name, std::vector<std::string> const& args, BasicNode&& body) :
+    FunctionDeclaration(std::string&& name, std::vector<BasicNode> const& args, BasicNode&& body) :
         name_(std::move(name)),
         args_(args),
         body_(std::move(body))
     {}
 
-    FunctionDeclaration(std::string&& name, std::vector<std::string> const& args, BasicNode const& body) :
+    FunctionDeclaration(std::string&& name, std::vector<BasicNode> const& args, BasicNode const& body) :
         name_(std::move(name)),
         args_(args),
         body_(body)
     {}
-
-    void add_arg(std::string&& new_arg)
-    { args_.push_back(std::move(new_arg)); }
-
-    void set_name(std::string&& name)
-    { name_ = std::move(name); }
-
-    void set_body(BasicNode && new_body)
-    { body_ = std::move(new_body); }
-
-    void set_body(BasicNode const & new_body)
-    { body_ = new_body; }
 
 private:
     mutable CodeLocation location_;
