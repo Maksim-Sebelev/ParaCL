@@ -363,9 +363,7 @@ llvm::Value* visit(Print const& node, llvmIrTranslatorContext& context)
 
     auto&& fmt_str = static_cast<llvm::Value*>(nullptr);
 
-    auto&& is_print_percent_d = ((node.size() == 1) and (node[0].is_a<Variable>() or node[0].is_a<Scan>()));
-
-    if (is_print_percent_d)
+    if (fmt.str() == "%d\n")
     {
         static auto&& fmt_percent_d = context.builder.CreateGlobalStringPtr(fmt.str(), "__printfFormat");
         fmt_str = fmt_percent_d;
