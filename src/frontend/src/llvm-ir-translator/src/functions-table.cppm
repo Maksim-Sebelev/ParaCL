@@ -42,7 +42,7 @@ public:
         args_quantity_(std::distance(begin, end))
     {}
 
-    declaration_args_t(frontend::ast::node::FunctionDeclaration const & funcdecl) :
+    declaration_args_t(ast::node::FunctionDeclaration const & funcdecl) :
         args_quantity_(funcdecl.args().size())
     {}
 
@@ -96,7 +96,10 @@ private:
     struct function_info_t
     {
         llvm::Function* value = nullptr;
-        frontend::ast::node::FunctionDeclaration declaration_node;
+
+        // FIXME: deep copy here. i didnt find way, how to do here reference.
+        // also i didnt want to use raw pointer here.
+        ast::node::FunctionDeclaration declaration_node;
 
         bool used : 1 = false;
     };
@@ -164,7 +167,7 @@ public:
     }
 
 public:
-    void declare(frontend::ast::node::FunctionDeclaration const & funcdecl, llvm::Function* funcvalue)
+    void declare(ast::node::FunctionDeclaration const & funcdecl, llvm::Function* funcvalue)
     {
         static auto&& no_name_functions_counter = 0LU;
 

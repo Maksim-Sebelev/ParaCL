@@ -64,9 +64,9 @@ llvm::Value* convert_Int1_to_Int32(llvmIrTranslatorContext& context, llvm::Value
 
 //---------------------------------------------------------------------------------------------------------------
 
-bool is_semicolon_or_empty_scope(frontend::ast::node::BasicNode const & node)
+bool is_semicolon_or_empty_scope(ast::node::BasicNode const & node)
 {
-    return node.is_a<frontend::ast::node::Semicolon>() or (node.is_a<frontend::ast::node::Scope>() and static_cast<frontend::ast::node::Scope const &>(node).empty());
+    return node.is_a<ast::node::Semicolon>() or (node.is_a<ast::node::Scope>() and static_cast<ast::node::Scope const &>(node).empty());
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -764,7 +764,7 @@ namespace ParaCL::frontend::llvm_ir_translator
 //-----------------------------------------------------------------------------
 
 export
-void generate_llvm_ir(frontend::ast::AST const & ast, options::Options const & options)
+void generate_llvm_ir(ast::AST const & ast, options::Options const & options)
 {
     auto&& context = llvmIrTranslatorContext{options.input_file};
 
@@ -775,7 +775,7 @@ void generate_llvm_ir(frontend::ast::AST const & ast, options::Options const & o
 
     context.set_current_block(entry_block);
 
-    frontend::ast::node::generate_statement(ast.root(), context);
+    ast::node::generate_statement(ast.root(), context);
 
     context.builder.CreateRet(frontend::llvm_ir_translator::create_null_Int32(context));
 
