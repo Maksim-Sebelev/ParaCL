@@ -91,6 +91,7 @@ private:
     identifier_info_t       * lookup_(identifier_t name);
     identifier_info_t const * lookup_(identifier_t name) const;
 
+    llvm::Value* create_variable(identifier_t name, llvm::Value * value, ast::node::Variable const & declaration_node, ValueStatus status);
     void declare_(identifier_t name, llvm::Value * value, ast::node::Variable const & declaration_node, ValueStatus status);
 
   private:
@@ -204,23 +205,21 @@ void Nametable::set(std::string_view name, llvm::Value *value, ast::node::Variab
     auto&& is_variable_function = is_function(variable.value);
     auto&& is_value_function = is_function(value);
 
-    if (not is_variable_function and not is_value_function)
-    {
-        builder_.CreateStore(value, variable.value);
-    }
-    else if (not is_variable_function and is_value_function)
+    if (is_variable_function and is_value_function)
     {
         variable.value = value;
+    }
+    else if (not is_variable_function and not is_value_function)
+    {
+        builder_.CreateStore(value, variable.value);
     }
     else if (is_variable_function and not is_value_function)
     {
-
-        variable.value = builder_.CreateAlloca(builder_.getInt32Ty(), nullptr, name);
-        builder_.CreateStore(value, variable.value);
+        throw error::set_function_variale_integer_value_error(declaration_node);
     }
-    else /*if (is_variable_function and is_value_function) */
+    else /* if (not is_variable_function and is_value_function)*/
     {
-        variable.value = value;
+        throw error::set_integer_variable_function_value_error(declaration_node);
     }
 }
 

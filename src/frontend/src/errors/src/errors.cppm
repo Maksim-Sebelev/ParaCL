@@ -266,6 +266,26 @@ public:
     }
 };
 
+class set_integer_variable_function_value_error : public error
+{
+public:
+    set_integer_variable_function_value_error(ast::node::Variable const & node)
+    {
+        auto&& explain = "set variable '"+std::string(node.name())+"' with integer type function value";
+        msg_ = show_code_error(explain, node.location());
+    }
+};
+
+class set_function_variale_integer_value_error : public error
+{
+public:
+    set_function_variale_integer_value_error(ast::node::Variable const & node)
+    {
+        auto&& explain = "set variable '"+std::string(node.name())+"' with function type integer value";
+        msg_ = show_code_error(explain, node.location());
+    }
+};
+
 } /* namespace error */
 
 export
