@@ -139,6 +139,20 @@ private:
     }
 
 public:
+    void check_unused_call_names() const noexcept
+    {
+        for (auto&& overload_set: functions_)
+        {
+            for (auto&& function: overload_set.second)
+            {
+                auto&& function_info = function.second;
+                if (function_info.used or function_info.declaration_node.name().empty()) continue;
+                warning::unused_function_call_name(function_info.declaration_node);
+            }
+        }
+    }
+
+public:
     static std::string mangle_name(std::string_view base_name, declaration_args_t const & args)
     {
         if (not base_name.empty())
@@ -152,19 +166,6 @@ public:
     FunctionsTable(llvm::IRBuilder<>& builder) :
         builder_(builder)
     {}
-
-    ~FunctionsTable()
-    {
-        for (auto&& overload_set: functions_)
-        {
-            for (auto&& function: overload_set.second)
-            {
-                auto&& function_info = function.second;
-                if (function_info.used or function_info.declaration_node.name().empty()) continue;
-                warning::unused_function_call_name(function_info.declaration_node);
-            }
-        }
-    }
 
 public:
     void declare(ast::node::FunctionDeclaration const & funcdecl, llvm::Function* funcvalue)

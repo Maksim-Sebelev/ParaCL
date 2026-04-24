@@ -780,6 +780,8 @@ void generate_llvm_ir(ast::AST const & ast, options::Options const & options)
 
     context.builder.CreateRet(frontend::llvm_ir_translator::create_null_Int32(context));
 
+    context.functable.check_unused_call_names();
+
     auto&& ec = std::error_code{};
 
     auto&& ir_file = options.tmp_ir_file;
