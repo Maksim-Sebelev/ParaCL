@@ -140,10 +140,10 @@ llvm::Value* visit(Variable const& node, llvmIrTranslatorContext& context)
         throw error::using_undeclarated_variable(node);
 
     if (context.nametable.is_function(node.name()))
-        throw error::using_function_as_int(node);
+        throw error::using_function_as_int(node, context.nametable.get_info(node.name()).declaration_node);
 
     if (not context.nametable.is_visible_from(node.name(), context.current_block->getParent()))
-        throw error::using_variable_from_parent_function_scope(node);
+        throw error::using_variable_from_parent_function_scope(node, context.nametable.get_info(node.name()).declaration_node);
 
     return variable;
 }
@@ -736,7 +736,7 @@ llvm::Value* visit(FunctionCall const & node, llvmIrTranslatorContext& context)
     auto&& function = llvm::dyn_cast<llvm::Function>(value);
 
     if (not function)
-        throw error::using_int_as_function(node);
+        throw error::using_int_as_function(node, context.nametable.get_info(node.name()).declaration_node);
 
     if (function->arg_size() != completed_args.size())
         throw error::function_alias_arguments_mismatch(node, function->arg_size(), completed_args.size());

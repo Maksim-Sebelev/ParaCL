@@ -56,6 +56,15 @@ std::string mark_error(ast::node::CodeLocation const & location)
     return mark.str();
 }
 
+std::string note(std::string_view msg)
+{
+    auto&& note = std::ostringstream{};
+
+    note << BOLD "note: " << msg << RESET << "\n";
+
+    return note.str();
+}
+
 enum class ProblemStatus
 {
     Warning, Error
@@ -89,6 +98,27 @@ std::string show_code_error(std::string_view msg, ast::node::CodeLocation const 
 
     return explain.str();
 }
+
+std::string was_declared_here(std::string_view name, ast::node::CodeLocation const & location, std::string user_msg = "was declared here: ")
+{
+    auto&& msg = std::ostringstream{};
+
+    msg << "'" << name << "' " << user_msg << to_string(location) << "\n" RESET
+        << show_code(location) + RESET;
+
+    return msg.str();    
+}
+
+std::string was_declared_here(ast::node::Variable const & node, std::string msg = "was declared here: ")
+{
+    return was_declared_here(node.name(), node.location(), msg);
+}
+
+std::string was_declared_here(ast::node::FunctionDeclaration const & node, std::string msg = "was declared here: ")
+{
+    return was_declared_here(node.name(), node.location(), msg);
+}
+
 
 export
 namespace error
@@ -154,20 +184,22 @@ public:
 class using_int_as_function : public error
 {
 public:
-    using_int_as_function(ast::node::FunctionCall const & node)
+    using_int_as_function(ast::node::FunctionCall const & node, ast::node::Variable const & declaration_node)
     {
-        auto&& explain = "using '" + std::string(node.name()) + "' as function, but it has `int` type.";
-        msg_ = show_code_error(explain, node.location());
+        auto&& explain = "using '" + std::string(node.name()) + "' as function, but it has `int` type";
+        msg_ = show_code_error(explain, node.location()) + "\n"
+        + note(was_declared_here(declaration_node, "was declared as integer here"));
     }
 };
 
 class using_function_as_int : public error
 {
 public:
-    using_function_as_int(ast::node::Variable const & node)
+    using_function_as_int(ast::node::Variable const & node, ast::node::Variable const & declaration_node)
     {
         auto&& explain = "using '" + std::string(node.name()) + "' as integer, but it has function type.";
-        msg_ = show_code_error(explain, node.location());
+        msg_ = show_code_error(explain, node.location()) + "\n"
+        + note(was_declared_here(declaration_node, "was declared as function here"));
     }
 };
 
@@ -184,10 +216,11 @@ public:
 class using_variable_from_parent_function_scope : public error
 {
 public:
-    using_variable_from_parent_function_scope(ast::node::Variable const & node)
+    using_variable_from_parent_function_scope(ast::node::Variable const & node, ast::node::Variable const & declaration_node)
     {
         auto&& explain = "'" + std::string(node.name()) + "' was declared in parent scope, but isn`t global variable (belong to the parent function scope)";
-        msg_ = show_code_error(explain, node.location());
+        msg_ = show_code_error(explain, node.location()) + "\n"
+        + note(was_declared_here(declaration_node));
     }
 };
 
@@ -228,9 +261,8 @@ public:
     redeclaration_of_function(ast::node::FunctionDeclaration const & node, ast::node::FunctionDeclaration const & declaration_node)
     {
         auto&& explain = "redeclaration of '"+std::string(node.name())+"'";
-        msg_ = show_code_error(explain, node.location())
-        + RESET BOLD "\nfirst was declared here: "+to_string(declaration_node.location())+"\n" RESET
-        + show_code(declaration_node.location()) + RESET "\n";
+        msg_ = show_code_error(explain, node.location()) + "\n"
+        + note(was_declared_here(declaration_node));
     }
 };
 
@@ -275,8 +307,8 @@ public:
     {
         auto&& explain = "set '"+std::string(node.name())+"' function value";
         msg_ = show_code_error(explain, node.location())
-        + RESET BOLD "\nbut '"+std::string(node.name())+"' was declared as integer here: "+to_string(declaration_node.location())+"\n" RESET
-        + show_code(declaration_node.location()) + RESET "\n";
+        + RESET BOLD "\nbut '"+std::string(node.name()) + "\n"
+        + note(was_declared_here(declaration_node));
     }
 };
 
@@ -287,8 +319,8 @@ public:
     {
         auto&& explain = "set '"+std::string(node.name())+"' integer value";
         msg_ = show_code_error(explain, node.location())
-        + RESET BOLD "\nbut '"+std::string(node.name())+"' was declared as function here: "+to_string(declaration_node.location())+"\n" RESET
-        + show_code(declaration_node.location()) + RESET;
+        + RESET BOLD "\nbut '"+std::string(node.name()) + "\n"
+        + note(was_declared_here(declaration_node));
     }
 };
 

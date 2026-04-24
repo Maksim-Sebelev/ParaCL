@@ -62,7 +62,7 @@ export class Nametable final
     llvm::Module& module_;
     llvm::IRBuilder<> &builder_;
 
-private:
+public:
 
     using identifier_t = std::string_view;
     struct identifier_info_t
@@ -107,6 +107,7 @@ private:
     void leave_scope();
 
     llvm::Value *get(std::string_view name);
+    identifier_info_t const & get_info(std::string_view name) const;
 
     void set(std::string_view name, llvm::Value *value, ast::node::Variable const & declaration_node, ValueStatus status = local);
     void force_declare(std::string_view name, llvm::Value *value, ast::node::Variable const & declaration_node);
@@ -186,6 +187,18 @@ llvm::Value *Nametable::get(std::string_view name)
     auto&& variable_value = variable.value;
     if (is_function(variable_value)) return variable_value;
     return builder_.CreateLoad(builder_.getInt32Ty(), variable_value, std::string(name) + "_load");
+}
+
+//---------------------------------------------------------------------------------------------------------------
+
+Nametable::identifier_info_t const & Nametable::get_info(std::string_view name) const
+{
+    auto&& variable_info_ptr = lookup_(name);
+
+    if (not variable_info_ptr)
+        throw std::runtime_error("requested information about undeclated variable '"+std::string(name)+"'");
+
+    return *variable_info_ptr;
 }
 
 //---------------------------------------------------------------------------------------------------------------
