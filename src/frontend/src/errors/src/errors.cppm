@@ -128,20 +128,20 @@ public:
     }
 };
 
-class using_undeclarated_variable_error : public error
+class using_undeclarated_variable : public error
 {
 public:
-    using_undeclarated_variable_error(ast::node::Variable const & node)
+    using_undeclarated_variable(ast::node::Variable const & node)
     {
         auto&& explain = "use of undeclared identifier '" + std::string(node.name()) + "'";
         msg_ = show_code_error(explain, node.location());
     }
 };
 
-class function_alias_arguments_mismatch_error : public error
+class function_alias_arguments_mismatch : public error
 {
 public:
-    function_alias_arguments_mismatch_error(ast::node::FunctionCall const & node, size_t expected_args_size, size_t call_args_size)
+    function_alias_arguments_mismatch(ast::node::FunctionCall const & node, size_t expected_args_size, size_t call_args_size)
     {
         auto&& explain = "function alias signature mismatch, '" + std::string(node.name()) +
                                  "' expects " + std::to_string(expected_args_size) +
@@ -151,10 +151,10 @@ public:
     }
 };
 
-class using_int_as_function_error : public error
+class using_int_as_function : public error
 {
 public:
-    using_int_as_function_error(ast::node::FunctionCall const & node)
+    using_int_as_function(ast::node::FunctionCall const & node)
     {
         auto&& explain = "using '" + std::string(node.name()) + "' as function, but it has `int` type.";
         msg_ = show_code_error(explain, node.location());
@@ -181,10 +181,10 @@ public:
     }
 };
 
-class using_variable_from_parent_function_scope_error : public error
+class using_variable_from_parent_function_scope : public error
 {
 public:
-    using_variable_from_parent_function_scope_error(ast::node::Variable const & node)
+    using_variable_from_parent_function_scope(ast::node::Variable const & node)
     {
         auto&& explain = "'" + std::string(node.name()) + "' was declared in parent scope, but isn`t global variable (belong to the parent function scope)";
         msg_ = show_code_error(explain, node.location());
@@ -225,37 +225,39 @@ public:
 class redeclaration_of_function : public error
 {
 public:
-    redeclaration_of_function(ast::node::FunctionDeclaration const & node)
+    redeclaration_of_function(ast::node::FunctionDeclaration const & node, ast::node::FunctionDeclaration const & declaration_node)
     {
-        auto&& explain = "redeclaration of function '"+std::string(node.name())+"'";
-        msg_ = show_code_error(explain, node.location());
+        auto&& explain = "redeclaration of '"+std::string(node.name())+"'";
+        msg_ = show_code_error(explain, node.location())
+        + RESET BOLD "\nfirst was declared here: "+to_string(declaration_node.location())+"\n" RESET
+        + show_code(declaration_node.location()) + RESET "\n";
     }
 };
 
-class function_with_empty_body_error : public error
+class function_with_empty_body : public error
 {
 public:
-    function_with_empty_body_error(ast::node::FunctionDeclaration const & node)
+    function_with_empty_body(ast::node::FunctionDeclaration const & node)
     {
         auto&& explain = "empty function body";
         msg_ = show_code_error(explain, node.location());
     }
 };
 
-class return_in_not_function_scope_error : public error
+class return_in_not_function_scope : public error
 {
 public:
-    return_in_not_function_scope_error(ast::node::Return const & node)
+    return_in_not_function_scope(ast::node::Return const & node)
     {
         auto&& explain = "using 'return' outside of a function";
         msg_ = show_code_error(explain, node.location());
     }
 };
 
-class function_arguments_with_same_names_error : public error
+class function_arguments_with_same_names : public error
 {
 public:
-    function_arguments_with_same_names_error
+    function_arguments_with_same_names
     (
         ast::node::Variable const & /* FIXME: when show eror will shows more than 1 location, add this argument*/,
         ast::node::Variable const & snd
@@ -266,23 +268,27 @@ public:
     }
 };
 
-class set_integer_variable_function_value_error : public error
+class set_integer_variable_function_value : public error
 {
 public:
-    set_integer_variable_function_value_error(ast::node::Variable const & node)
+    set_integer_variable_function_value(ast::node::Variable const & node, ast::node::Variable const & declaration_node)
     {
-        auto&& explain = "set variable '"+std::string(node.name())+"' with integer type function value";
-        msg_ = show_code_error(explain, node.location());
+        auto&& explain = "set '"+std::string(node.name())+"' function value";
+        msg_ = show_code_error(explain, node.location())
+        + RESET BOLD "\nbut '"+std::string(node.name())+"' was declared as integer here: "+to_string(declaration_node.location())+"\n" RESET
+        + show_code(declaration_node.location()) + RESET "\n";
     }
 };
 
-class set_function_variale_integer_value_error : public error
+class set_function_variale_integer_value : public error
 {
 public:
-    set_function_variale_integer_value_error(ast::node::Variable const & node)
+    set_function_variale_integer_value(ast::node::Variable const & node, ast::node::Variable const & declaration_node)
     {
-        auto&& explain = "set variable '"+std::string(node.name())+"' with function type integer value";
-        msg_ = show_code_error(explain, node.location());
+        auto&& explain = "set '"+std::string(node.name())+"' integer value";
+        msg_ = show_code_error(explain, node.location())
+        + RESET BOLD "\nbut '"+std::string(node.name())+"' was declared as function here: "+to_string(declaration_node.location())+"\n" RESET
+        + show_code(declaration_node.location()) + RESET;
     }
 };
 

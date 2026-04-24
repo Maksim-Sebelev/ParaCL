@@ -215,11 +215,11 @@ void Nametable::set(std::string_view name, llvm::Value *value, ast::node::Variab
     }
     else if (is_variable_function and not is_value_function)
     {
-        throw error::set_function_variale_integer_value_error(declaration_node);
+        throw error::set_function_variale_integer_value(declaration_node, variable.declaration_node);
     }
     else /* if (not is_variable_function and is_value_function)*/
     {
-        throw error::set_integer_variable_function_value_error(declaration_node);
+        throw error::set_integer_variable_function_value(declaration_node, variable.declaration_node);
     }
 }
 
@@ -344,7 +344,7 @@ void Nametable::force_declare(Nametable::identifier_t name, llvm::Value *value, 
     auto&& back = scopes_.back();
 
     if (auto&& found = back.find(name); found != back.end())
-        throw error::function_arguments_with_same_names_error(found->second.declaration_node, declaration_node);
+        throw error::function_arguments_with_same_names(found->second.declaration_node, declaration_node);
 
     declare_(name, value, declaration_node, ValueStatus::local);
 }

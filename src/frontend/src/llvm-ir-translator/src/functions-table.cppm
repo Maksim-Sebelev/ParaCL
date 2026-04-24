@@ -174,8 +174,8 @@ public:
 
         auto&& declname = funcdecl.name();
 
-        if (lookup_(declname, funcdecl))
-            throw error::redeclaration_of_function(funcdecl);
+        if (auto&& found = lookup_(declname, funcdecl); found)
+            throw error::redeclaration_of_function(funcdecl, found->declaration_node);
 
         auto&& declargs = declaration_args_t{funcdecl};
         auto&& function = functions_[declname][declargs];

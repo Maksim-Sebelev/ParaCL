@@ -137,13 +137,13 @@ llvm::Value* visit(Variable const& node, llvmIrTranslatorContext& context)
 {
     auto&& variable = context.nametable.get(node.name());
     if (not variable)
-        throw error::using_undeclarated_variable_error(node);
+        throw error::using_undeclarated_variable(node);
 
     if (context.nametable.is_function(node.name()))
         throw error::using_function_as_int(node);
 
     if (not context.nametable.is_visible_from(node.name(), context.current_block->getParent()))
-        throw error::using_variable_from_parent_function_scope_error(node);
+        throw error::using_variable_from_parent_function_scope(node);
 
     return variable;
 }
@@ -617,7 +617,7 @@ void visit(Return const & node, llvmIrTranslatorContext& context)
 {
     auto&& not_in_function = (context.current_scope_status == ValueStatus::global);
 
-    if (not_in_function) throw error::return_in_not_function_scope_error(node);
+    if (not_in_function) throw error::return_in_not_function_scope(node);
 
     auto&& returning_value = generate_expression(node.expression(), context);
     context.builder.CreateRet(returning_value);
@@ -676,7 +676,7 @@ llvm::Value* visit(FunctionDeclaration const & node, llvmIrTranslatorContext& co
     auto&& body = static_cast<Scope const &>(node.body());
 
     if (body.empty())
-        throw error::function_with_empty_body_error(node);
+        throw error::function_with_empty_body(node);
 
     auto&& last_statement = body.back();
 
@@ -736,10 +736,10 @@ llvm::Value* visit(FunctionCall const & node, llvmIrTranslatorContext& context)
     auto&& function = llvm::dyn_cast<llvm::Function>(value);
 
     if (not function)
-        throw error::using_int_as_function_error(node);
+        throw error::using_int_as_function(node);
 
     if (function->arg_size() != completed_args.size())
-        throw error::function_alias_arguments_mismatch_error(node, function->arg_size(), completed_args.size());
+        throw error::function_alias_arguments_mismatch(node, function->arg_size(), completed_args.size());
 
     return context.builder.CreateCall(function, completed_args, name);;
 }
