@@ -13,7 +13,7 @@ export module ast_graph_dump;
 
 export import ast;
 
-namespace ParaCL::ast::node
+namespace ParaCL::frontend::ast::node
 {
 
 using unique_node_id_t = const void*;
@@ -53,7 +53,7 @@ void dump_and_link_with_parent(std::ofstream& os, unique_node_id_t parent, Basic
     link_nodes(os, parent, get_node_unique_id(node), label);
 }
 
-std::string dump_code_location(ast::node::CodeLocation const & location)
+std::string dump_code_location(frontend::ast::node::CodeLocation const & location)
 {
     auto&& dump = std::ostringstream{};
     dump << location.file()
@@ -64,9 +64,9 @@ std::string dump_code_location(ast::node::CodeLocation const & location)
 }
 
 } /* namespace graphic_dump */
-} /* namespace ParaCL::ast::node */
+} /* namespace ParaCL::frontend::ast::node */
 
-namespace ParaCL::ast
+namespace ParaCL::frontend::ast
 {
 
 export
@@ -95,9 +95,9 @@ void dump(AST const & ast, std::filesystem::path const & dot_file, std::filesyst
     std::system(dot_cmd.c_str());
 }
 
-} /* namespace ParaCL::ast */
+} /* namespace ParaCL::frontend::ast */
 
-namespace ParaCL::ast::node::visit_specializations
+namespace ParaCL::frontend::ast::node::visit_specializations
 {
 
 template <>
@@ -298,5 +298,5 @@ void visit(FunctionCall const& node, unique_node_id_t unique_node_id, std::ofstr
     }
 }
 //-----------------------------------------------------------------------------
-} /* namespace ParaCL::ast::node::visit_specializations */
+} /* namespace ParaCL::frontend::ast::node::visit_specializations */
 //-----------------------------------------------------------------------------

@@ -9,7 +9,7 @@ export module node_traits;
 export import ast_nodes;
 
 export
-namespace ParaCL::ast::node::traits
+namespace ParaCL::frontend::ast::node::traits
 {
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -633,5 +633,5 @@ struct NodeTraits<FunctionDeclaration, NodeInfo::FIELD, 2>
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
-} /* namespace ParaCL::ast::node::traits */
+} /* namespace ParaCL::frontend::ast::node::traits */
 //--------------------------------------------------------------------------------------------------------------------------------------

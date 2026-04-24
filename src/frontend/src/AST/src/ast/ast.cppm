@@ -7,7 +7,7 @@ export module ast;
 export import node_type_erasure;
 export import ast_nodes;
 
-namespace ParaCL::ast
+namespace ParaCL::frontend::ast
 {
 
 export
@@ -35,4 +35,4 @@ public:
 
 };
 
-} /* namespace ParaCL::ast */
+} /* namespace ParaCL::frontend::ast */

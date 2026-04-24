@@ -11,7 +11,7 @@ export module node_type_erasure;
 export import node_code_location;
 
 //--------------------------------------------------------------------------------------------------------------------------------------
-namespace ParaCL::ast::node
+namespace ParaCL::frontend::ast::node
 {
 //--------------------------------------------------------------------------------------------------------------------------------------
 
@@ -294,7 +294,7 @@ public:
     operator const T &() const
     {
         if (not is_a<T>())
-            throw std::runtime_error("Bad ast::node::BasicNode cast: real type: '" + std::string(self_->type_().name()) + "', casted type: '" + typeid(T).name() + std::string("'"));
+            throw std::runtime_error("Bad frontend::ast::node::BasicNode cast: real type: '" + std::string(self_->type_().name()) + "', casted type: '" + typeid(T).name() + std::string("'"));
 
         return (static_cast<NodeImpl<T> const *>(self_.get()))->data_;
     }
@@ -304,7 +304,7 @@ public:
     operator T& ()
     {
         if (not is_a<T>())
-            throw std::runtime_error("Bad ast::node::BasicNode cast: real type: '" + std::string(self_->type_().name()) + "', casted type: '" + typeid(T).name() + std::string("'"));
+            throw std::runtime_error("Bad frontend::ast::node::BasicNode cast: real type: '" + std::string(self_->type_().name()) + "', casted type: '" + typeid(T).name() + std::string("'"));
 
         return (static_cast<NodeImpl<T>*>(self_.get()))->data_;
     }
@@ -340,5 +340,5 @@ BasicNode create(NodeT)
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
-} /* namespace ParaCL::ast::node */
+} /* namespace ParaCL::frontend::ast::node */
 //--------------------------------------------------------------------------------------------------------------------------------------

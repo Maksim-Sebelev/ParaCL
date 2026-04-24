@@ -11,7 +11,7 @@ export module nodes_functional;
 export import llvm_ir_translator_context;
 
 //-----------------------------------------------------------------------------
-namespace ParaCL::ast::node
+namespace ParaCL::frontend::ast::node
 {
 //-----------------------------------------------------------------------------
 
@@ -24,5 +24,5 @@ static_assert(not std::is_same_v<generatable_statement, generatable_if_statement
 static_assert(not std::is_same_v<generatable_if_statement, generatable_expression>, "visit specializations must be diferent");
 
 //-----------------------------------------------------------------------------
-} /* namespace ParaCL::ast::node */
+} /* namespace ParaCL::frontend::ast::node */
 //-----------------------------------------------------------------------------

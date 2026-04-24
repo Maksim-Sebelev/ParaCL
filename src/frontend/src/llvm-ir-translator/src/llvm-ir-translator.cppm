@@ -64,9 +64,9 @@ llvm::Value* convert_Int1_to_Int32(llvmIrTranslatorContext& context, llvm::Value
 
 //---------------------------------------------------------------------------------------------------------------
 
-bool is_semicolon_or_empty_scope(ast::node::BasicNode const & node)
+bool is_semicolon_or_empty_scope(frontend::ast::node::BasicNode const & node)
 {
-    return node.is_a<ast::node::Semicolon>() or (node.is_a<ast::node::Scope>() and static_cast<ast::node::Scope const &>(node).empty());
+    return node.is_a<frontend::ast::node::Semicolon>() or (node.is_a<frontend::ast::node::Scope>() and static_cast<frontend::ast::node::Scope const &>(node).empty());
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ bool is_semicolon_or_empty_scope(ast::node::BasicNode const & node)
 //---------------------------------------------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-namespace ParaCL::ast::node
+namespace ParaCL::frontend::ast::node
 {
 //-----------------------------------------------------------------------------
 
@@ -109,7 +109,7 @@ llvm::Value* visit(NumberLiteral const& node, llvmIrTranslatorContext& context)
 template <>
 void visit(NumberLiteral const& node, llvmIrTranslatorContext& context)
 {
-    frontend::warning::expression_result_unused(node.location());
+    warning::expression_result_unused(node.location());
     std::ignore = visit<NumberLiteral, llvm::Value*, llvmIrTranslatorContext&>(node, context);
 }
 
@@ -125,7 +125,7 @@ llvm::Value* visit(StringLiteral const& node, llvmIrTranslatorContext& context)
 template <>
 void visit(StringLiteral const& node, llvmIrTranslatorContext& context)
 {
-    frontend::warning::expression_result_unused(node.location());
+    warning::expression_result_unused(node.location());
     std::ignore = visit<StringLiteral, llvm::Value*, llvmIrTranslatorContext&>(node, context);
 }
 
@@ -137,13 +137,13 @@ llvm::Value* visit(Variable const& node, llvmIrTranslatorContext& context)
 {
     auto&& variable = context.nametable.get(node.name());
     if (not variable)
-        throw frontend::error::using_undeclarated_variable_error(node);
+        throw error::using_undeclarated_variable_error(node);
 
     if (context.nametable.is_function(node.name()))
-        throw frontend::error::using_function_as_int(node);
+        throw error::using_function_as_int(node);
 
     if (not context.nametable.is_visible_from(node.name(), context.current_block->getParent()))
-        throw frontend::error::using_variable_from_parent_function_scope_error(node);
+        throw error::using_variable_from_parent_function_scope_error(node);
 
     return variable;
 }
@@ -151,7 +151,7 @@ llvm::Value* visit(Variable const& node, llvmIrTranslatorContext& context)
 template <>
 void visit(Variable const& node, llvmIrTranslatorContext& context)
 {
-    frontend::warning::expression_result_unused(node.location());
+    warning::expression_result_unused(node.location());
     std::ignore = visit<Variable, llvm::Value*, llvmIrTranslatorContext&>(node, context);
 }
 
@@ -174,7 +174,7 @@ llvm::Value* visit(Scan const& node, llvmIrTranslatorContext& context)
 template <>
 void visit(Scan const& node, llvmIrTranslatorContext& context)
 {
-    frontend::warning::expression_result_unused(node.location());
+    warning::expression_result_unused(node.location());
     std::ignore = visit<Scan, llvm::Value*, llvmIrTranslatorContext&>(node, context);
 }
 
@@ -212,7 +212,7 @@ llvm::Value* visit(UnaryOperator const& node, llvmIrTranslatorContext& context)
 template <>
 void visit(UnaryOperator const& node, llvmIrTranslatorContext& context)
 {
-    frontend::warning::expression_result_unused(node.location());
+    warning::expression_result_unused(node.location());
     std::ignore = visit<UnaryOperator, llvm::Value*, llvmIrTranslatorContext&>(node, context);
 }
 
@@ -325,7 +325,7 @@ void visit(BinaryOperator const& node, llvmIrTranslatorContext& context)
         case BinaryOperator::MULASGN:
         case BinaryOperator::DIVASGN:
         case BinaryOperator::REMASGN: break;
-        default: frontend::warning::expression_result_unused(node.location()); break;
+        default: warning::expression_result_unused(node.location()); break;
     }
 
     std::ignore = visit<BinaryOperator, llvm::Value*, llvmIrTranslatorContext&>(node, context);
@@ -440,7 +440,7 @@ void visit(If const& node, llvmIrTranslatorContext& context, llvm::BasicBlock* s
     if (not frontend::llvm_ir_translator::is_semicolon_or_empty_scope(body))
         generate_statement(body, context);
     else
-        frontend::warning::useless_condition(node);
+        warning::useless_condition(node);
 
     context.builder.CreateBr(end);
     context.set_current_block(end);
@@ -456,7 +456,7 @@ void visit(Else const& node, llvmIrTranslatorContext& context)
     if (not frontend::llvm_ir_translator::is_semicolon_or_empty_scope(body))
         generate_statement(body, context);
     else
-        frontend::warning::useless_else(node);
+        warning::useless_else(node);
 }
 
 //-----------------------------------------------------------------------------
@@ -539,14 +539,14 @@ llvm::Value* visit(Scope const& node, llvmIrTranslatorContext& context)
     auto&& size = node.size();
 
     if (size == 0)
-        throw frontend::error::using_scope_as_expression_but_its_empty(node);
+        throw error::using_scope_as_expression_but_its_empty(node);
 
     for (auto&& it = 0LU, ite = size - 1; it != ite; ++it)
     {
         auto&& statement = node[it];
 
         if (statement.is_a<Return>())
-            frontend::warning::instructions_after_return(statement);
+            warning::instructions_after_return(statement);
 
         generate_statement(statement, context);
     }
@@ -558,7 +558,7 @@ llvm::Value* visit(Scope const& node, llvmIrTranslatorContext& context)
     if (last.is_a<Return>())
         generate_statement(last, context);
     else if (not last.supports<generatable_expression>())
-        throw frontend::error::using_scope_as_expression_but_last_statement_isnt_expression(last);
+        throw error::using_scope_as_expression_but_last_statement_isnt_expression(last);
     else
         return_value = generate_expression(last, context);
 
@@ -576,7 +576,7 @@ void visit(Scope const& node, llvmIrTranslatorContext& context)
 
     if (size == 0)
     {
-        frontend::warning::empty_scope(node);
+        warning::empty_scope(node);
         return;
     }
 
@@ -589,7 +589,7 @@ void visit(Scope const& node, llvmIrTranslatorContext& context)
         auto&& statement = node[it];
 
         if (statement.is_a<Return>())
-            frontend::warning::instructions_after_return(statement);
+            warning::instructions_after_return(statement);
 
         generate_statement(statement, context);
     }
@@ -606,7 +606,7 @@ void visit(Scope const& node, llvmIrTranslatorContext& context)
 template <>
 void visit(Semicolon const & node, llvmIrTranslatorContext& context)
 {
-    frontend::warning::useless_semicolon(node);
+    warning::useless_semicolon(node);
 }
 
 //-----------------------------------------------------------------------------
@@ -617,7 +617,7 @@ void visit(Return const & node, llvmIrTranslatorContext& context)
 {
     auto&& not_in_function = (context.current_scope_status == ValueStatus::global);
 
-    if (not_in_function) throw frontend::error::return_in_not_function_scope_error(node);
+    if (not_in_function) throw error::return_in_not_function_scope_error(node);
 
     auto&& returning_value = generate_expression(node.expression(), context);
     context.builder.CreateRet(returning_value);
@@ -676,12 +676,12 @@ llvm::Value* visit(FunctionDeclaration const & node, llvmIrTranslatorContext& co
     auto&& body = static_cast<Scope const &>(node.body());
 
     if (body.empty())
-        throw frontend::error::function_with_empty_body_error(node);
+        throw error::function_with_empty_body_error(node);
 
     auto&& last_statement = body.back();
 
     if ((not last_statement.is_a<Return>()) and (not last_statement.supports<generatable_expression>()))
-        throw frontend::error::last_function_statement_is_not_return_and_cannot_be_converted_to_expression(node, last_statement);
+        throw error::last_function_statement_is_not_return_and_cannot_be_converted_to_expression(node, last_statement);
 
     auto&& body_return = generate_expression(node.body(), context);
 
@@ -702,7 +702,7 @@ llvm::Value* visit(FunctionDeclaration const & node, llvmIrTranslatorContext& co
 template <>
 void visit(FunctionDeclaration const & node, llvmIrTranslatorContext& context)
 {
-    if (node.name().empty()) frontend::warning::unnamed_function(node);
+    if (node.name().empty()) warning::unnamed_function(node);
     std::ignore = visit<FunctionDeclaration, llvm::Value*, llvmIrTranslatorContext&>(node, context);
 }
 
@@ -730,15 +730,15 @@ llvm::Value* visit(FunctionCall const & node, llvmIrTranslatorContext& context)
 
     auto&& value = context.nametable.get(name);
     if (not value)
-        throw frontend::error::using_undeclarated_function(node);
+        throw error::using_undeclarated_function(node);
 
     auto&& function = llvm::dyn_cast<llvm::Function>(value);
 
     if (not function)
-        throw frontend::error::using_int_as_function_error(node);
+        throw error::using_int_as_function_error(node);
 
     if (function->arg_size() != completed_args.size())
-        throw frontend::error::function_alias_arguments_mismatch_error(node, function->arg_size(), completed_args.size());
+        throw error::function_alias_arguments_mismatch_error(node, function->arg_size(), completed_args.size());
 
     return context.builder.CreateCall(function, completed_args, name);;
 }
@@ -748,14 +748,14 @@ llvm::Value* visit(FunctionCall const & node, llvmIrTranslatorContext& context)
 template <>
 void visit(FunctionCall const & node, llvmIrTranslatorContext& context)
 {
-    frontend::warning::function_return_value_ignored(node);
+    warning::function_return_value_ignored(node);
     std::ignore = visit<FunctionCall, llvm::Value*, llvmIrTranslatorContext&>(node, context);
 }
 
 //-----------------------------------------------------------------------------
 } /* namespace visit_specializations */
 //-----------------------------------------------------------------------------
-} /* namespace ParaCL::ast::node */
+} /* namespace ParaCL::frontend::ast::node */
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -764,7 +764,7 @@ namespace ParaCL::frontend::llvm_ir_translator
 //-----------------------------------------------------------------------------
 
 export
-void generate_llvm_ir(ast::AST const & ast, options::Options const & options)
+void generate_llvm_ir(frontend::ast::AST const & ast, options::Options const & options)
 {
     auto&& context = llvmIrTranslatorContext{options.input_file};
 
@@ -775,7 +775,7 @@ void generate_llvm_ir(ast::AST const & ast, options::Options const & options)
 
     context.set_current_block(entry_block);
 
-    ast::node::generate_statement(ast.root(), context);
+    frontend::ast::node::generate_statement(ast.root(), context);
 
     context.builder.CreateRet(frontend::llvm_ir_translator::create_null_Int32(context));
 

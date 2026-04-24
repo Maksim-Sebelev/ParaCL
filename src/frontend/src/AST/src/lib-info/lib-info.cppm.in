@@ -16,7 +16,7 @@ module;
 export module last_info;
 
 
-namespace ParaCL::ast
+namespace ParaCL::frontend::ast
 {
     /* singletone pattern */
     /* понятия не имею нужен ли здесь этот паттерн, учитывая что все поля constexpr
@@ -87,4 +87,4 @@ namespace ParaCL::ast
         Info& operator = (Info&&) = delete;
     };
 
-} /* namespace ParaCL::ast */
+} /* namespace ParaCL::frontend::ast */

@@ -9,7 +9,7 @@ import thelast;
 #include <string_view>
 
 extern FILE* yyin;
-extern ParaCL::ast::AST program;
+extern ParaCL::frontend::ast::AST program;
 extern std::string current_file;
 
 export module ast_reader;
@@ -27,7 +27,7 @@ void set_current_paracl_file(std::string_view file)
 }
 
 export
-ParaCL::ast::AST&& read_ast(ParaCL::options::Options const & options)
+ParaCL::frontend::ast::AST&& read_ast(ParaCL::options::Options const & options)
 {
     auto&& input_file = options.input_file.string();
     set_current_paracl_file(input_file);

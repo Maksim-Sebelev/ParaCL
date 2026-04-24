@@ -14,7 +14,7 @@ import node_type_erasure;
 import ast_nodes;
 import node_traits;
 
-namespace ParaCL::ast
+namespace ParaCL::frontend::ast
 {
 namespace node
 {
@@ -320,4 +320,4 @@ void write(AST const & ast, std::filesystem::path const & file)
     out.close();
 }
 
-} /* namespace ParaCL::ast */
+} /* namespace ParaCL::frontend::ast */

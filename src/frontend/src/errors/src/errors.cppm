@@ -27,14 +27,14 @@ export import thelast;
 namespace ParaCL::frontend
 {
 
-std::string to_string(ast::node::CodeLocation const & location)
+std::string to_string(frontend::ast::node::CodeLocation const & location)
 {
     auto&& loc = std::ostringstream{};
     loc << location.file() << ":" << location.line_begin() << ":" << location.column_begin();
     return loc.str();
 }
 
-std::string mark_error(ast::node::CodeLocation const & location)
+std::string mark_error(frontend::ast::node::CodeLocation const & location)
 {
     auto&& mark = std::ostringstream{};
 
@@ -69,7 +69,7 @@ std::string show_error(std::string_view msg, ProblemStatus status = ProblemStatu
     return explain.str();
 }
 
-std::string show_code(ast::node::CodeLocation const & location)
+std::string show_code(frontend::ast::node::CodeLocation const & location)
 {
     auto&& code = std::ostringstream{};
     auto&& indent = " " + std::to_string(location.line_begin()) + " | ";
@@ -78,7 +78,7 @@ std::string show_code(ast::node::CodeLocation const & location)
     return code.str();
 }
 
-std::string show_code_error(std::string_view msg, ast::node::CodeLocation const & location, ProblemStatus status = ProblemStatus::Error)
+std::string show_code_error(std::string_view msg, frontend::ast::node::CodeLocation const & location, ProblemStatus status = ProblemStatus::Error)
 {
     auto&& explain = std::ostringstream{};
     explain << BOLD << to_string(location)
@@ -122,7 +122,7 @@ public:
 class parser_error : public error
 {
 public:
-    parser_error(ast::node::CodeLocation const & location, std::string_view explain)
+    parser_error(frontend::ast::node::CodeLocation const & location, std::string_view explain)
     {
         msg_ = show_code_error(explain, location);
     }
@@ -131,7 +131,7 @@ public:
 class using_undeclarated_variable_error : public error
 {
 public:
-    using_undeclarated_variable_error(ast::node::Variable const & node)
+    using_undeclarated_variable_error(frontend::ast::node::Variable const & node)
     {
         auto&& explain = "use of undeclared identifier '" + std::string(node.name()) + "'";
         msg_ = show_code_error(explain, node.location());
@@ -141,7 +141,7 @@ public:
 class function_alias_arguments_mismatch_error : public error
 {
 public:
-    function_alias_arguments_mismatch_error(ast::node::FunctionCall const & node, size_t expected_args_size, size_t call_args_size)
+    function_alias_arguments_mismatch_error(frontend::ast::node::FunctionCall const & node, size_t expected_args_size, size_t call_args_size)
     {
         auto&& explain = "function alias signature mismatch, '" + std::string(node.name()) +
                                  "' expects " + std::to_string(expected_args_size) +
@@ -154,7 +154,7 @@ public:
 class using_int_as_function_error : public error
 {
 public:
-    using_int_as_function_error(ast::node::FunctionCall const & node)
+    using_int_as_function_error(frontend::ast::node::FunctionCall const & node)
     {
         auto&& explain = "using '" + std::string(node.name()) + "' as function, but it has `int` type.";
         msg_ = show_code_error(explain, node.location());
@@ -164,7 +164,7 @@ public:
 class using_function_as_int : public error
 {
 public:
-    using_function_as_int(ast::node::Variable const & node)
+    using_function_as_int(frontend::ast::node::Variable const & node)
     {
         auto&& explain = "using '" + std::string(node.name()) + "' as integer, but it has function type.";
         msg_ = show_code_error(explain, node.location());
@@ -174,7 +174,7 @@ public:
 class using_undeclarated_function : public error
 {
 public:
-    using_undeclarated_function(ast::node::FunctionCall const & node)
+    using_undeclarated_function(frontend::ast::node::FunctionCall const & node)
     {
         auto&& explain = "call to undeclared function '" + std::string(node.name()) + "'";
         msg_ = show_code_error(explain, node.location());
@@ -184,7 +184,7 @@ public:
 class using_variable_from_parent_function_scope_error : public error
 {
 public:
-    using_variable_from_parent_function_scope_error(ast::node::Variable const & node)
+    using_variable_from_parent_function_scope_error(frontend::ast::node::Variable const & node)
     {
         auto&& explain = "'" + std::string(node.name()) + "' was declared in parent scope, but isn`t global variable (belong to the parent function scope)";
         msg_ = show_code_error(explain, node.location());
@@ -194,7 +194,7 @@ public:
 class last_function_statement_is_not_return_and_cannot_be_converted_to_expression : public error
 {
 public:
-    last_function_statement_is_not_return_and_cannot_be_converted_to_expression(ast::node::FunctionDeclaration const & node, ast::node::BasicNode const & last)
+    last_function_statement_is_not_return_and_cannot_be_converted_to_expression(frontend::ast::node::FunctionDeclaration const & node, frontend::ast::node::BasicNode const & last)
     {
         auto&& explain = "in function '"+std::string(node.name())+"':\n" RESET + show_code(node.location()) + "\n"
         BOLD "last statement isn`t 'return' and cannot be converted to expression" RESET;
@@ -205,7 +205,7 @@ public:
 class using_scope_as_expression_but_last_statement_isnt_expression : public error
 {
 public:
-    using_scope_as_expression_but_last_statement_isnt_expression(ast::node::BasicNode const & node)
+    using_scope_as_expression_but_last_statement_isnt_expression(frontend::ast::node::BasicNode const & node)
     {
         auto&& explain = "last statement in scope isn`t expression, but scope used as expression";
         msg_ = show_code_error(explain, node.location());
@@ -215,7 +215,7 @@ public:
 class using_scope_as_expression_but_its_empty : public error
 {
 public:
-    using_scope_as_expression_but_its_empty(ast::node::Scope const & node)
+    using_scope_as_expression_but_its_empty(frontend::ast::node::Scope const & node)
     {
         auto&& explain = "empty scope is using like expression";
         msg_ = show_code_error(explain, node.location());
@@ -225,7 +225,7 @@ public:
 class redeclaration_of_function : public error
 {
 public:
-    redeclaration_of_function(ast::node::FunctionDeclaration const & node)
+    redeclaration_of_function(frontend::ast::node::FunctionDeclaration const & node)
     {
         auto&& explain = "redeclaration of function '"+std::string(node.name())+"'";
         msg_ = show_code_error(explain, node.location());
@@ -235,7 +235,7 @@ public:
 class function_with_empty_body_error : public error
 {
 public:
-    function_with_empty_body_error(ast::node::FunctionDeclaration const & node)
+    function_with_empty_body_error(frontend::ast::node::FunctionDeclaration const & node)
     {
         auto&& explain = "empty function body";
         msg_ = show_code_error(explain, node.location());
@@ -245,7 +245,7 @@ public:
 class return_in_not_function_scope_error : public error
 {
 public:
-    return_in_not_function_scope_error(ast::node::Return const & node)
+    return_in_not_function_scope_error(frontend::ast::node::Return const & node)
     {
         auto&& explain = "using 'return' outside of a function";
         msg_ = show_code_error(explain, node.location());
@@ -257,8 +257,8 @@ class function_arguments_with_same_names_error : public error
 public:
     function_arguments_with_same_names_error
     (
-        ast::node::Variable const & /* FIXME: when show eror will shows more than 1 location, add this argument*/,
-        ast::node::Variable const & snd
+        frontend::ast::node::Variable const & /* FIXME: when show eror will shows more than 1 location, add this argument*/,
+        frontend::ast::node::Variable const & snd
     )
     {
         auto&& explain = "function arguments must have different names";
@@ -272,7 +272,7 @@ export
 namespace warning
 {
 
-std::ostream& function_return_value_ignored(ast::node::FunctionCall const & node, std::ostream& os = std::cerr)
+std::ostream& function_return_value_ignored(frontend::ast::node::FunctionCall const & node, std::ostream& os = std::cerr)
 {
     auto&& explain = "return value of '"+std::string(node.name())+"' is ignored";
     os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";
@@ -280,7 +280,7 @@ std::ostream& function_return_value_ignored(ast::node::FunctionCall const & node
     return os;
 }
 
-std::ostream& expression_result_unused(ast::node::CodeLocation const & location, std::ostream& os = std::cerr)
+std::ostream& expression_result_unused(frontend::ast::node::CodeLocation const & location, std::ostream& os = std::cerr)
 {
     auto&& explain = "expression result unused";
     os << show_code_error(explain, location, ProblemStatus::Warning) << "\n";
@@ -288,12 +288,12 @@ std::ostream& expression_result_unused(ast::node::CodeLocation const & location,
     return os;
 }
 
-std::ostream& expression_result_unused(ast::node::BasicNode const & node, std::ostream& os = std::cerr)
+std::ostream& expression_result_unused(frontend::ast::node::BasicNode const & node, std::ostream& os = std::cerr)
 {
     return expression_result_unused(node.location(), os);
 }
 
-std::ostream& unnamed_function(ast::node::FunctionDeclaration const & node, std::ostream& os = std::cerr)
+std::ostream& unnamed_function(frontend::ast::node::FunctionDeclaration const & node, std::ostream& os = std::cerr)
 {
     auto&& explain = "function has no alias and no call-name";
     os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";
@@ -301,7 +301,7 @@ std::ostream& unnamed_function(ast::node::FunctionDeclaration const & node, std:
     return os;
 }
 
-std::ostream& instructions_after_return(ast::node::BasicNode const & node, std::ostream& os = std::cerr)
+std::ostream& instructions_after_return(frontend::ast::node::BasicNode const & node, std::ostream& os = std::cerr)
 {
     auto&& explain = "instructions after this 'return' will never be reached";
     os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";
@@ -309,7 +309,7 @@ std::ostream& instructions_after_return(ast::node::BasicNode const & node, std::
     return os;
 }
 
-std::ostream& empty_scope(ast::node::Scope const & node, std::ostream& os = std::cerr)
+std::ostream& empty_scope(frontend::ast::node::Scope const & node, std::ostream& os = std::cerr)
 {
     auto&& explain = "this scope has no actions";
     os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";
@@ -317,7 +317,7 @@ std::ostream& empty_scope(ast::node::Scope const & node, std::ostream& os = std:
     return os;
 }
 
-std::ostream& useless_semicolon(ast::node::Semicolon const & node, std::ostream& os = std::cerr)
+std::ostream& useless_semicolon(frontend::ast::node::Semicolon const & node, std::ostream& os = std::cerr)
 {
     auto&& explain = "this semicolon does not match any statement";
     os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";
@@ -325,7 +325,7 @@ std::ostream& useless_semicolon(ast::node::Semicolon const & node, std::ostream&
     return os;
 }
 
-std::ostream& useless_condition(ast::node::If const & node, std::ostream& os = std::cerr)
+std::ostream& useless_condition(frontend::ast::node::If const & node, std::ostream& os = std::cerr)
 {
     auto&& explain = "this condition has no action";
     os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";
@@ -333,7 +333,7 @@ std::ostream& useless_condition(ast::node::If const & node, std::ostream& os = s
     return os;
 }
 
-std::ostream& useless_else(ast::node::Else const & node, std::ostream& os = std::cerr)
+std::ostream& useless_else(frontend::ast::node::Else const & node, std::ostream& os = std::cerr)
 {
     auto&& explain = "this 'else' has no action";
     os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";
@@ -341,7 +341,7 @@ std::ostream& useless_else(ast::node::Else const & node, std::ostream& os = std:
     return os;
 }
 
-std::ostream& unused_variable(ast::node::Variable const & node, std::ostream& os = std::cerr)
+std::ostream& unused_variable(frontend::ast::node::Variable const & node, std::ostream& os = std::cerr)
 {
     auto&& explain = "unused variable";
     os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";
@@ -349,7 +349,7 @@ std::ostream& unused_variable(ast::node::Variable const & node, std::ostream& os
     return os;
 }
 
-std::ostream& unused_function_call_name(ast::node::FunctionDeclaration const & node, std::ostream& os = std::cerr)
+std::ostream& unused_function_call_name(frontend::ast::node::FunctionDeclaration const & node, std::ostream& os = std::cerr)
 {
     auto&& explain = "useless function call name '"+std::string(node.name())+"'";
     os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";

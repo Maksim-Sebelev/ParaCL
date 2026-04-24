@@ -67,7 +67,7 @@ private:
     using identifier_t = std::string_view;
     struct identifier_info_t
     {
-        ast::node::Variable declaration_node{""};
+        frontend::ast::node::Variable declaration_node{""};
         llvm::Value* value;
         ValueStatus status;
 
@@ -88,7 +88,7 @@ private:
     identifier_info_t       * lookup_(identifier_t name);
     identifier_info_t const * lookup_(identifier_t name) const;
 
-    void declare_(identifier_t name, llvm::Value * value, ast::node::Variable const & declaration_node, ValueStatus status);
+    void declare_(identifier_t name, llvm::Value * value, frontend::ast::node::Variable const & declaration_node, ValueStatus status);
 
   private:
     static bool is_function(llvm::Value const* value)
@@ -104,8 +104,8 @@ private:
 
     llvm::Value *get(std::string_view name);
 
-    void set(std::string_view name, llvm::Value *value, ast::node::Variable const & declaration_node, ValueStatus status = local);
-    void force_declare(std::string_view name, llvm::Value *value, ast::node::Variable const & declaration_node);
+    void set(std::string_view name, llvm::Value *value, frontend::ast::node::Variable const & declaration_node, ValueStatus status = local);
+    void force_declare(std::string_view name, llvm::Value *value, frontend::ast::node::Variable const & declaration_node);
     ValueStatus status(std::string_view name) const;
     bool from_current_scope(std::string_view name) const;
     bool is_visible_from(std::string_view name, llvm::Function* function) const;
@@ -187,7 +187,7 @@ llvm::Value *Nametable::get(std::string_view name)
 
 //---------------------------------------------------------------------------------------------------------------
 
-void Nametable::set(std::string_view name, llvm::Value *value, ast::node::Variable const & declaration_node, ValueStatus status)
+void Nametable::set(std::string_view name, llvm::Value *value, frontend::ast::node::Variable const & declaration_node, ValueStatus status)
 {
 #if not defined(NDEBUG)
     if (scopes_.empty())
@@ -298,7 +298,7 @@ Nametable::identifier_info_t* Nametable::lookup_(Nametable::identifier_t name)
 
 //---------------------------------------------------------------------------------------------------------------
 
-void Nametable::declare_(Nametable::identifier_t name, llvm::Value *value, ast::node::Variable const & declaration_node, ValueStatus status)
+void Nametable::declare_(Nametable::identifier_t name, llvm::Value *value, frontend::ast::node::Variable const & declaration_node, ValueStatus status)
 {
     assert(scopes_.size() > 0);
 
@@ -323,7 +323,7 @@ void Nametable::declare_(Nametable::identifier_t name, llvm::Value *value, ast::
 
 //---------------------------------------------------------------------------------------------------------------
 
-void Nametable::force_declare(Nametable::identifier_t name, llvm::Value *value, ast::node::Variable const & declaration_node)
+void Nametable::force_declare(Nametable::identifier_t name, llvm::Value *value, frontend::ast::node::Variable const & declaration_node)
 {
     assert(scopes_.size() > 0);
     

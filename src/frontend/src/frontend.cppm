@@ -24,7 +24,7 @@ void run(options::Options const & options)
         auto&& ast_svg = std::filesystem::path{ast_dot};
         ast_svg.replace_extension(".svg");
 
-        ast::dump(ast, ast_dot, ast_svg);
+        frontend::ast::dump(ast, ast_dot, ast_svg);
     }
 
     llvm_ir_translator::generate_llvm_ir(ast, options);

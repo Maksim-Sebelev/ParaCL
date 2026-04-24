@@ -49,15 +49,15 @@ std::string get_token_line(const yy::location &loc, FILE* in)
 }
 
 export
-ast::node::CodeLocation location_cast(yy::location const & loc, FILE* in)
+frontend::ast::node::CodeLocation location_cast(yy::location const & loc, FILE* in)
 {
-    return ast::node::CodeLocation
+    return frontend::ast::node::CodeLocation
     {
         current_file,
-        static_cast<ast::node::CodeLocation::code_place_uint_t>(loc.begin.line),
-        static_cast<ast::node::CodeLocation::code_place_uint_t>(loc.end.line),
-        static_cast<ast::node::CodeLocation::code_place_uint_t>(loc.begin.column),
-        static_cast<ast::node::CodeLocation::code_place_uint_t>(loc.end.column),
+        static_cast<frontend::ast::node::CodeLocation::code_place_uint_t>(loc.begin.line),
+        static_cast<frontend::ast::node::CodeLocation::code_place_uint_t>(loc.end.line),
+        static_cast<frontend::ast::node::CodeLocation::code_place_uint_t>(loc.begin.column),
+        static_cast<frontend::ast::node::CodeLocation::code_place_uint_t>(loc.end.column),
         get_token_line(loc, in)
     };
 }
