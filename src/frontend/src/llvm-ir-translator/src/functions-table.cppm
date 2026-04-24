@@ -183,12 +183,6 @@ public:
         function.declaration_node = funcdecl;
     }
 
-    // llvm::Function* get(std::string_view name, call_args_t const & args)
-    // {
-    //     auto&& function = lookup_(name, args);
-    //     return function ? function->value : nullptr;
-    // }
-
     llvm::Value* call(std::string_view name, call_args_t const & args)
     {
         auto&& function = lookup_(name, args);

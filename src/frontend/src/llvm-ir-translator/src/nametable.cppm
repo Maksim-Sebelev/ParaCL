@@ -117,17 +117,15 @@ private:
 #if not defined(NDEBUG)
     friend void dump(Nametable const & nt)
     {
-#if 0
         static auto&& dump_counter = 0LU;
         std::cout << "NAMETABLE DUMP[" << dump_counter++ << "]\n{" << std::endl;
         for (auto&& scope: nt.scopes_)
         {
             for (auto&& name: scope)
-                std::cout << "\t(" << name.first << ", " << name.second.first->getType()->getTypeID() << ")" << std::endl;
-            std::cout << std::endl;;
+                std::cout << "\t(" << name.first << ", " << name.second.value->getType()->getTypeID() << ")" << std::endl;
+            std::cout << std::endl;
         }
         std::cout << "}" << std::endl;
-        #endif /* 0 */
     }
 #endif /* not defined(NDEBUG) */
 };
@@ -178,6 +176,7 @@ void Nametable::leave_scope()
 llvm::Value *Nametable::get(std::string_view name)
 {
     auto&& variable_info_ptr = lookup_(name);
+
     if (not variable_info_ptr) return nullptr;
 
     auto&& variable = *variable_info_ptr;
@@ -202,14 +201,27 @@ void Nametable::set(std::string_view name, llvm::Value *value, ast::node::Variab
 
     auto&& variable = *variable_info_ptr;
 
-    if (is_function(value))
+    auto&& is_variable_function = is_function(variable.value);
+    auto&& is_value_function = is_function(value);
+
+    if (not is_variable_function and not is_value_function)
+    {
+        builder_.CreateStore(value, variable.value);
+    }
+    else if (not is_variable_function and is_value_function)
     {
         variable.value = value;
-        variable.status = status;
-        return;
     }
+    else if (is_variable_function and not is_value_function)
+    {
 
-    builder_.CreateStore(value, variable.value);
+        variable.value = builder_.CreateAlloca(builder_.getInt32Ty(), nullptr, name);
+        builder_.CreateStore(value, variable.value);
+    }
+    else /*if (is_variable_function and is_value_function) */
+    {
+        variable.value = value;
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------

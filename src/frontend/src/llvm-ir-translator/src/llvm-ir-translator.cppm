@@ -726,6 +726,7 @@ llvm::Value* visit(FunctionCall const & node, llvmIrTranslatorContext& context)
     }
 
     auto&& funccall = context.functable.call(name, completed_args);
+
     if (funccall) return funccall;
 
     auto&& value = context.nametable.get(name);
