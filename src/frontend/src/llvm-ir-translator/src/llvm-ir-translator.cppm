@@ -603,7 +603,6 @@ void visit(Scope const& node, llvmIrTranslatorContext& context)
 // SEMICOLON
 //-----------------------------------------------------------------------------
 
-
 template <>
 void visit(Semicolon const & node, llvmIrTranslatorContext& context)
 {

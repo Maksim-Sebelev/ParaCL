@@ -26,24 +26,24 @@ std::string get_token_line(const yy::location &loc, FILE* in)
 
     auto&& current_file_pos = ftell(in);
 
-    rewind(in);
+    std::rewind(in);
 
     char buffer[1024];
 
     size_t current_line = 1;
     std::string target_line;
 
-    while (current_line < loc.begin.line && fgets(buffer, sizeof(buffer), in))
+    while (current_line < loc.begin.line && std::fgets(buffer, sizeof(buffer), in))
     {
         ++current_line;
     }
 
-    if (current_line == loc.begin.line && fgets(buffer, sizeof(buffer), in))
+    if (current_line == loc.begin.line && std::fgets(buffer, sizeof(buffer), in))
         target_line = buffer;
 
     target_line.pop_back();
 
-    fseek(in, current_file_pos, SEEK_SET);
+    std::fseek(in, current_file_pos, SEEK_SET);
 
     return target_line;
 }

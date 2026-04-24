@@ -89,7 +89,7 @@
             static_cast<ParaCL::ast::node::CodeLocation::code_place_uint_t>(right_location.end.line),
             static_cast<ParaCL::ast::node::CodeLocation::code_place_uint_t>(left_location.begin.column),
             static_cast<ParaCL::ast::node::CodeLocation::code_place_uint_t>(right_location.end.column),
-            parser_get_token_line(operator_location)  // или можно left_location для строки начала выражения
+            parser_get_token_line(operator_location)
         };
     }
 }
@@ -420,7 +420,7 @@ binary_operator:
     | variable MULASGN error      { parser_show_error(@3, "expected expression after '*='"); YYABORT; }
     | variable DIVASGN error      { parser_show_error(@3, "expected expression after '/='"); YYABORT; }
     | variable REMASGN error      { parser_show_error(@3, "expected expression after '%='"); YYABORT; }
-    | variable AS      error      { parser_show_error(@3, "expected expression after '='"); YYABORT; }
+    | variable AS      error      { parser_show_error(@3, "expected expression after '='" ); YYABORT; }
     | expression ADD expression %prec ADD {
         auto&& node = ParaCL::ast::node::BinaryOperator
         {

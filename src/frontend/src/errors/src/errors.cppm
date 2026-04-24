@@ -2,11 +2,8 @@ module;
 
 #include <cstddef>
 #include <ostream>
-#include <filesystem>
-#include <vector>
 #include <sstream>
 #include <exception>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <cassert>
@@ -93,6 +90,7 @@ std::string show_code_error(std::string_view msg, ast::node::CodeLocation const 
     return explain.str();
 }
 
+export
 namespace error
 {
 
@@ -108,22 +106,19 @@ public:
     { return what_(); }
 };
 
-export
 std::ostream& operator << (std::ostream& os, error const & e)
 { return os << e.what(); }
 
-export
 class no_such_file_error : public error
 {
 public:
     no_such_file_error(std::string_view file)
     {
-        auto&& explain = "No such file: '"+std::string(file)+"'";
+        auto&& explain = "no such file: '"+std::string(file)+"'";
         msg_ = show_error(explain);
     }
 };
 
-export
 class parser_error : public error
 {
 public:
@@ -133,7 +128,6 @@ public:
     }
 };
 
-export
 class using_undeclarated_variable_error : public error
 {
 public:
@@ -144,13 +138,12 @@ public:
     }
 };
 
-export
 class function_alias_arguments_mismatch_error : public error
 {
 public:
     function_alias_arguments_mismatch_error(ast::node::FunctionCall const & node, size_t expected_args_size, size_t call_args_size)
     {
-        auto&& explain = "Function alias signature mismatch:\n'" + std::string(node.name()) +
+        auto&& explain = "function alias signature mismatch, '" + std::string(node.name()) +
                                  "' expects " + std::to_string(expected_args_size) +
                                  " arg" + ((expected_args_size != 1) ? "s" : "") +
                                  ", but called with " + std::to_string(call_args_size) + ":";
@@ -158,29 +151,26 @@ public:
     }
 };
 
-export
 class using_int_as_function_error : public error
 {
 public:
     using_int_as_function_error(ast::node::FunctionCall const & node)
     {
-        auto&& explain = "Using '" + std::string(node.name()) + "' as function, but it has `int` type.";
+        auto&& explain = "using '" + std::string(node.name()) + "' as function, but it has `int` type.";
         msg_ = show_code_error(explain, node.location());
     }
 };
 
-export
 class using_function_as_int : public error
 {
 public:
     using_function_as_int(ast::node::Variable const & node)
     {
-        auto&& explain = "Using '" + std::string(node.name()) + "' as integer, but it has function type.";
+        auto&& explain = "using '" + std::string(node.name()) + "' as integer, but it has function type.";
         msg_ = show_code_error(explain, node.location());
     }
 };
 
-export
 class using_undeclarated_function : public error
 {
 public:
@@ -191,7 +181,6 @@ public:
     }
 };
 
-export
 class using_variable_from_parent_function_scope_error : public error
 {
 public:
@@ -202,7 +191,6 @@ public:
     }
 };
 
-export
 class last_function_statement_is_not_return_and_cannot_be_converted_to_expression : public error
 {
 public:
@@ -214,7 +202,6 @@ public:
     }
 };
 
-export
 class using_scope_as_expression_but_last_statement_isnt_expression : public error
 {
 public:
@@ -225,7 +212,6 @@ public:
     }
 };
 
-export
 class using_scope_as_expression_but_its_empty : public error
 {
 public:
@@ -236,7 +222,6 @@ public:
     }
 };
 
-export
 class redeclaration_of_function : public error
 {
 public:
@@ -247,7 +232,6 @@ public:
     }
 };
 
-export
 class function_with_empty_body_error : public error
 {
 public:
@@ -258,7 +242,6 @@ public:
     }
 };
 
-export
 class return_in_not_function_scope_error : public error
 {
 public:
@@ -269,7 +252,6 @@ public:
     }
 };
 
-export
 class function_arguments_with_same_names_error : public error
 {
 public:
@@ -286,19 +268,18 @@ public:
 
 } /* namespace error */
 
+export
 namespace warning
 {
 
-export
 std::ostream& function_return_value_ignored(ast::node::FunctionCall const & node, std::ostream& os = std::cerr)
 {
-    auto&& explain = "The return value of '"+std::string(node.name())+"' is ignored";
+    auto&& explain = "return value of '"+std::string(node.name())+"' is ignored";
     os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";
 
     return os;
 }
 
-export
 std::ostream& expression_result_unused(ast::node::CodeLocation const & location, std::ostream& os = std::cerr)
 {
     auto&& explain = "expression result unused";
@@ -307,13 +288,11 @@ std::ostream& expression_result_unused(ast::node::CodeLocation const & location,
     return os;
 }
 
-export
 std::ostream& expression_result_unused(ast::node::BasicNode const & node, std::ostream& os = std::cerr)
 {
     return expression_result_unused(node.location(), os);
 }
 
-export
 std::ostream& unnamed_function(ast::node::FunctionDeclaration const & node, std::ostream& os = std::cerr)
 {
     auto&& explain = "function has no alias and no call-name";
@@ -322,7 +301,6 @@ std::ostream& unnamed_function(ast::node::FunctionDeclaration const & node, std:
     return os;
 }
 
-export
 std::ostream& instructions_after_return(ast::node::BasicNode const & node, std::ostream& os = std::cerr)
 {
     auto&& explain = "instructions after this 'return' will never be reached";
@@ -331,7 +309,6 @@ std::ostream& instructions_after_return(ast::node::BasicNode const & node, std::
     return os;
 }
 
-export
 std::ostream& empty_scope(ast::node::Scope const & node, std::ostream& os = std::cerr)
 {
     auto&& explain = "this scope has no actions";
@@ -340,7 +317,6 @@ std::ostream& empty_scope(ast::node::Scope const & node, std::ostream& os = std:
     return os;
 }
 
-export
 std::ostream& useless_semicolon(ast::node::Semicolon const & node, std::ostream& os = std::cerr)
 {
     auto&& explain = "this semicolon does not match any statement";
@@ -349,7 +325,6 @@ std::ostream& useless_semicolon(ast::node::Semicolon const & node, std::ostream&
     return os;
 }
 
-export
 std::ostream& useless_condition(ast::node::If const & node, std::ostream& os = std::cerr)
 {
     auto&& explain = "this condition has no action";
@@ -358,7 +333,6 @@ std::ostream& useless_condition(ast::node::If const & node, std::ostream& os = s
     return os;
 }
 
-export
 std::ostream& useless_else(ast::node::Else const & node, std::ostream& os = std::cerr)
 {
     auto&& explain = "this 'else' has no action";
@@ -367,7 +341,6 @@ std::ostream& useless_else(ast::node::Else const & node, std::ostream& os = std:
     return os;
 }
 
-export
 std::ostream& unused_variable(ast::node::Variable const & node, std::ostream& os = std::cerr)
 {
     auto&& explain = "unused variable";
@@ -375,6 +348,15 @@ std::ostream& unused_variable(ast::node::Variable const & node, std::ostream& os
 
     return os;
 }
+
+std::ostream& unused_function_call_name(ast::node::FunctionDeclaration const & node, std::ostream& os = std::cerr)
+{
+    auto&& explain = "useless function call name '"+std::string(node.name())+"'";
+    os << show_code_error(explain, node.location(), ProblemStatus::Warning) << "\n";
+
+    return os;
+};
+
 } /* namespace warning */
 
 } /* namespace ParaCL::frontend */

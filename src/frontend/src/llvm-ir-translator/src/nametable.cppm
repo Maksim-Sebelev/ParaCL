@@ -62,9 +62,7 @@ export class Nametable final
     llvm::Module& module_;
     llvm::IRBuilder<> &builder_;
 
-
 private:
-
 
     using identifier_t = std::string_view;
     struct identifier_info_t
@@ -215,18 +213,19 @@ void Nametable::set(std::string_view name, llvm::Value *value, ast::node::Variab
 
 ValueStatus Nametable::status(std::string_view name) const
 {
-    for (auto&& scope : scopes_ | std::views::reverse)
+
+    auto&& variable = lookup_(name);
+
+    if (not variable)
     {
-        auto&& found = scope.find(name);
-        if (found == scope.end()) continue;
-        return found->second.status;
+#if defined(NDEBUG)
+        throw std::runtime_error("requests status of undeclarated variable '" + std::string(name) + "'");
+#else
+        __builtin_unreachable();
+#endif /* defined(NDEBUG) */
     }
 
-#if defined(NDEBUG)
-    __builtin_unreachable();
-#endif /* defined(NDEBUG) */
-
-    throw std::runtime_error("requests status of undeclarated variable '" + std::string(name) + "'");
+    return variable->status;
 }
 
 //---------------------------------------------------------------------------------------------------------------

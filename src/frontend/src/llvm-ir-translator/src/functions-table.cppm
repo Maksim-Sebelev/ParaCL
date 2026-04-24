@@ -93,17 +93,26 @@ export
 class FunctionsTable final
 {
 private:
+    struct function_info_t
+    {
+        llvm::Function* value = nullptr;
+        ast::node::FunctionDeclaration declaration_node;
+
+        bool used : 1 = false;
+    };
+private:
     using function_overload_set =
     std::unordered_map
     <
-      declaration_args_t /* functoin args */,
-      llvm::Function* /* function llvm representation */
+      declaration_args_t, /* functoin args */
+      function_info_t
+    //   llvm::Function* /* function llvm representation */
     >;
 
     using functions_table =
     std::unordered_map
     <
-        std::string_view /* function name */,
+        std::string_view, /* function name */
         function_overload_set /* all functions with the same name*/
     >;
 
@@ -112,7 +121,7 @@ private:
     llvm::IRBuilder<>& builder_;
 
 private:
-    llvm::Function * lookup_(std::string_view name, declaration_args_t const & args)
+    function_info_t * lookup_(std::string_view name, declaration_args_t const & args)
     {
         auto&& overload_set = functions_.find(name);
         if (overload_set == functions_.end())
@@ -123,7 +132,7 @@ private:
         if (function == (overload_set->second).end())
             return nullptr;
 
-        return function->second;
+        return std::addressof(function->second);
     }
 
 public:
@@ -141,6 +150,19 @@ public:
         builder_(builder)
     {}
 
+    ~FunctionsTable()
+    {
+        for (auto&& overload_set: functions_)
+        {
+            for (auto&& function: overload_set.second)
+            {
+                auto&& function_info = function.second;
+                if (function_info.used or function_info.declaration_node.name().empty()) continue;
+                warning::unused_function_call_name(function_info.declaration_node);
+            }
+        }
+    }
+
 public:
     void declare(ast::node::FunctionDeclaration const & funcdecl, llvm::Function* funcvalue)
     {
@@ -152,20 +174,25 @@ public:
             throw error::redeclaration_of_function(funcdecl);
 
         auto&& declargs = declaration_args_t{funcdecl};
-        functions_[declname][declargs] = funcvalue;
+        auto&& function = functions_[declname][declargs];
+
+        function.value = funcvalue;
+        function.declaration_node = funcdecl;
     }
 
-    llvm::Function* get(std::string_view name, call_args_t const & args)
-    {
-        return lookup_(name, args);
-    }
+    // llvm::Function* get(std::string_view name, call_args_t const & args)
+    // {
+    //     auto&& function = lookup_(name, args);
+    //     return function ? function->value : nullptr;
+    // }
 
     llvm::Value* call(std::string_view name, call_args_t const & args)
     {
         auto&& function = lookup_(name, args);
-        if (not function)
-            return nullptr;
-        return builder_.CreateCall(function, args, mangle_name(name, args));
+        if (not function) return nullptr;
+
+        function->used = true;
+        return builder_.CreateCall(function->value, args, mangle_name(name, args));
     }
 
 #if not defined(NDEBUG)
