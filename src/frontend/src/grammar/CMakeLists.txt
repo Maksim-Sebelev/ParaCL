@@ -138,7 +138,7 @@ target_include_directories(parser
 PUBLIC
     ${BISON_OUTPUT_DIR} # parser.tab.hpp
     ${PARSER_SRC_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/lexer/inc
+    ${PROJECT_SOURCE_DIR}/lexer/inc
 )
 
 target_link_libraries(parser
@@ -179,7 +179,7 @@ PRIVATE
 target_include_directories(lexer
 PUBLIC
     ${FLEX_OUTPUT_DIR}   # lexer.yy.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/lexer/inc
+    ${PROJECT_SOURCE_DIR}/lexer/inc
     ${BISON_OUTPUT_DIR}  # parser.tab.hpp
     ${PARSER_SRC_DIR}
 )

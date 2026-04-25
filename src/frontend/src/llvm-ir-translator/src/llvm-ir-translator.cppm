@@ -19,6 +19,7 @@ module;
 #include <cassert>
 #include <iterator>
 #include <set>
+#include <deque>
 
 #if not defined(NDEBUG)
 #include <iostream>
@@ -361,19 +362,20 @@ llvm::Value* visit(Print const& node, llvmIrTranslatorContext& context)
 
     fmt << "\n";
 
-    auto&& fmt_str = static_cast<llvm::Value*>(nullptr);
+    auto&& fmt_llvm_str = static_cast<llvm::Value*>(nullptr);
+    auto&& fmt_str = fmt.str();
 
-    if (fmt.str() == "%d\n")
+    if (fmt_str == "%d\n")
     {
-        static auto&& fmt_percent_d = context.builder.CreateGlobalStringPtr(fmt.str(), "__printfFormat");
-        fmt_str = fmt_percent_d;
+        static auto&& fmt_percent_d = context.builder.CreateGlobalStringPtr(fmt_str, "__printfFormat");
+        fmt_llvm_str = fmt_percent_d;
     }
     else
     {
-        fmt_str = context.builder.CreateGlobalStringPtr(fmt.str(), "__printfFormat");
+        fmt_llvm_str = context.builder.CreateGlobalStringPtr(fmt_str, "__printfFormat");
     }
 
-    printf_args.insert(printf_args.begin(), fmt_str);
+    printf_args.insert(printf_args.begin(), fmt_llvm_str);
 
     return context.builder.CreateCall(context.libc_standart_functions.libc_printf(), printf_args, "__printfExitCode");
 }

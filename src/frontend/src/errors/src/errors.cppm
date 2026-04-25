@@ -60,7 +60,7 @@ std::string note(std::string_view msg)
 {
     auto&& note = std::ostringstream{};
 
-    note << BOLD "note: " << msg << RESET << "\n";
+    note << BOLD "note: " << msg << RESET;
 
     return note.str();
 }
@@ -188,7 +188,7 @@ public:
     {
         auto&& explain = "using '" + std::string(node.name()) + "' as function, but it has `int` type";
         msg_ = show_code_error(explain, node.location()) + "\n"
-        + note(was_declared_here(declaration_node, "was declared as integer here"));
+        + note(was_declared_here(declaration_node, "was declared as integer here: "));
     }
 };
 
@@ -199,7 +199,7 @@ public:
     {
         auto&& explain = "using '" + std::string(node.name()) + "' as integer, but it has function type.";
         msg_ = show_code_error(explain, node.location()) + "\n"
-        + note(was_declared_here(declaration_node, "was declared as function here"));
+        + note(was_declared_here(declaration_node, "was declared as function here: "));
     }
 };
 
@@ -305,9 +305,8 @@ class set_integer_variable_function_value : public error
 public:
     set_integer_variable_function_value(ast::node::Variable const & node, ast::node::Variable const & declaration_node)
     {
-        auto&& explain = "set '"+std::string(node.name())+"' function value";
-        msg_ = show_code_error(explain, node.location())
-        + RESET BOLD "\nbut '"+std::string(node.name()) + "\n"
+        auto&& explain = "set '"+std::string(node.name())+"' function value, but it has integer type";
+        msg_ = show_code_error(explain, node.location()) + "\n"
         + note(was_declared_here(declaration_node));
     }
 };
@@ -317,9 +316,8 @@ class set_function_variale_integer_value : public error
 public:
     set_function_variale_integer_value(ast::node::Variable const & node, ast::node::Variable const & declaration_node)
     {
-        auto&& explain = "set '"+std::string(node.name())+"' integer value";
-        msg_ = show_code_error(explain, node.location())
-        + RESET BOLD "\nbut '"+std::string(node.name()) + "\n"
+        auto&& explain = "set '"+std::string(node.name())+"' integer value, but it has function type";
+        msg_ = show_code_error(explain, node.location()) + "\n"
         + note(was_declared_here(declaration_node));
     }
 };

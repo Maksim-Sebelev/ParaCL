@@ -271,7 +271,6 @@ boost::json::value visit(const FunctionDeclaration& node)
     return obj;
 }
 
-
 template <>
 boost::json::value visit(const FunctionCall& node)
 {
