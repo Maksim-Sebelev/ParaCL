@@ -13,6 +13,7 @@ module;
 #include <vector>
 #include <algorithm>
 #include <optional>
+#include <cassert>
 
 #if not defined(NDEBUG)
 #include <iostream>
@@ -154,10 +155,7 @@ void Nametable::new_scope()
 
 void Nametable::leave_scope()
 {
-#if not defined(NDEBUG)
-    if (scopes_.empty())
-        throw std::runtime_error("paracl: try to leave scope, when there are no scopes in nametable");
-#endif /* not defined(NDEBUG) */
+    assert(not scopes_.empty() && "try to leave scope, when no active scopes");
 
     auto&& unused_variable_check = [&](auto identifier) -> void
     {
@@ -195,8 +193,7 @@ Nametable::identifier_info_t const & Nametable::get_info(std::string_view name) 
 {
     auto&& variable_info_ptr = lookup_(name);
 
-    if (not variable_info_ptr)
-        throw std::runtime_error("requested information about undeclated variable '"+std::string(name)+"'");
+    assert(variable_info_ptr && "requested info about undeclarated identifier");
 
     return *variable_info_ptr;
 }
@@ -205,10 +202,7 @@ Nametable::identifier_info_t const & Nametable::get_info(std::string_view name) 
 
 void Nametable::set(std::string_view name, llvm::Value *value, ast::node::Variable const & declaration_node, ValueStatus status)
 {
-#if not defined(NDEBUG)
-    if (scopes_.empty())
-        throw std::runtime_error("cannot set '" + std::string(name) + "': no active scopes");
-#endif /* not defined(NDEBUG) */
+    assert(not scopes_.empty() && "no active scopes");
 
     auto&& variable_info_ptr = lookup_(name);
     if (not variable_info_ptr) return declare_(name, value, declaration_node, status);
