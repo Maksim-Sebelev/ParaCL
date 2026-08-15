@@ -16,52 +16,78 @@ namespace ParaCL::frontend::llvm_ir_translator
 //---------------------------------------------------------------------------------------------------------------
 
 /* TODO: singleton pattern */
-export
-class LibcStandartFunctions final
+export class LibcStandartFunctions final
 {
-  private:
-    llvm::Function *libc_printf_;
-    llvm::Function *libc_scanf_;
+private:
+  llvm::Function* libc_printf_;
+  llvm::Function* libc_scanf_;
 
-  public:
-    explicit LibcStandartFunctions(llvm::Module &module, llvm::IRBuilder<> &builder);
+public:
+  explicit LibcStandartFunctions(
+      llvm::Module& module, llvm::IRBuilder<>& builder
+  );
 
-    llvm::Function *libc_printf() &;
-    llvm::Function *libc_scanf() &;
+  llvm::Function*
+  libc_printf() &;
+  llvm::Function*
+  libc_scanf() &;
 
-    const llvm::Function *libc_printf() const &;
-    const llvm::Function *libc_scanf() const &;
+  llvm::Function const*
+  libc_printf() const&;
+  llvm::Function const*
+  libc_scanf() const&;
 };
 
 //---------------------------------------------------------------------------------------------------------------
 
-LibcStandartFunctions::LibcStandartFunctions(llvm::Module &module, llvm::IRBuilder<> &builder) :
-      libc_printf_(llvm::Function::Create(llvm::FunctionType::get(builder.getInt32Ty(), {builder.getInt8Ty()->getPointerTo()}, true),
-                  llvm::Function::ExternalLinkage, "printf", module)),
-      libc_scanf_(llvm::Function::Create(llvm::FunctionType::get(builder.getInt32Ty(), {builder.getInt8Ty()->getPointerTo()}, true),
-                  llvm::Function::ExternalLinkage, "scanf", module))
+LibcStandartFunctions::LibcStandartFunctions(
+    llvm::Module& module, llvm::IRBuilder<>& builder
+) :
+    libc_printf_(
+        llvm::Function::Create(
+            llvm::FunctionType::get(
+                builder.getInt32Ty(), {builder.getInt8Ty()->getPointerTo()},
+                true
+            ),
+            llvm::Function::ExternalLinkage, "printf", module
+        )
+    ),
+    libc_scanf_(
+        llvm::Function::Create(
+            llvm::FunctionType::get(
+                builder.getInt32Ty(), {builder.getInt8Ty()->getPointerTo()},
+                true
+            ),
+            llvm::Function::ExternalLinkage, "scanf", module
+        )
+    )
 {}
 
 //---------------------------------------------------------------------------------------------------------------
 
-llvm::Function *LibcStandartFunctions::libc_printf() &
+llvm::Function*
+LibcStandartFunctions::libc_printf() &
 { return libc_printf_; }
 
 //---------------------------------------------------------------------------------------------------------------
 
-llvm::Function *LibcStandartFunctions::libc_scanf() &
+llvm::Function*
+LibcStandartFunctions::libc_scanf() &
 { return libc_scanf_; }
 
 //---------------------------------------------------------------------------------------------------------------
 
-const llvm::Function *LibcStandartFunctions::libc_printf() const &
+llvm::Function const*
+LibcStandartFunctions::libc_printf() const&
 { return libc_printf_; }
 
 //---------------------------------------------------------------------------------------------------------------
 
-const llvm::Function *LibcStandartFunctions::libc_scanf() const &
+llvm::Function const*
+LibcStandartFunctions::libc_scanf() const&
 { return libc_scanf_; }
 
 //---------------------------------------------------------------------------------------------------------------
 } /* namespace ParaCL::frontend::llvm_ir_translator */
+
 //---------------------------------------------------------------------------------------------------------------

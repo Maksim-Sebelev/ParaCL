@@ -8,18 +8,17 @@ export module node_traits;
 
 export import ast_nodes;
 
-export
-namespace ParaCL::frontend::ast::node::traits
+export namespace ParaCL::frontend::ast::node::traits
 {
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
 enum NodeInfo
 {
-    NAME,
-    FIELDS,
-    FIELD,
-    OPERATOR_NAME,
+  NAME,
+  FIELDS,
+  FIELD,
+  OPERATOR_NAME,
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -27,13 +26,15 @@ enum NodeInfo
 template <typename NodeT, NodeInfo n, int id = 0>
 struct NodeTraits
 {
-    static_assert(false, "using unspecialized NodeTraits");
+  static_assert(false, "using unspecialized NodeTraits");
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename NodeT, NodeInfo n, int id = 0>
-constexpr typename NodeTraits<NodeT, n, id>::type get_node_info()
+constexpr
+typename NodeTraits<NodeT, n, id>::type
+get_node_info()
 { return NodeTraits<NodeT, n, id>::value; }
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -43,22 +44,22 @@ constexpr typename NodeTraits<NodeT, n, id>::type get_node_info()
 template <>
 struct NodeTraits<Scope, NodeInfo::NAME>
 {
-    using type = const char *;
-    static constexpr type value = STRINGIFY(Scope);
+  using type                  = char const*;
+  static constexpr type value = STRINGIFY(Scope);
 };
 
 template <>
 struct NodeTraits<Scope, NodeInfo::FIELDS>
 {
-    using type = size_t;
-    static constexpr type value = 1;
+  using type                  = size_t;
+  static constexpr type value = 1;
 };
 
 template <>
 struct NodeTraits<Scope, NodeInfo::FIELD, 0>
 {
-    using type = const char *;
-    static constexpr type value = "args";
+  using type                  = char const*;
+  static constexpr type value = "args";
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -68,22 +69,22 @@ struct NodeTraits<Scope, NodeInfo::FIELD, 0>
 template <>
 struct NodeTraits<Print, NodeInfo::NAME>
 {
-    using type = const char *;
-    static constexpr type value = STRINGIFY(Print);
+  using type                  = char const*;
+  static constexpr type value = STRINGIFY(Print);
 };
 
 template <>
 struct NodeTraits<Print, NodeInfo::FIELDS>
 {
-    using type = size_t;
-    static constexpr type value = 1;
+  using type                  = size_t;
+  static constexpr type value = 1;
 };
 
 template <>
 struct NodeTraits<Print, NodeInfo::FIELD, 0>
 {
-    using type = const char *;
-    static constexpr type value = "args";
+  using type                  = char const*;
+  static constexpr type value = "args";
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -93,15 +94,15 @@ struct NodeTraits<Print, NodeInfo::FIELD, 0>
 template <>
 struct NodeTraits<Scan, NodeInfo::NAME>
 {
-    using type = const char *;
-    static constexpr type value = STRINGIFY(Scan);
+  using type                  = char const*;
+  static constexpr type value = STRINGIFY(Scan);
 };
 
 template <>
 struct NodeTraits<Scan, NodeInfo::FIELDS>
 {
-    using type = size_t;
-    static constexpr type value = 0;
+  using type                  = size_t;
+  static constexpr type value = 0;
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -111,22 +112,22 @@ struct NodeTraits<Scan, NodeInfo::FIELDS>
 template <>
 struct NodeTraits<Variable, NodeInfo::NAME>
 {
-    using type = const char *;
-    static constexpr type value = STRINGIFY(Variable);
+  using type                  = char const*;
+  static constexpr type value = STRINGIFY(Variable);
 };
 
 template <>
 struct NodeTraits<Variable, NodeInfo::FIELDS>
 {
-    using type = size_t;
-    static constexpr type value = 1;
+  using type                  = size_t;
+  static constexpr type value = 1;
 };
 
 template <>
 struct NodeTraits<Variable, NodeInfo::FIELD, 0>
 {
-    using type = const char *;
-    static constexpr type value = "name";
+  using type                  = char const*;
+  static constexpr type value = "name";
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -136,22 +137,22 @@ struct NodeTraits<Variable, NodeInfo::FIELD, 0>
 template <>
 struct NodeTraits<NumberLiteral, NodeInfo::NAME>
 {
-    using type = const char *;
-    static constexpr type value = STRINGIFY(NumberLiteral);
+  using type                  = char const*;
+  static constexpr type value = STRINGIFY(NumberLiteral);
 };
 
 template <>
 struct NodeTraits<NumberLiteral, NodeInfo::FIELDS>
 {
-    using type = size_t;
-    static constexpr type value = 1;
+  using type                  = size_t;
+  static constexpr type value = 1;
 };
 
 template <>
 struct NodeTraits<NumberLiteral, NodeInfo::FIELD, 0>
 {
-    using type = const char *;
-    static constexpr type value = "value";
+  using type                  = char const*;
+  static constexpr type value = "value";
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -161,22 +162,22 @@ struct NodeTraits<NumberLiteral, NodeInfo::FIELD, 0>
 template <>
 struct NodeTraits<StringLiteral, NodeInfo::NAME>
 {
-    using type = const char *;
-    static constexpr type value = STRINGIFY(StringLiteral);
+  using type                  = char const*;
+  static constexpr type value = STRINGIFY(StringLiteral);
 };
 
 template <>
 struct NodeTraits<StringLiteral, NodeInfo::FIELDS>
 {
-    using type = size_t;
-    static constexpr type value = 1;
+  using type                  = size_t;
+  static constexpr type value = 1;
 };
 
 template <>
 struct NodeTraits<StringLiteral, NodeInfo::FIELD, 0>
 {
-    using type = const char *;
-    static constexpr type value = "value";
+  using type                  = char const*;
+  static constexpr type value = "value";
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -186,52 +187,51 @@ struct NodeTraits<StringLiteral, NodeInfo::FIELD, 0>
 template <>
 struct NodeTraits<UnaryOperator, NodeInfo::NAME>
 {
-    using type = const char *;
-    static constexpr type value = STRINGIFY(UnaryOperator);
+  using type                  = char const*;
+  static constexpr type value = STRINGIFY(UnaryOperator);
 };
 
 template <>
 struct NodeTraits<UnaryOperator, NodeInfo::FIELDS>
 {
-    using type = size_t;
-    static constexpr type value = 2;
+  using type                  = size_t;
+  static constexpr type value = 2;
 };
 
 template <>
 struct NodeTraits<UnaryOperator, NodeInfo::FIELD, 0>
 {
-    using type = const char *;
-    static constexpr type value = "type";
+  using type                  = char const*;
+  static constexpr type value = "type";
 };
 
 template <>
 struct NodeTraits<UnaryOperator, NodeInfo::FIELD, 1>
 {
-    using type = const char *;
-    static constexpr type value = "arg";
+  using type                  = char const*;
+  static constexpr type value = "arg";
 };
 
 template <>
 struct NodeTraits<UnaryOperator, NodeInfo::OPERATOR_NAME, UnaryOperator::PLUS>
 {
-    using type = const char*; 
-    static constexpr type value = "+";
+  using type                  = char const*;
+  static constexpr type value = "+";
 };
 
 template <>
 struct NodeTraits<UnaryOperator, NodeInfo::OPERATOR_NAME, UnaryOperator::MINUS>
 {
-    using type = const char*; 
-    static constexpr type value = "-";
+  using type                  = char const*;
+  static constexpr type value = "-";
 };
 
 template <>
 struct NodeTraits<UnaryOperator, NodeInfo::OPERATOR_NAME, UnaryOperator::NOT>
 {
-    using type = const char*; 
-    static constexpr type value = "!";
+  using type                  = char const*;
+  static constexpr type value = "!";
 };
-
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 // BINARY OPERATOR_NAME
@@ -240,172 +240,184 @@ struct NodeTraits<UnaryOperator, NodeInfo::OPERATOR_NAME, UnaryOperator::NOT>
 template <>
 struct NodeTraits<BinaryOperator, NodeInfo::NAME>
 {
-    using type = const char *;
-    static constexpr type value = STRINGIFY(BinaryOperator);
+  using type                  = char const*;
+  static constexpr type value = STRINGIFY(BinaryOperator);
 };
 
 template <>
 struct NodeTraits<BinaryOperator, NodeInfo::FIELDS>
 {
-    using type = size_t;
-    static constexpr type value = 3;
+  using type                  = size_t;
+  static constexpr type value = 3;
 };
 
 template <>
 struct NodeTraits<BinaryOperator, NodeInfo::FIELD, 0>
 {
-    using type = const char *;
-    static constexpr type value = "type";
+  using type                  = char const*;
+  static constexpr type value = "type";
 };
 
 template <>
 struct NodeTraits<BinaryOperator, NodeInfo::FIELD, 1>
 {
-    using type = const char *;
-    static constexpr type value = "left";
+  using type                  = char const*;
+  static constexpr type value = "left";
 };
 
 template <>
 struct NodeTraits<BinaryOperator, NodeInfo::FIELD, 2>
 {
-    using type = const char *;
-    static constexpr type value = "right";
+  using type                  = char const*;
+  static constexpr type value = "right";
 };
-
 
 template <>
 struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::AND>
 {
-    using type = const char*; 
-    static constexpr type value = "&&";
+  using type                  = char const*;
+  static constexpr type value = "&&";
 };
 
 template <>
 struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::OR>
 {
-    using type = const char*; 
-    static constexpr type value = "||";
+  using type                  = char const*;
+  static constexpr type value = "||";
 };
 
 template <>
 struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::ADD>
 {
-    using type = const char*; 
-    static constexpr type value = "+";
+  using type                  = char const*;
+  static constexpr type value = "+";
 };
 
 template <>
 struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::SUB>
 {
-    using type = const char*; 
-    static constexpr type value = "-";
+  using type                  = char const*;
+  static constexpr type value = "-";
 };
 
 template <>
 struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::MUL>
 {
-    using type = const char*; 
-    static constexpr type value = "*";
+  using type                  = char const*;
+  static constexpr type value = "*";
 };
 
 template <>
 struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::DIV>
 {
-    using type = const char*; 
-    static constexpr type value = "/";
+  using type                  = char const*;
+  static constexpr type value = "/";
 };
 
 template <>
 struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::REM>
 {
-    using type = const char*; 
-    static constexpr type value = "%";
+  using type                  = char const*;
+  static constexpr type value = "%";
 };
 
 template <>
 struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::ISAB>
 {
-    using type = const char*; 
-    static constexpr type value = ">";
+  using type                  = char const*;
+  static constexpr type value = ">";
 };
 
 template <>
-struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::ISABE>
+struct NodeTraits<
+    BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::ISABE
+>
 {
-    using type = const char*; 
-    static constexpr type value = ">=";
+  using type                  = char const*;
+  static constexpr type value = ">=";
 };
 
 template <>
 struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::ISLS>
 {
-    using type = const char*; 
-    static constexpr type value = "<";
+  using type                  = char const*;
+  static constexpr type value = "<";
 };
 
 template <>
-struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::ISLSE>
+struct NodeTraits<
+    BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::ISLSE
+>
 {
-    using type = const char*; 
-    static constexpr type value = "<=";
+  using type                  = char const*;
+  static constexpr type value = "<=";
 };
 
 template <>
 struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::ISEQ>
 {
-    using type = const char*; 
-    static constexpr type value = "==";
+  using type                  = char const*;
+  static constexpr type value = "==";
 };
 
 template <>
 struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::ISNE>
 {
-    using type = const char*;
-    static constexpr const char* value = "!=";
+  using type                         = char const*;
+  static constexpr char const* value = "!=";
 };
 
 template <>
 struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::ASGN>
 {
-    using type = const char*;
-    static constexpr const char* value = "=";
+  using type                         = char const*;
+  static constexpr char const* value = "=";
 };
 
 template <>
-struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::ADDASGN>
+struct NodeTraits<
+    BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::ADDASGN
+>
 {
-    using type = const char*; 
-    static constexpr type value = "+=";
+  using type                  = char const*;
+  static constexpr type value = "+=";
 };
 
 template <>
-struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::SUBASGN>
+struct NodeTraits<
+    BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::SUBASGN
+>
 {
-    using type = const char*; 
-    static constexpr type value = "-=";
+  using type                  = char const*;
+  static constexpr type value = "-=";
 };
 
 template <>
-struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::MULASGN>
+struct NodeTraits<
+    BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::MULASGN
+>
 {
-    using type = const char*; 
-    static constexpr type value = "*=";
+  using type                  = char const*;
+  static constexpr type value = "*=";
 };
 
 template <>
-struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::DIVASGN>
+struct NodeTraits<
+    BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::DIVASGN
+>
 {
-    using type = const char*; 
-    static constexpr type value = "/=";
+  using type                  = char const*;
+  static constexpr type value = "/=";
 };
 
 template <>
-struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::REMASGN>
+struct NodeTraits<
+    BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::REMASGN
+>
 {
-    using type = const char*; 
-    static constexpr type value = "%=";
+  using type                  = char const*;
+  static constexpr type value = "%=";
 };
-
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 // WHILE
@@ -414,29 +426,29 @@ struct NodeTraits<BinaryOperator, NodeInfo::OPERATOR_NAME, BinaryOperator::REMAS
 template <>
 struct NodeTraits<While, NodeInfo::NAME>
 {
-    using type = const char *;
-    static constexpr type value = STRINGIFY(WHile);
+  using type                  = char const*;
+  static constexpr type value = STRINGIFY(WHile);
 };
 
 template <>
 struct NodeTraits<While, NodeInfo::FIELDS>
 {
-    using type = size_t;
-    static constexpr type value = 2;
+  using type                  = size_t;
+  static constexpr type value = 2;
 };
 
 template <>
 struct NodeTraits<While, NodeInfo::FIELD, 0>
 {
-    using type = const char *;
-    static constexpr type value = "condition";
+  using type                  = char const*;
+  static constexpr type value = "condition";
 };
 
 template <>
 struct NodeTraits<While, NodeInfo::FIELD, 1>
 {
-    using type = const char *;
-    static constexpr type value = "body";
+  using type                  = char const*;
+  static constexpr type value = "body";
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -446,29 +458,29 @@ struct NodeTraits<While, NodeInfo::FIELD, 1>
 template <>
 struct NodeTraits<If, NodeInfo::NAME>
 {
-    using type = const char *;
-    static constexpr type value = STRINGIFY(If);
+  using type                  = char const*;
+  static constexpr type value = STRINGIFY(If);
 };
 
 template <>
 struct NodeTraits<If, NodeInfo::FIELDS>
 {
-    using type = size_t;
-    static constexpr type value = 2;
+  using type                  = size_t;
+  static constexpr type value = 2;
 };
 
 template <>
 struct NodeTraits<If, NodeInfo::FIELD, 0>
 {
-    using type = const char *;
-    static constexpr type value = "condition";
+  using type                  = char const*;
+  static constexpr type value = "condition";
 };
 
 template <>
 struct NodeTraits<If, NodeInfo::FIELD, 1>
 {
-    using type = const char *;
-    static constexpr type value = "body";
+  using type                  = char const*;
+  static constexpr type value = "body";
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -478,22 +490,22 @@ struct NodeTraits<If, NodeInfo::FIELD, 1>
 template <>
 struct NodeTraits<Else, NodeInfo::NAME>
 {
-    using type = const char *;
-    static constexpr type value = STRINGIFY(Else);
+  using type                  = char const*;
+  static constexpr type value = STRINGIFY(Else);
 };
 
 template <>
 struct NodeTraits<Else, NodeInfo::FIELDS>
 {
-    using type = size_t;
-    static constexpr type value = 1;
+  using type                  = size_t;
+  static constexpr type value = 1;
 };
 
 template <>
 struct NodeTraits<Else, NodeInfo::FIELD, 0>
 {
-    using type = const char *;
-    static constexpr type value = "body";
+  using type                  = char const*;
+  static constexpr type value = "body";
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -503,29 +515,29 @@ struct NodeTraits<Else, NodeInfo::FIELD, 0>
 template <>
 struct NodeTraits<Condition, NodeInfo::NAME>
 {
-    using type = const char *;
-    static constexpr type value = STRINGIFY(Condition);
+  using type                  = char const*;
+  static constexpr type value = STRINGIFY(Condition);
 };
 
 template <>
 struct NodeTraits<Condition, NodeInfo::FIELDS>
 {
-    using type = size_t;
-    static constexpr type value = 2;
+  using type                  = size_t;
+  static constexpr type value = 2;
 };
 
 template <>
 struct NodeTraits<Condition, NodeInfo::FIELD, 0>
 {
-    using type = const char*;
-    static constexpr type value = "if";
+  using type                  = char const*;
+  static constexpr type value = "if";
 };
 
 template <>
 struct NodeTraits<Condition, NodeInfo::FIELD, 1>
 {
-    using type = const char*;
-    static constexpr type value = "else";
+  using type                  = char const*;
+  static constexpr type value = "else";
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -535,31 +547,30 @@ struct NodeTraits<Condition, NodeInfo::FIELD, 1>
 template <>
 struct NodeTraits<Return, NodeInfo::NAME>
 {
-    using type = const char *;
-    static constexpr type value = STRINGIFY(Return);
+  using type                  = char const*;
+  static constexpr type value = STRINGIFY(Return);
 };
 
 template <>
 struct NodeTraits<Return, NodeInfo::FIELDS>
 {
-    using type = size_t;
-    static constexpr type value = 2;
+  using type                  = size_t;
+  static constexpr type value = 2;
 };
 
 template <>
 struct NodeTraits<Return, NodeInfo::FIELD, 0>
 {
-    using type = const char*;
-    static constexpr type value = "returning-value";
+  using type                  = char const*;
+  static constexpr type value = "returning-value";
 };
 
 template <>
 struct NodeTraits<Return, NodeInfo::FIELD, 1>
 {
-    using type = const char*;
-    static constexpr type value = "else";
+  using type                  = char const*;
+  static constexpr type value = "else";
 };
-
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 // FUNCTION CALL
@@ -568,29 +579,29 @@ struct NodeTraits<Return, NodeInfo::FIELD, 1>
 template <>
 struct NodeTraits<FunctionCall, NodeInfo::NAME>
 {
-    using type = const char *;
-    static constexpr type value = STRINGIFY(FunctionCall);
+  using type                  = char const*;
+  static constexpr type value = STRINGIFY(FunctionCall);
 };
 
 template <>
 struct NodeTraits<FunctionCall, NodeInfo::FIELDS>
 {
-    using type = size_t;
-    static constexpr type value = 2;
+  using type                  = size_t;
+  static constexpr type value = 2;
 };
 
 template <>
 struct NodeTraits<FunctionCall, NodeInfo::FIELD, 0>
 {
-    using type = const char*;
-    static constexpr type value = "name";
+  using type                  = char const*;
+  static constexpr type value = "name";
 };
 
 template <>
 struct NodeTraits<FunctionCall, NodeInfo::FIELD, 1>
 {
-    using type = const char*;
-    static constexpr type value = "args";
+  using type                  = char const*;
+  static constexpr type value = "args";
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -600,38 +611,39 @@ struct NodeTraits<FunctionCall, NodeInfo::FIELD, 1>
 template <>
 struct NodeTraits<FunctionDeclaration, NodeInfo::NAME>
 {
-    using type = const char *;
-    static constexpr type value = STRINGIFY(FunctionDeclaration);
+  using type                  = char const*;
+  static constexpr type value = STRINGIFY(FunctionDeclaration);
 };
 
 template <>
 struct NodeTraits<FunctionDeclaration, NodeInfo::FIELDS>
 {
-    using type = size_t;
-    static constexpr type value = 3;
+  using type                  = size_t;
+  static constexpr type value = 3;
 };
 
 template <>
 struct NodeTraits<FunctionDeclaration, NodeInfo::FIELD, 0>
 {
-    using type = const char*;
-    static constexpr type value = "name";
+  using type                  = char const*;
+  static constexpr type value = "name";
 };
 
 template <>
 struct NodeTraits<FunctionDeclaration, NodeInfo::FIELD, 1>
 {
-    using type = const char*;
-    static constexpr type value = "args";
+  using type                  = char const*;
+  static constexpr type value = "args";
 };
 
 template <>
 struct NodeTraits<FunctionDeclaration, NodeInfo::FIELD, 2>
 {
-    using type = const char*;
-    static constexpr type value = "body";
+  using type                  = char const*;
+  static constexpr type value = "body";
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 } /* namespace ParaCL::frontend::ast::node::traits */
+
 //--------------------------------------------------------------------------------------------------------------------------------------

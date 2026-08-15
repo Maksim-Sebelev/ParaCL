@@ -1,22 +1,22 @@
 module;
 //---------------------------------------------------------------------------------------------------------------
 
-#include <llvm/IR/Module.h>
-#include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/GlobalVariable.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/Module.h>
 
+#include <algorithm>
+#include <cassert>
+#include <optional>
 #include <ranges>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <unordered_map>
 #include <vector>
-#include <algorithm>
-#include <optional>
-#include <cassert>
 
 #if not defined(NDEBUG)
-#include <iostream>
+#  include <iostream>
 #endif /* not defined(NDEBUG) */
 
 //---------------------------------------------------------------------------------------------------------------
@@ -31,257 +31,315 @@ namespace ParaCL::frontend::llvm_ir_translator
 {
 //---------------------------------------------------------------------------------------------------------------
 
-export
-enum ValueStatus { global, local };
+export enum ValueStatus
+{
+  global,
+  local,
+};
 
 //---------------------------------------------------------------------------------------------------------------
 
-llvm::Function const* get_function_of_value(llvm::Value const* value)
+llvm::Function const*
+get_function_of_value(
+    llvm::Value const* value
+)
 {
-    if (!value) return nullptr;
+  if (!value) return nullptr;
 
-    if (auto&& inst = llvm::dyn_cast<llvm::Instruction>(value))
-        return inst->getFunction();
+  if (auto&& inst = llvm::dyn_cast<llvm::Instruction>(value))
+    return inst->getFunction();
 
-    if (auto&& arg = llvm::dyn_cast<llvm::Argument>(value))
-        return arg->getParent();
+  if (auto&& arg = llvm::dyn_cast<llvm::Argument>(value))
+    return arg->getParent();
 
-    if (auto&& basicBlock = llvm::dyn_cast<llvm::BasicBlock>(value))
-        return basicBlock->getParent();
+  if (auto&& basicBlock = llvm::dyn_cast<llvm::BasicBlock>(value))
+    return basicBlock->getParent();
 
-    if (auto&& func = llvm::dyn_cast<llvm::Function>(value))
-        return func;
+  if (auto&& func = llvm::dyn_cast<llvm::Function>(value)) return func;
 
-    return nullptr;
+  return nullptr;
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
 export class Nametable final
 {
-  private:
-    llvm::Module& module_;
-    llvm::IRBuilder<> &builder_;
+private:
+  llvm::Module&      module_;
+  llvm::IRBuilder<>& builder_;
 
 public:
+  using identifier_t = std::string_view;
 
-    using identifier_t = std::string_view;
-    struct identifier_info_t
-    {
-        // FIXME: deep copy here. i didnt find way, how to do here reference.
-        // also i didnt want to use raw pointer here.
-        ast::node::Variable declaration_node{""};
+  struct identifier_info_t
+  {
+    // FIXME: deep copy here. i didnt find way, how to do here reference.
+    // also i didnt want to use raw pointer here.
+    ast::node::Variable declaration_node{""};
 
-        llvm::Value* value = nullptr;
-        ValueStatus status;
+    llvm::Value* value = nullptr;
+    ValueStatus  status;
 
-        bool used : 1 = false;
-    };
+    bool used : 1 = false;
+  };
 
-    std::vector
-    <
-        std::unordered_map
-        <
-            identifier_t,
-            identifier_info_t
-        >
-    > scopes_;
+  std::vector<std::unordered_map<identifier_t, identifier_info_t> > scopes_;
 
 private:
+  identifier_info_t*
+  lookup_(identifier_t name);
+  identifier_info_t const*
+  lookup_(identifier_t name) const;
 
-    identifier_info_t       * lookup_(identifier_t name);
-    identifier_info_t const * lookup_(identifier_t name) const;
+  llvm::Value*
+  create_variable(
+      identifier_t name, llvm::Value* value,
+      ast::node::Variable const& declaration_node, ValueStatus status
+  );
+  void
+  declare_(
+      identifier_t name, llvm::Value* value,
+      ast::node::Variable const& declaration_node, ValueStatus status
+  );
 
-    llvm::Value* create_variable(identifier_t name, llvm::Value * value, ast::node::Variable const & declaration_node, ValueStatus status);
-    void declare_(identifier_t name, llvm::Value * value, ast::node::Variable const & declaration_node, ValueStatus status);
+private:
+  static
+  bool
+  is_function(
+      llvm::Value const* value
+  )
+  { return llvm::isa<llvm::Function>(value); }
 
-  private:
-    static bool is_function(llvm::Value const* value)
-    {
-        return llvm::isa<llvm::Function>(value);
-    }
+public:
+  Nametable(llvm::Module& module, llvm::IRBuilder<>& builder);
 
-  public:
-    Nametable(llvm::Module& module, llvm::IRBuilder<> &builder);
+  void
+  new_scope();
+  void
+  leave_scope();
 
-    void new_scope();
-    void leave_scope();
+  llvm::Value*
+  get(std::string_view name);
+  identifier_info_t const&
+  get_info(std::string_view name) const;
 
-    llvm::Value *get(std::string_view name);
-    identifier_info_t const & get_info(std::string_view name) const;
-
-    void set(std::string_view name, llvm::Value *value, ast::node::Variable const & declaration_node, ValueStatus status = local);
-    void force_declare(std::string_view name, llvm::Value *value, ast::node::Variable const & declaration_node);
-    ValueStatus status(std::string_view name) const;
-    bool from_current_scope(std::string_view name) const;
-    bool is_visible_from(std::string_view name, llvm::Function* function) const;
-    bool is_function(std::string_view name) const;
+  void
+  set(std::string_view name, llvm::Value* value,
+      ast::node::Variable const& declaration_node, ValueStatus status = local);
+  void
+  force_declare(
+      std::string_view name, llvm::Value* value,
+      ast::node::Variable const& declaration_node
+  );
+  ValueStatus
+  status(std::string_view name) const;
+  bool
+  from_current_scope(std::string_view name) const;
+  bool
+  is_visible_from(std::string_view name, llvm::Function* function) const;
+  bool
+  is_function(std::string_view name) const;
 
 #if not defined(NDEBUG)
-    friend void dump(Nametable const & nt)
+  friend
+  void
+  dump(
+      Nametable const& nt
+  )
+  {
+    static auto&& dump_counter = 0lu;
+    std::cout << "NAMETABLE DUMP[" << dump_counter++ << "]\n{" << std::endl;
+    for (auto&& scope : nt.scopes_)
     {
-        static auto&& dump_counter = 0LU;
-        std::cout << "NAMETABLE DUMP[" << dump_counter++ << "]\n{" << std::endl;
-        for (auto&& scope: nt.scopes_)
-        {
-            for (auto&& name: scope)
-                std::cout << "\t(" << name.first << ", " << name.second.value->getType()->getTypeID() << ")" << std::endl;
-            std::cout << std::endl;
-        }
-        std::cout << "}" << std::endl;
+      for (auto&& name : scope)
+        std::cout << "\t(" << name.first << ", "
+                  << name.second.value->getType()->getTypeID() << ")"
+                  << std::endl;
+      std::cout << std::endl;
     }
+    std::cout << "}" << std::endl;
+  }
 #endif /* not defined(NDEBUG) */
 };
 
 //---------------------------------------------------------------------------------------------------------------
 #if not defined(NDEBUG)
-export void dump(Nametable const &);
+export
+void
+dump(Nametable const&);
 #endif /* not defined(NDEBUG) */
 //---------------------------------------------------------------------------------------------------------------
 
-Nametable::Nametable(llvm::Module& module, llvm::IRBuilder<> &builder)
-    : module_(module), builder_(builder), scopes_(1 /* global scope */)
+Nametable::Nametable(
+    llvm::Module& module, llvm::IRBuilder<>& builder
+) :
+    module_(module), builder_(builder), scopes_(1 /* global scope */)
+{}
+
+//---------------------------------------------------------------------------------------------------------------
+
+void
+Nametable::new_scope()
+{ scopes_.emplace_back(); }
+
+//---------------------------------------------------------------------------------------------------------------
+
+void
+Nametable::leave_scope()
 {
+  assert(not scopes_.empty() && "try to leave scope, when no active scopes");
+
+  auto&& unused_variable_check = [&](auto identifier) -> void
+  {
+    auto&& info = identifier.second;
+    if (info.used) return;
+    warning::unused_variable(info.declaration_node);
+  };
+
+  auto&& back = scopes_.back();
+
+  std::for_each(back.begin(), back.end(), unused_variable_check);
+
+  scopes_.pop_back();
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-void Nametable::new_scope()
+llvm::Value*
+Nametable::get(
+    std::string_view name
+)
 {
-    scopes_.emplace_back();
+  auto&& variable_info_ptr = lookup_(name);
+
+  if (not variable_info_ptr) return nullptr;
+
+  auto&& variable = *variable_info_ptr;
+  variable.used   = true;
+
+  auto&& variable_value = variable.value;
+  if (is_function(variable_value)) return variable_value;
+  return builder_.CreateLoad(
+      builder_.getInt32Ty(), variable_value, std::string(name) + "_load"
+  );
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-void Nametable::leave_scope()
+Nametable::identifier_info_t const&
+Nametable::get_info(
+    std::string_view name
+) const
 {
-    assert(not scopes_.empty() && "try to leave scope, when no active scopes");
+  auto&& variable_info_ptr = lookup_(name);
 
-    auto&& unused_variable_check = [&](auto identifier) -> void
-    {
-        auto&& info = identifier.second;
-        if (info.used) return;
-        warning::unused_variable(info.declaration_node);
-    };
+  assert(variable_info_ptr && "requested info about undeclarated identifier");
 
-    auto&& back = scopes_.back();
-
-    std::for_each(back.begin(), back.end(), unused_variable_check);
-
-    scopes_.pop_back();
+  return *variable_info_ptr;
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-llvm::Value *Nametable::get(std::string_view name)
+void
+Nametable::set(
+    std::string_view name, llvm::Value* value,
+    ast::node::Variable const& declaration_node, ValueStatus status
+)
 {
-    auto&& variable_info_ptr = lookup_(name);
+  assert(not scopes_.empty() && "no active scopes");
 
-    if (not variable_info_ptr) return nullptr;
+  auto&& variable_info_ptr = lookup_(name);
+  if (not variable_info_ptr)
+    return declare_(name, value, declaration_node, status);
 
-    auto&& variable = *variable_info_ptr;
-    variable.used = true;
+  auto&& variable = *variable_info_ptr;
 
-    auto&& variable_value = variable.value;
-    if (is_function(variable_value)) return variable_value;
-    return builder_.CreateLoad(builder_.getInt32Ty(), variable_value, std::string(name) + "_load");
+  auto&& is_variable_function = is_function(variable.value);
+  auto&& is_value_function    = is_function(value);
+
+  if (is_variable_function and is_value_function) { variable.value = value; }
+  else if (not is_variable_function and not is_value_function)
+  {
+    builder_.CreateStore(value, variable.value);
+  }
+  else if (is_variable_function and not is_value_function)
+  {
+    throw error::set_function_variale_integer_value(
+        declaration_node, variable.declaration_node
+    );
+  }
+  else /* if (not is_variable_function and is_value_function)*/
+  {
+    throw error::set_integer_variable_function_value(
+        declaration_node, variable.declaration_node
+    );
+  }
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-Nametable::identifier_info_t const & Nametable::get_info(std::string_view name) const
+ValueStatus
+Nametable::status(
+    std::string_view name
+) const
 {
-    auto&& variable_info_ptr = lookup_(name);
+  auto&& variable = lookup_(name);
 
-    assert(variable_info_ptr && "requested info about undeclarated identifier");
-
-    return *variable_info_ptr;
-}
-
-//---------------------------------------------------------------------------------------------------------------
-
-void Nametable::set(std::string_view name, llvm::Value *value, ast::node::Variable const & declaration_node, ValueStatus status)
-{
-    assert(not scopes_.empty() && "no active scopes");
-
-    auto&& variable_info_ptr = lookup_(name);
-    if (not variable_info_ptr) return declare_(name, value, declaration_node, status);
-
-    auto&& variable = *variable_info_ptr;
-
-    auto&& is_variable_function = is_function(variable.value);
-    auto&& is_value_function = is_function(value);
-
-    if (is_variable_function and is_value_function)
-    {
-        variable.value = value;
-    }
-    else if (not is_variable_function and not is_value_function)
-    {
-        builder_.CreateStore(value, variable.value);
-    }
-    else if (is_variable_function and not is_value_function)
-    {
-        throw error::set_function_variale_integer_value(declaration_node, variable.declaration_node);
-    }
-    else /* if (not is_variable_function and is_value_function)*/
-    {
-        throw error::set_integer_variable_function_value(declaration_node, variable.declaration_node);
-    }
-}
-
-//---------------------------------------------------------------------------------------------------------------
-
-ValueStatus Nametable::status(std::string_view name) const
-{
-
-    auto&& variable = lookup_(name);
-
-    if (not variable)
-    {
+  if (not variable)
+  {
 #if defined(NDEBUG)
-        throw std::runtime_error("requests status of undeclarated variable '" + std::string(name) + "'");
+    throw std::runtime_error(
+        "requests status of undeclarated variable '" + std::string(name) + "'"
+    );
 #else
-        __builtin_unreachable();
+    __builtin_unreachable();
 #endif /* defined(NDEBUG) */
-    }
+  }
 
-    return variable->status;
+  return variable->status;
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-bool Nametable::from_current_scope(std::string_view name) const
+bool
+Nametable::from_current_scope(
+    std::string_view name
+) const
 {
-    if (scopes_.empty()) return false;
-    return (scopes_.back().find(name) != scopes_.back().end());
+  if (scopes_.empty()) return false;
+  return (scopes_.back().find(name) != scopes_.back().end());
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-bool Nametable::is_visible_from(std::string_view name, llvm::Function* function) const
+bool
+Nametable::is_visible_from(
+    std::string_view name, llvm::Function* function
+) const
 {
-    auto&& variable_info_ptr = lookup_(name);
-    if (not variable_info_ptr) return false;
+  auto&& variable_info_ptr = lookup_(name);
+  if (not variable_info_ptr) return false;
 
-    auto&& variable = *variable_info_ptr;
+  auto&& variable = *variable_info_ptr;
 
-    return
-        (status(name) == ValueStatus::global)
-        or
-        (get_function_of_value(variable.value) == function);
+  return (status(name) == ValueStatus::global) or
+         (get_function_of_value(variable.value) == function);
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-bool Nametable::is_function(std::string_view name) const
+bool
+Nametable::is_function(
+    std::string_view name
+) const
 {
-    auto&& variable_info_ptr = lookup_(name); assert(variable_info_ptr);
-    if (not variable_info_ptr) return false;
+  auto&& variable_info_ptr = lookup_(name);
+  assert(variable_info_ptr);
+  if (not variable_info_ptr) return false;
 
-    auto&& variable = *variable_info_ptr;
+  auto&& variable = *variable_info_ptr;
 
-    return is_function(variable.value);
+  return is_function(variable.value);
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -291,72 +349,94 @@ bool Nametable::is_function(std::string_view name) const
 //---------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
-Nametable::identifier_info_t const* Nametable::lookup_(Nametable::identifier_t name) const
+Nametable::identifier_info_t const*
+Nametable::lookup_(
+    Nametable::identifier_t name
+) const
 {
-    for (auto&& scope : scopes_ | std::views::reverse)
-    {
-        auto&& found = scope.find(name);
-        if (found == scope.end()) continue;
-        return std::addressof(found->second);
-    }
+  for (auto&& scope : scopes_ | std::views::reverse)
+  {
+    auto&& found = scope.find(name);
+    if (found == scope.end()) continue;
+    return std::addressof(found->second);
+  }
 
-    return nullptr;
+  return nullptr;
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-Nametable::identifier_info_t* Nametable::lookup_(Nametable::identifier_t name)
+Nametable::identifier_info_t*
+Nametable::lookup_(
+    Nametable::identifier_t name
+)
 {
-    for (auto&& scope : scopes_ | std::views::reverse)
-    {
-        auto&& found = scope.find(name);
-        if (found == scope.end()) continue;
-        return std::addressof(found->second);
-    }
+  for (auto&& scope : scopes_ | std::views::reverse)
+  {
+    auto&& found = scope.find(name);
+    if (found == scope.end()) continue;
+    return std::addressof(found->second);
+  }
 
-    return nullptr;
+  return nullptr;
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-void Nametable::declare_(Nametable::identifier_t name, llvm::Value *value, ast::node::Variable const & declaration_node, ValueStatus status)
+void
+Nametable::declare_(
+    Nametable::identifier_t name, llvm::Value* value,
+    ast::node::Variable const& declaration_node, ValueStatus status
+)
 {
-    assert(scopes_.size() > 0);
+  assert(scopes_.size() > 0);
 
-    auto&& variable = scopes_.back()[name];
-    variable.status = status;
-    variable.declaration_node = declaration_node;
+  auto&& variable           = scopes_.back()[name];
+  variable.status           = status;
+  variable.declaration_node = declaration_node;
 
-    auto&& variable_value = variable.value;
-    if (is_function(value))
-    {
-        variable_value = value;
-        return;
-    }
+  auto&& variable_value = variable.value;
+  if (is_function(value))
+  {
+    variable_value = value;
+    return;
+  }
 
-    if (status == global)
-        variable_value = new llvm::GlobalVariable(module_, value->getType(), false, llvm::GlobalValue::InternalLinkage, llvm::Constant::getNullValue(value->getType()), name);
-    else
-        variable_value = builder_.CreateAlloca(value->getType(), nullptr, name);
+  if (status == global)
+    variable_value = new llvm::GlobalVariable(
+        module_,
+        value->getType(),
+        false,
+        llvm::GlobalValue::InternalLinkage,
+        llvm::Constant::getNullValue(value->getType()),
+        name
+    );
+  else variable_value = builder_.CreateAlloca(value->getType(), nullptr, name);
 
-    builder_.CreateStore(value, variable_value);
+  builder_.CreateStore(value, variable_value);
 }
 
 //---------------------------------------------------------------------------------------------------------------
 
-void Nametable::force_declare(Nametable::identifier_t name, llvm::Value *value, ast::node::Variable const & declaration_node)
+void
+Nametable::force_declare(
+    Nametable::identifier_t name, llvm::Value* value,
+    ast::node::Variable const& declaration_node
+)
 {
-    assert(scopes_.size() > 0);
-    
-    auto&& back = scopes_.back();
+  assert(scopes_.size() > 0);
 
-    if (auto&& found = back.find(name); found != back.end())
-        throw error::function_arguments_with_same_names(found->second.declaration_node, declaration_node);
+  auto&& back = scopes_.back();
 
-    declare_(name, value, declaration_node, ValueStatus::local);
+  if (auto&& found = back.find(name); found != back.end())
+    throw error::function_arguments_with_same_names(
+        found->second.declaration_node, declaration_node
+    );
+
+  declare_(name, value, declaration_node, ValueStatus::local);
 }
 
 //---------------------------------------------------------------------------------------------------------------
 } /* namespace ParaCL::frontend::llvm_ir_translator */
-//---------------------------------------------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------------------------------------------
