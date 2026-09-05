@@ -21,7 +21,7 @@ run(
 {
   auto&& command = std::ostringstream{};
 
-  command << "clang " << options.tmp_ir_file;
+  command << "clang " << options.tmp_ir_file.string();
 
   if (options.save_temps) { command << " --save-temps"; }
 
@@ -47,7 +47,7 @@ run(
     }
   }
 
-  command << " -o " << options.output_file;
+  command << " -o " << options.output_file.string();
 
   auto&& result = std::system(command.str().c_str());
 

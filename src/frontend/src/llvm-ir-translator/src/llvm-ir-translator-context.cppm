@@ -38,7 +38,11 @@ export struct llvmIrTranslatorContext
       nametable(module, builder),
       functable(builder),
       libc_standart_functions(module, builder)
-  { module.setTargetTriple(llvm::sys::getDefaultTargetTriple()); }
+  {
+      // llvm, what's wrong with your back compability?
+      auto && target_triple = llvm::Triple(llvm::sys::getDefaultTargetTriple());
+      module.setTargetTriple(target_triple);
+  }
 
   void
   set_current_block(

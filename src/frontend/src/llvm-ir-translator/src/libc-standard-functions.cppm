@@ -41,12 +41,14 @@ public:
 //---------------------------------------------------------------------------------------------------------------
 
 LibcStandartFunctions::LibcStandartFunctions(
+    /* llvm::LLVMContext& context, */
     llvm::Module& module, llvm::IRBuilder<>& builder
 ) :
     libc_printf_(
         llvm::Function::Create(
             llvm::FunctionType::get(
                 builder.getInt32Ty(), {builder.getInt8Ty()->getPointerTo()},
+                // builder.getInt32Ty(), {llvm::PointerType::get(context, builder.getInt8Ty())},
                 true
             ),
             llvm::Function::ExternalLinkage, "printf", module
@@ -56,6 +58,7 @@ LibcStandartFunctions::LibcStandartFunctions(
         llvm::Function::Create(
             llvm::FunctionType::get(
                 builder.getInt32Ty(), {builder.getInt8Ty()->getPointerTo()},
+                // builder.getInt32Ty(), {llvm::PointerType::get(context, builder.getInt8Ty())},
                 true
             ),
             llvm::Function::ExternalLinkage, "scanf", module

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.30)
 
 project(ParaCL
-    LANGUAGES CXX
+    LANGUAGES C CXX
     VERSION 6.1
 )
 
