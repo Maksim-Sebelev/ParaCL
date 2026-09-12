@@ -439,6 +439,30 @@ public:
   }
 };
 
+class continue_not_in_a_loop : public error
+{
+public:
+  continue_not_in_a_loop(
+      ast::node::Continue const& node
+  )
+  {
+    auto&& explain = "continue statement not in a loop";
+    msg_           = show_code_error(explain, node.location());
+  }
+};
+
+class break_not_in_a_loop : public error
+{
+public:
+  break_not_in_a_loop(
+      ast::node::Break const& node
+  )
+  {
+    auto&& explain = "break statement not in a loop";
+    msg_           = show_code_error(explain, node.location());
+  }
+};
+
 } /* namespace error */
 
 export namespace warning
@@ -492,6 +516,30 @@ instructions_after_return(
 )
 {
   auto&& explain = "instructions after this 'return' will never be reached";
+  os << show_code_error(explain, node.location(), ProblemStatus::Warning)
+     << "\n";
+
+  return os;
+}
+
+std::ostream&
+instructions_after_break(
+    ast::node::BasicNode const& node, std::ostream& os = std::cerr
+)
+{
+  auto&& explain = "instructions after this 'break' will never be reached";
+  os << show_code_error(explain, node.location(), ProblemStatus::Warning)
+     << "\n";
+
+  return os;
+}
+
+std::ostream&
+instructions_after_continue(
+    ast::node::BasicNode const& node, std::ostream& os = std::cerr
+)
+{
+  auto&& explain = "instructions after this 'continue' will never be reached";
   os << show_code_error(explain, node.location(), ProblemStatus::Warning)
      << "\n";
 

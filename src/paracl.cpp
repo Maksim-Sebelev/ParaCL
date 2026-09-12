@@ -9,33 +9,38 @@ import backend;
 
 namespace ParaCL
 {
-void remove_temps(ParaCL::options::Options const &options)
+void
+remove_temps(
+    ParaCL::options::Options const& options
+)
 {
-    if (options.save_temps)
-        return;
-    std::filesystem::remove(options.tmp_ir_file);
+  if (options.save_temps) return;
+  std::filesystem::remove(options.tmp_ir_file);
 }
 } /* namespace ParaCL */
 
-int main(int argc, char *argv[])
+int
+main(
+    int argc, char* argv[]
+)
 try
 {
-    auto &&options = ParaCL::options::read_options(argc, argv);
+  auto&& options = ParaCL::options::read_options(argc, argv);
 
-    ParaCL::frontend::run(options);
-    ParaCL::backend ::run(options);
+  ParaCL::frontend::run(options);
+  ParaCL::backend::run(options);
 
-    ParaCL::remove_temps(options);
+  ParaCL::remove_temps(options);
 
-    return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }
-catch (std::exception const &e)
+catch (std::exception const& e)
 {
-    std::cerr << e.what() << "\n";
-    return EXIT_FAILURE;
+  std::cerr << e.what() << "\n";
+  return EXIT_FAILURE;
 }
 catch (...)
 {
-    std::cerr << "Undefined error.\nPlease submit a but report with your code.\n";
-    return EXIT_FAILURE;
+  std::cerr << "Undefined error.\nPlease submit a but report with your code.\n";
+  return EXIT_FAILURE;
 }

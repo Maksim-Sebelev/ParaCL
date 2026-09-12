@@ -555,7 +555,7 @@ template <>
 struct NodeTraits<Return, NodeInfo::FIELDS>
 {
   using type                  = size_t;
-  static constexpr type value = 2;
+  static constexpr type value = 1;
 };
 
 template <>
@@ -565,11 +565,26 @@ struct NodeTraits<Return, NodeInfo::FIELD, 0>
   static constexpr type value = "returning-value";
 };
 
+//--------------------------------------------------------------------------------------------------------------------------------------
+// continue
+//--------------------------------------------------------------------------------------------------------------------------------------
+
 template <>
-struct NodeTraits<Return, NodeInfo::FIELD, 1>
+struct NodeTraits<Continue, NodeInfo::NAME>
 {
   using type                  = char const*;
-  static constexpr type value = "else";
+  static constexpr type value = STRINGIFY(Continue);
+};
+
+//--------------------------------------------------------------------------------------------------------------------------------------
+// break
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+template <>
+struct NodeTraits<Break, NodeInfo::NAME>
+{
+  using type                  = char const*;
+  static constexpr type value = STRINGIFY(Break);
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------

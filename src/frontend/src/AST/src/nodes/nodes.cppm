@@ -796,6 +796,40 @@ public:
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
+
+export class Continue final
+{
+private:
+  mutable CodeLocation location_;
+
+public:
+  CodeLocation&
+  location() & noexcept
+  { return location_; }
+
+  CodeLocation const&
+  location() const& noexcept
+  { return location_; }
+};
+
+//--------------------------------------------------------------------------------------------------------------------------------------
+
+export class Break final
+{
+private:
+  mutable CodeLocation location_;
+
+public:
+  CodeLocation&
+  location() & noexcept
+  { return location_; }
+
+  CodeLocation const&
+  location() const& noexcept
+  { return location_; }
+};
+
+//--------------------------------------------------------------------------------------------------------------------------------------
 } /* namespace ParaCL::frontend::ast::node */
 
 //--------------------------------------------------------------------------------------------------------------------------------------

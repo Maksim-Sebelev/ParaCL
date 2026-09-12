@@ -28,6 +28,8 @@ export struct llvmIrTranslatorContext
   LibcStandartFunctions           libc_standart_functions;
   llvm::BasicBlock*               current_block        = nullptr;
   ValueStatus                     current_scope_status = ValueStatus::global;
+  llvm::BasicBlock*               current_loop         = nullptr;
+  llvm::BasicBlock*               current_loop_end     = nullptr;
 
   llvmIrTranslatorContext(
       std::filesystem::path const& source
@@ -39,9 +41,9 @@ export struct llvmIrTranslatorContext
       functable(builder),
       libc_standart_functions(module, builder)
   {
-      // llvm, what's wrong with your back compability?
-      auto && target_triple = llvm::Triple(llvm::sys::getDefaultTargetTriple());
-      module.setTargetTriple(target_triple);
+    // llvm, what's wrong with your back compability?
+    auto&& target_triple = llvm::Triple(llvm::sys::getDefaultTargetTriple());
+    module.setTargetTriple(target_triple);
   }
 
   void

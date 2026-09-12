@@ -48,7 +48,8 @@ LibcStandartFunctions::LibcStandartFunctions(
         llvm::Function::Create(
             llvm::FunctionType::get(
                 builder.getInt32Ty(), {builder.getInt8Ty()->getPointerTo()},
-                // builder.getInt32Ty(), {llvm::PointerType::get(context, builder.getInt8Ty())},
+                // builder.getInt32Ty(), {llvm::PointerType::get(context,
+                // builder.getInt8Ty())},
                 true
             ),
             llvm::Function::ExternalLinkage, "printf", module
@@ -58,7 +59,8 @@ LibcStandartFunctions::LibcStandartFunctions(
         llvm::Function::Create(
             llvm::FunctionType::get(
                 builder.getInt32Ty(), {builder.getInt8Ty()->getPointerTo()},
-                // builder.getInt32Ty(), {llvm::PointerType::get(context, builder.getInt8Ty())},
+                // builder.getInt32Ty(), {llvm::PointerType::get(context,
+                // builder.getInt8Ty())},
                 true
             ),
             llvm::Function::ExternalLinkage, "scanf", module

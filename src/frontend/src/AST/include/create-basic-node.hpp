@@ -23,6 +23,8 @@
   SET_NODE_FUNCTIONALITY(ParaCL::frontend::ast::node::Else, __VA_ARGS__)      \
   SET_NODE_FUNCTIONALITY(ParaCL::frontend::ast::node::Condition, __VA_ARGS__) \
   SET_NODE_FUNCTIONALITY(ParaCL::frontend::ast::node::While, __VA_ARGS__)     \
+  SET_NODE_FUNCTIONALITY(ParaCL::frontend::ast::node::Continue, __VA_ARGS__)  \
+  SET_NODE_FUNCTIONALITY(ParaCL::frontend::ast::node::Break, __VA_ARGS__)     \
   SET_NODE_FUNCTIONALITY(                                                     \
       ParaCL::frontend::ast::node::NumberLiteral, __VA_ARGS__                 \
   )                                                                           \

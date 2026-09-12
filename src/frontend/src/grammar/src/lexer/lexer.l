@@ -95,6 +95,8 @@ STRING    \"[^"]*\"
 ":"                    { return yy::parser::token::COLON; }
 "func"                 { return yy::parser::token::DECLFUNC; }
 "return"               { return yy::parser::token::RET; }
+"continue"             { return yy::parser::token::CONTINUE; }
+"break"                { return yy::parser::token::BREAK; }
 
 {STRING} {
     yytext[yyleng - 1] = '\0';

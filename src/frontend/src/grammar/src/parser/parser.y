@@ -46,6 +46,8 @@
     SET_NODE_FUNCTIONALITY(ParaCL::frontend::ast::node::FunctionCall       , ParaCL::frontend::ast::node::dumpable, ParaCL::frontend::ast::node::generatable_statement, ParaCL::frontend::ast::node::generatable_expression)
     SET_NODE_FUNCTIONALITY(ParaCL::frontend::ast::node::Return             , ParaCL::frontend::ast::node::dumpable, ParaCL::frontend::ast::node::generatable_statement)
     SET_NODE_FUNCTIONALITY(ParaCL::frontend::ast::node::Semicolon          , ParaCL::frontend::ast::node::dumpable, ParaCL::frontend::ast::node::generatable_statement)
+    SET_NODE_FUNCTIONALITY(ParaCL::frontend::ast::node::Break              , ParaCL::frontend::ast::node::dumpable, ParaCL::frontend::ast::node::generatable_statement)
+    SET_NODE_FUNCTIONALITY(ParaCL::frontend::ast::node::Continue           , ParaCL::frontend::ast::node::dumpable, ParaCL::frontend::ast::node::generatable_statement)
 
     void parser_show_error(yy::location const & loc, std::string_view msg)
     {
@@ -112,7 +114,7 @@
 %nonassoc ELIF
 %nonassoc ELSE
 
-%token WHILE
+%token WHILE CONTINUE BREAK
 %token PRINT
 %token <char> SC COMMA
 %token <char> COLON DECLFUNC RET
@@ -124,7 +126,7 @@
 // statements
 %type <std::vector<ParaCL::frontend::ast::node::BasicNode>> statements
 %type <ParaCL::frontend::ast::node::BasicNode> statement no_separated_with_semicolon_statement separated_with_semicolon_statement separated_with_semicolon_statement_no_semicolon scope one_statement_scope
-%type <ParaCL::frontend::ast::node::BasicNode> condition while if else semicolon
+%type <ParaCL::frontend::ast::node::BasicNode> condition while if else semicolon continue break
 %type <std::vector<ParaCL::frontend::ast::node::BasicNode>> elifs
 // expressionss
 %type <ParaCL::frontend::ast::node::BasicNode> expression binary_operator unary_operator variable number string scan brackets
@@ -190,12 +192,30 @@ separated_with_semicolon_statement_no_semicolon:
     expression             { $$ = std::move($1); }
     | return               { $$ = std::move($1); }
     | print                { $$ = std::move($1); }
+    | continue             { $$ = std::move($1); }
+    | break                { $$ = std::move($1); }
     ;
 
 semicolon:
     SC
     {
         $$ = ParaCL::frontend::ast::node::create(ParaCL::frontend::ast::node::Semicolon{});
+        $$.location() = parser_location_cast(@1);
+    }
+    ;
+
+continue:
+    CONTINUE
+    {
+        $$ = ParaCL::frontend::ast::node::create(ParaCL::frontend::ast::node::Continue{});
+        $$.location() = parser_location_cast(@1);
+    }
+    ;
+
+break:
+    BREAK
+    {
+        $$ = ParaCL::frontend::ast::node::create(ParaCL::frontend::ast::node::Break{});
         $$.location() = parser_location_cast(@1);
     }
     ;

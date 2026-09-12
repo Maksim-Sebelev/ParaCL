@@ -551,8 +551,10 @@ visit(
   auto&& end_block =
       llvm::BasicBlock::Create(context.context, "done", current_func);
 
-  context.builder.CreateBr(cond_block);
+  auto&& old_loop     = std::exchange(context.current_loop, cond_block);
+  auto&& old_loop_end = std::exchange(context.current_loop_end, end_block);
 
+  context.builder.CreateBr(cond_block);
   context.set_current_block(cond_block);
 
   auto&& cond_val = generate_expression(node.condition(), context);
@@ -573,6 +575,8 @@ visit(
   context.builder.CreateBr(cond_block);
 
   context.set_current_block(end_block);
+  context.current_loop     = old_loop;
+  context.current_loop_end = old_loop_end;
 }
 
 //-----------------------------------------------------------------------------
@@ -743,6 +747,10 @@ visit(
     auto&& statement = node[it];
 
     if (statement.is_a<Return>()) warning::instructions_after_return(statement);
+    else if (statement.is_a<Continue>())
+      warning::instructions_after_continue(statement);
+    else if (statement.is_a<Break>())
+      warning::instructions_after_break(statement);
 
     generate_statement(statement, context);
   }
@@ -788,6 +796,10 @@ visit(
     auto&& statement = node[it];
 
     if (statement.is_a<Return>()) warning::instructions_after_return(statement);
+    else if (statement.is_a<Continue>())
+      warning::instructions_after_continue(statement);
+    else if (statement.is_a<Break>())
+      warning::instructions_after_break(statement);
 
     generate_statement(statement, context);
   }
@@ -807,6 +819,39 @@ visit(
     Semicolon const& node, llvmIrTranslatorContext& context
 )
 { warning::useless_semicolon(node); }
+
+//-----------------------------------------------------------------------------
+// CONTINUE
+//-----------------------------------------------------------------------------
+
+template <>
+void
+visit(
+    Continue const& node, llvmIrTranslatorContext& context
+)
+{
+  if (not context.current_loop) throw error::continue_not_in_a_loop(node);
+  context.builder.CreateBr(context.current_loop);
+}
+
+//-----------------------------------------------------------------------------
+// BREAK
+//-----------------------------------------------------------------------------
+
+template <>
+void
+visit(
+    Break const& node, llvmIrTranslatorContext& context
+)
+{
+  if (not context.current_loop) throw error::break_not_in_a_loop(node);
+  assert(
+      context.current_loop_end &&
+      "if context.current_loop isn't nulltpr, context.current_loop_end also "
+      "mustn't be nullpts"
+  );
+  context.builder.CreateBr(context.current_loop_end);
+}
 
 //-----------------------------------------------------------------------------
 // RETURN
