@@ -17,7 +17,14 @@ namespace ParaCL::frontend::ast::node
 {
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-export class Semicolon
+/*
+    currently i don't know how to implement CodeLocation interface into all
+   nodes. inheritance isn't kind of good idea, because not any libraries need's
+   this info, like code-format lib for example but now this is best of all
+   solutions, what i found
+*/
+
+class NodeCodeLocation
 {
 private:
   mutable CodeLocation location_;
@@ -34,57 +41,13 @@ public:
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-export class Scope final : private std::vector<BasicNode>
-{
-public:
-  using std::vector<BasicNode>::emplace_back;
-  using std::vector<BasicNode>::push_back;
-  using std::vector<BasicNode>::begin;
-  using std::vector<BasicNode>::end;
-  using std::vector<BasicNode>::size;
-  using std::vector<BasicNode>::operator [];
-  using std::vector<BasicNode>::back;
-  using std::vector<BasicNode>::empty;
+export class Semicolon final : public NodeCodeLocation
+{};
 
-public:
-  Scope() = default;
+//--------------------------------------------------------------------------------------------------------------------------------------
 
-  Scope(
-      size_t size
-  ) :
-      std::vector<BasicNode>(size)
-  {}
-
-  Scope(
-      std::vector<BasicNode>&& nodes
-  ) :
-      std::vector<BasicNode>(std::move(nodes))
-  {}
-
-  Scope(
-      std::vector<BasicNode> const& nodes
-  ) :
-      std::vector<BasicNode>(nodes)
-  {}
-
-  Scope(
-      std::initializer_list<BasicNode> il
-  ) :
-      std::vector<BasicNode>(std::move(il))
-  {}
-
-private:
-  mutable CodeLocation location_;
-
-public:
-  CodeLocation&
-  location() & noexcept
-  { return location_; }
-
-  CodeLocation const&
-  location() const& noexcept
-  { return location_; }
-};
+export class Scope final : public std::vector<BasicNode>, public NodeCodeLocation
+{};
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
@@ -120,21 +83,11 @@ public:
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-export class Print final : private std::vector<BasicNode>
+export class Print final :
+    public std::vector<BasicNode>,
+    public NodeCodeLocation
 {
 public:
-  using std::vector<BasicNode>::emplace_back;
-  using std::vector<BasicNode>::push_back;
-  using std::vector<BasicNode>::begin;
-  using std::vector<BasicNode>::end;
-  using std::vector<BasicNode>::size;
-  using std::vector<BasicNode>::operator [];
-  using std::vector<BasicNode>::iterator;
-  using std::vector<BasicNode>::const_iterator;
-
-public:
-  Print() = default;
-
   Print(
       std::vector<BasicNode>&& args
   ) :
@@ -146,43 +99,19 @@ public:
   ) :
       std::vector<BasicNode>(std::move(il))
   {}
-
-private:
-  mutable CodeLocation location_;
-
-public:
-  CodeLocation&
-  location() & noexcept
-  { return location_; }
-
-  CodeLocation const&
-  location() const& noexcept
-  { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-export class Scan final
+export class Scan final : public NodeCodeLocation
 {
 public:
   Scan() = default;
-
-private:
-  mutable CodeLocation location_;
-
-public:
-  CodeLocation&
-  location() & noexcept
-  { return location_; }
-
-  CodeLocation const&
-  location() const& noexcept
-  { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-export class UnaryOperator final
+export class UnaryOperator final : public NodeCodeLocation
 {
 public:
   enum UnaryOperatorT
@@ -221,23 +150,11 @@ public:
   BasicNode&
   arg() & noexcept
   { return arg_; }
-
-private:
-  mutable CodeLocation location_;
-
-public:
-  CodeLocation&
-  location() & noexcept
-  { return location_; }
-
-  CodeLocation const&
-  location() const& noexcept
-  { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-export class BinaryOperator final
+export class BinaryOperator final : public NodeCodeLocation
 {
 public:
   enum BinaryOperatorT
@@ -313,23 +230,11 @@ public:
   BasicNode&
   rarg() & noexcept
   { return rarg_; }
-
-private:
-  mutable CodeLocation location_;
-
-public:
-  CodeLocation&
-  location() & noexcept
-  { return location_; }
-
-  CodeLocation const&
-  location() const& noexcept
-  { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-export class NumberLiteral final
+export class NumberLiteral final : public NodeCodeLocation
 {
 private:
   int value_;
@@ -345,23 +250,11 @@ public:
   int
   value() const noexcept
   { return value_; }
-
-private:
-  mutable CodeLocation location_;
-
-public:
-  CodeLocation&
-  location() & noexcept
-  { return location_; }
-
-  CodeLocation const&
-  location() const& noexcept
-  { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-export class StringLiteral final
+export class StringLiteral final : public NodeCodeLocation
 {
 private:
   std::string value_;
@@ -377,24 +270,12 @@ public:
   std::string_view
   value() const& noexcept
   { return value_; }
-
-private:
-  mutable CodeLocation location_;
-
-public:
-  CodeLocation&
-  location() & noexcept
-  { return location_; }
-
-  CodeLocation const&
-  location() const& noexcept
-  { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
 /* impl basic class for while, if, else-if classes */
-class ConditionWithBody /* not final */
+class ConditionWithBody /* not final */ : public NodeCodeLocation
 {
 private:
   BasicNode condition_;
@@ -443,9 +324,6 @@ public:
   BasicNode&
   body() & noexcept
   { return body_; }
-
-protected:
-  mutable CodeLocation location_;
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -454,16 +332,6 @@ export class While final : public ConditionWithBody
 {
 public:
   using ConditionWithBody::ConditionWithBody;
-
-private:
-public:
-  CodeLocation&
-  location() & noexcept
-  { return location_; }
-
-  CodeLocation const&
-  location() const& noexcept
-  { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -472,22 +340,13 @@ export class If final : public ConditionWithBody
 {
 public:
   using ConditionWithBody::ConditionWithBody;
-
-public:
-  CodeLocation&
-  location() & noexcept
-  { return location_; }
-
-  CodeLocation const&
-  location() const& noexcept
-  { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
 export class Condition;
 
-export class Else final
+export class Else final : public NodeCodeLocation
 {
 private:
   BasicNode body_;
@@ -518,23 +377,11 @@ public:
 
 private:
   Else() = default;
-
-private:
-  mutable CodeLocation location_;
-
-public:
-  CodeLocation&
-  location() & noexcept
-  { return location_; }
-
-  CodeLocation const&
-  location() const& noexcept
-  { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-export class Condition final
+export class Condition final : public NodeCodeLocation
 {
 private:
   std::vector<BasicNode> ifs_;
@@ -601,23 +448,11 @@ public:
   BasicNode&
   get_else() & noexcept
   { return else_; }
-
-private:
-  mutable CodeLocation location_;
-
-public:
-  CodeLocation&
-  location() & noexcept
-  { return location_; }
-
-  CodeLocation const&
-  location() const& noexcept
-  { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-export class Return final
+export class Return final : public NodeCodeLocation
 {
 private:
   BasicNode expression_;
@@ -644,23 +479,11 @@ public:
   ) :
       expression_(expression)
   {}
-
-private:
-  mutable CodeLocation location_;
-
-public:
-  CodeLocation&
-  location() & noexcept
-  { return location_; }
-
-  CodeLocation const&
-  location() const& noexcept
-  { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-export class FunctionDeclaration final
+export class FunctionDeclaration final : public NodeCodeLocation
 {
 private:
   std::string            name_;
@@ -715,23 +538,11 @@ public:
   ) :
       name_(std::move(name)), args_(args), body_(body)
   {}
-
-private:
-  mutable CodeLocation location_;
-
-public:
-  CodeLocation&
-  location() & noexcept
-  { return location_; }
-
-  CodeLocation const&
-  location() const& noexcept
-  { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-export class FunctionCall final
+export class FunctionCall final : public NodeCodeLocation
 {
 private:
   std::string            name_;
@@ -781,53 +592,17 @@ public:
       std::string&& name
   )
   { name_ = std::move(name); }
-
-private:
-  mutable CodeLocation location_;
-
-public:
-  CodeLocation&
-  location() & noexcept
-  { return location_; }
-
-  CodeLocation const&
-  location() const& noexcept
-  { return location_; }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-export class Continue final
-{
-private:
-  mutable CodeLocation location_;
-
-public:
-  CodeLocation&
-  location() & noexcept
-  { return location_; }
-
-  CodeLocation const&
-  location() const& noexcept
-  { return location_; }
-};
+export class Continue final : public NodeCodeLocation
+{};
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-export class Break final
-{
-private:
-  mutable CodeLocation location_;
-
-public:
-  CodeLocation&
-  location() & noexcept
-  { return location_; }
-
-  CodeLocation const&
-  location() const& noexcept
-  { return location_; }
-};
+export class Break final : public NodeCodeLocation
+{};
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 } /* namespace ParaCL::frontend::ast::node */
