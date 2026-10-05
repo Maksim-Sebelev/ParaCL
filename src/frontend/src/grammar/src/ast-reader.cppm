@@ -25,7 +25,9 @@ void
 set_current_paracl_file(
     std::string_view file
 )
-{ current_file = std::string(file); }
+{
+  current_file = std::string(file);
+}
 
 export
 ast::AST&&

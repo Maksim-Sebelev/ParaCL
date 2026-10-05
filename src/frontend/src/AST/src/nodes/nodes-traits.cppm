@@ -35,7 +35,9 @@ template <typename NodeT, NodeInfo n, int id = 0>
 constexpr
 typename NodeTraits<NodeT, n, id>::type
 get_node_info()
-{ return NodeTraits<NodeT, n, id>::value; }
+{
+  return NodeTraits<NodeT, n, id>::value;
+}
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 // SCOPE

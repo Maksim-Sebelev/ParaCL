@@ -108,7 +108,9 @@ private:
   is_function(
       llvm::Value const* value
   )
-  { return llvm::isa<llvm::Function>(value); }
+  {
+    return llvm::isa<llvm::Function>(value);
+  }
 
 public:
   Nametable(llvm::Module& module, llvm::IRBuilder<>& builder);
@@ -180,7 +182,9 @@ Nametable::Nametable(
 
 void
 Nametable::new_scope()
-{ scopes_.emplace_back(); }
+{
+  scopes_.emplace_back();
+}
 
 //---------------------------------------------------------------------------------------------------------------
 
@@ -257,7 +261,10 @@ Nametable::set(
   auto&& is_variable_function = is_function(variable.value);
   auto&& is_value_function    = is_function(value);
 
-  if (is_variable_function and is_value_function) { variable.value = value; }
+  if (is_variable_function and is_value_function)
+  {
+    variable.value = value;
+  }
   else if (not is_variable_function and not is_value_function)
   {
     builder_.CreateStore(value, variable.value);

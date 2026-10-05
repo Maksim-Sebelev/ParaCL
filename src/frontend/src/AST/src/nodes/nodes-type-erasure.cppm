@@ -72,12 +72,16 @@ private:
 
     CodeLocation const&
     location_() const& override
-    { return data_.location(); }
+    {
+      return data_.location();
+    }
 
     CodeLocation&
         location_() &
         override
-    { return data_.location(); }
+    {
+      return data_.location();
+    }
 
     template <typename Signature>
     struct Invoker;
@@ -149,7 +153,9 @@ private:
 
     std::type_info const&
     type_() const override
-    { return typeid(NodeT); }
+    {
+      return typeid(NodeT);
+    }
 
     template <size_t... Is>
     bool
@@ -193,7 +199,9 @@ private:
     invoke_one_(
         std::any* args
     ) const
-    { return Invoker<Signature>::call_(data_, args); }
+    {
+      return Invoker<Signature>::call_(data_, args);
+    }
 
   public:
     explicit NodeImpl(
@@ -368,7 +376,9 @@ public:
   template <typename T>
   bool
   is_a() const
-  { return (typeid(T) == self_->type_()); }
+  {
+    return (typeid(T) == self_->type_());
+  }
 
   /* check that self is not nullptr */
   /* implicit */
@@ -376,7 +386,9 @@ public:
 
   std::type_info const&
   type() const
-  { return self_->type_(); }
+  {
+    return self_->type_();
+  }
 
   /* convert to a real data */
   template <typename T>
@@ -413,11 +425,15 @@ public:
 
   CodeLocation const&
   location() const&
-  { return self_->location_(); }
+  {
+    return self_->location_();
+  }
 
   CodeLocation&
   location() &
-  { return self_->location_(); }
+  {
+    return self_->location_();
+  }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------

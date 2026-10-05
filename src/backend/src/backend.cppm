@@ -23,7 +23,10 @@ run(
 
   command << "clang " << options.tmp_ir_file.string();
 
-  if (options.save_temps) { command << " --save-temps"; }
+  if (options.save_temps)
+  {
+    command << " --save-temps";
+  }
 
   if (options.debug)
   {

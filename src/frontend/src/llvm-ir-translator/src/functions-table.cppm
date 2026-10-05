@@ -59,14 +59,18 @@ public:
 
   size_t
   args_quantity() const noexcept
-  { return args_quantity_; }
+  {
+    return args_quantity_;
+  }
 };
 
 bool
 operator ==(
     declaration_args_t const& lhs, declaration_args_t const& rhs
 )
-{ return (lhs.args_quantity() == rhs.args_quantity()); }
+{
+  return (lhs.args_quantity() == rhs.args_quantity());
+}
 
 /* call_matches_declaration_by_args */
 bool
@@ -97,7 +101,9 @@ struct hash<
       ParaCL::frontend::llvm_ir_translator::functions_table::
           declaration_args_t const& x
   ) const
-  { return x.args_quantity(); }
+  {
+    return x.args_quantity();
+  }
 };
 
 } /* namespace std */

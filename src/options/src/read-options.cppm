@@ -56,12 +56,16 @@ protected:
 private:
   char const*
   what_() const noexcept
-  { return msg_.c_str(); }
+  {
+    return msg_.c_str();
+  }
 
 public:
   char const*
   what() const noexcept override
-  { return what_(); }
+  {
+    return what_();
+  }
 };
 
 class unknown_argument_error : public error

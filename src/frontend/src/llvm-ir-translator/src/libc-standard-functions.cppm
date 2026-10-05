@@ -72,25 +72,33 @@ LibcStandartFunctions::LibcStandartFunctions(
 
 llvm::Function*
 LibcStandartFunctions::libc_printf() &
-{ return libc_printf_; }
+{
+  return libc_printf_;
+}
 
 //---------------------------------------------------------------------------------------------------------------
 
 llvm::Function*
 LibcStandartFunctions::libc_scanf() &
-{ return libc_scanf_; }
+{
+  return libc_scanf_;
+}
 
 //---------------------------------------------------------------------------------------------------------------
 
 llvm::Function const*
 LibcStandartFunctions::libc_printf() const&
-{ return libc_printf_; }
+{
+  return libc_printf_;
+}
 
 //---------------------------------------------------------------------------------------------------------------
 
 llvm::Function const*
 LibcStandartFunctions::libc_scanf() const&
-{ return libc_scanf_; }
+{
+  return libc_scanf_;
+}
 
 //---------------------------------------------------------------------------------------------------------------
 } /* namespace ParaCL::frontend::llvm_ir_translator */

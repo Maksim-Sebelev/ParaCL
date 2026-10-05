@@ -25,7 +25,9 @@ auto
 write(
     BasicNode const& node
 ) -> decltype(visit<boost::json::value>(node))
-{ return visit<boost::json::value>(node); }
+{
+  return visit<boost::json::value>(node);
+}
 
 boost::json::value
 write(
@@ -47,7 +49,9 @@ void
 set_location(
     boost::json::object& obj, CodeLocation const& location
 )
-{ obj["location"] = write(location); }
+{
+  obj["location"] = write(location);
+}
 
 namespace visit_specializations
 {

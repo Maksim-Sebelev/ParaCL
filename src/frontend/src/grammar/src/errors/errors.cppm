@@ -83,6 +83,8 @@ show_error(
     yy::location const& loc, std::string_view msg, FILE* in,
     std::ostream& os = std::cerr
 )
-{ os << error::parser_error(location_cast(loc, in), msg) << "\n"; }
+{
+  os << error::parser_error(location_cast(loc, in), msg) << "\n";
+}
 
 } /* namespace ParaCL::frontend::grammar */

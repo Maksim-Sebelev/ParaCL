@@ -28,31 +28,45 @@ private:
 public: /* getters */
   std::string_view
   file() const noexcept
-  { return file_; }
+  {
+    return file_;
+  }
 
   code_place_uint_t
   column_begin() const noexcept
-  { return column_begin_; }
+  {
+    return column_begin_;
+  }
 
   code_place_uint_t
   column_end() const noexcept
-  { return column_end_; }
+  {
+    return column_end_;
+  }
 
   code_place_uint_t
   line_begin() const noexcept
-  { return line_begin_; }
+  {
+    return line_begin_;
+  }
 
   code_place_uint_t
   line_end() const noexcept
-  { return line_end_; }
+  {
+    return line_end_;
+  }
 
   std::string_view
   code_excerpt() const& noexcept
-  { return code_excerpt_; }
+  {
+    return code_excerpt_;
+  }
 
   std::string&&
   code_excerpt() && noexcept
-  { return std::move(code_excerpt_); }
+  {
+    return std::move(code_excerpt_);
+  }
 
 public: /* setters */
   CodeLocation&

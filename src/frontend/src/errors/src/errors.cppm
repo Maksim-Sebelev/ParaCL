@@ -145,14 +145,18 @@ std::string
 was_declared_here(
     ast::node::Variable const& node, std::string msg = "was declared here: "
 )
-{ return was_declared_here(node.name(), node.location(), msg); }
+{
+  return was_declared_here(node.name(), node.location(), msg);
+}
 
 std::string
 was_declared_here(
     ast::node::FunctionDeclaration const& node,
     std::string                           msg = "was declared here: "
 )
-{ return was_declared_here(node.name(), node.location(), msg); }
+{
+  return was_declared_here(node.name(), node.location(), msg);
+}
 
 export namespace error
 {
@@ -165,19 +169,25 @@ protected:
 private:
   char const*
   what_() const noexcept
-  { return msg_.c_str(); }
+  {
+    return msg_.c_str();
+  }
 
 public:
   char const*
   what() const noexcept override
-  { return what_(); }
+  {
+    return what_();
+  }
 };
 
 std::ostream&
 operator <<(
     std::ostream& os, error const& e
 )
-{ return os << e.what(); }
+{
+  return os << e.what();
+}
 
 class no_such_file_error : public error
 {
@@ -197,7 +207,9 @@ public:
   parser_error(
       ast::node::CodeLocation const& location, std::string_view explain
   )
-  { msg_ = show_code_error(explain, location); }
+  {
+    msg_ = show_code_error(explain, location);
+  }
 };
 
 class using_undeclarated_variable : public error
@@ -496,7 +508,9 @@ std::ostream&
 expression_result_unused(
     ast::node::BasicNode const& node, std::ostream& os = std::cerr
 )
-{ return expression_result_unused(node.location(), os); }
+{
+  return expression_result_unused(node.location(), os);
+}
 
 std::ostream&
 unnamed_function(

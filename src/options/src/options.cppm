@@ -36,7 +36,10 @@ export struct Options
     tmp_ir_file = input_file.filename();
     tmp_ir_file.replace_extension(".ll");
 
-    if (not save_temps) { tmp_ir_file = tmp_directory / tmp_ir_file; }
+    if (not save_temps)
+    {
+      tmp_ir_file = tmp_directory / tmp_ir_file;
+    }
   }
 };
 

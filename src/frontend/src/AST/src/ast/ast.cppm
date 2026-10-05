@@ -33,7 +33,9 @@ public:
 public:
   node::BasicNode const&
   root() const noexcept
-  { return root_; }
+  {
+    return root_;
+  }
 };
 
 } /* namespace ParaCL::frontend::ast */

@@ -38,7 +38,9 @@ unique_node_id_t
 get_node_unique_id(
     NodeT const& node
 )
-{ return static_cast<unique_node_id_t>(std::addressof(node)); }
+{
+  return static_cast<unique_node_id_t>(std::addressof(node));
+}
 
 void
 create_node(

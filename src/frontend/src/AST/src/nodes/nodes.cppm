@@ -32,11 +32,15 @@ private:
 public:
   CodeLocation&
   location() & noexcept
-  { return location_; }
+  {
+    return location_;
+  }
 
   CodeLocation const&
   location() const& noexcept
-  { return location_; }
+  {
+    return location_;
+  }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -46,7 +50,9 @@ export class Semicolon final : public NodeCodeLocation
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 
-export class Scope final : public std::vector<BasicNode>, public NodeCodeLocation
+export class Scope final :
+    public std::vector<BasicNode>,
+    public NodeCodeLocation
 {};
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -66,7 +72,9 @@ public:
 public:
   std::string_view
   name() const& noexcept
-  { return name_; }
+  {
+    return name_;
+  }
 
 private:
   mutable CodeLocation location_;
@@ -74,11 +82,15 @@ private:
 public:
   CodeLocation&
   location() & noexcept
-  { return location_; }
+  {
+    return location_;
+  }
 
   CodeLocation const&
   location() const& noexcept
-  { return location_; }
+  {
+    return location_;
+  }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -141,15 +153,21 @@ public:
 public:
   UnaryOperatorT
   type() const noexcept
-  { return type_; }
+  {
+    return type_;
+  }
 
   BasicNode const&
   arg() const& noexcept
-  { return arg_; }
+  {
+    return arg_;
+  }
 
   BasicNode&
   arg() & noexcept
-  { return arg_; }
+  {
+    return arg_;
+  }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -213,23 +231,33 @@ public:
 public:
   BinaryOperatorT
   type() const noexcept
-  { return type_; }
+  {
+    return type_;
+  }
 
   BasicNode const&
   larg() const& noexcept
-  { return larg_; }
+  {
+    return larg_;
+  }
 
   BasicNode&
   larg() & noexcept
-  { return larg_; }
+  {
+    return larg_;
+  }
 
   BasicNode const&
   rarg() const& noexcept
-  { return rarg_; }
+  {
+    return rarg_;
+  }
 
   BasicNode&
   rarg() & noexcept
-  { return rarg_; }
+  {
+    return rarg_;
+  }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -249,7 +277,9 @@ public:
 public:
   int
   value() const noexcept
-  { return value_; }
+  {
+    return value_;
+  }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -269,7 +299,9 @@ public:
 public:
   std::string_view
   value() const& noexcept
-  { return value_; }
+  {
+    return value_;
+  }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -311,19 +343,27 @@ public:
 public:
   BasicNode const&
   condition() const& noexcept
-  { return condition_; }
+  {
+    return condition_;
+  }
 
   BasicNode&
   condition() & noexcept
-  { return condition_; }
+  {
+    return condition_;
+  }
 
   BasicNode const&
   body() const& noexcept
-  { return body_; }
+  {
+    return body_;
+  }
 
   BasicNode&
   body() & noexcept
-  { return body_; }
+  {
+    return body_;
+  }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -367,11 +407,15 @@ public:
 public:
   BasicNode const&
   body() const& noexcept
-  { return body_; }
+  {
+    return body_;
+  }
 
   BasicNode&
   body() & noexcept
-  { return body_; }
+  {
+    return body_;
+  }
 
   friend class Condition;
 
@@ -420,34 +464,48 @@ public:
   add_condition(
       BasicNode&& condition
   )
-  { ifs_.push_back(condition); }
+  {
+    ifs_.push_back(condition);
+  }
 
   void
   set_else(
       BasicNode&& else_а_как_вот_это_назвать
   )
-  { else_ = std::move(else_а_как_вот_это_назвать); }
+  {
+    else_ = std::move(else_а_как_вот_это_назвать);
+  }
 
   bool
   has_else() const noexcept
-  { return else_; }
+  {
+    return else_;
+  }
 
 public:
   std::vector<BasicNode> const&
   get_ifs() const& noexcept
-  { return ifs_; }
+  {
+    return ifs_;
+  }
 
   std::vector<BasicNode>&
   get_ifs() & noexcept
-  { return ifs_; }
+  {
+    return ifs_;
+  }
 
   BasicNode const&
   get_else() const& noexcept
-  { return else_; }
+  {
+    return else_;
+  }
 
   BasicNode&
   get_else() & noexcept
-  { return else_; }
+  {
+    return else_;
+  }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------
@@ -460,11 +518,15 @@ private:
 public:
   BasicNode const&
   expression() const& noexcept
-  { return expression_; }
+  {
+    return expression_;
+  }
 
   BasicNode&
   expression() & noexcept
-  { return expression_; }
+  {
+    return expression_;
+  }
 
   Return() = default;
 
@@ -494,23 +556,33 @@ private:
 public:
   std::string_view
   name() const& noexcept
-  { return name_; }
+  {
+    return name_;
+  }
 
   std::vector<BasicNode> const&
   args() const& noexcept
-  { return args_; }
+  {
+    return args_;
+  }
 
   std::vector<BasicNode>&
   args() & noexcept
-  { return args_; }
+  {
+    return args_;
+  }
 
   BasicNode const&
   body() const& noexcept
-  { return body_; }
+  {
+    return body_;
+  }
 
   BasicNode&
   body() & noexcept
-  { return body_; }
+  {
+    return body_;
+  }
 
   FunctionDeclaration() = default;
 
@@ -565,33 +637,45 @@ public:
 
   std::string_view
   name() const& noexcept
-  { return name_; }
+  {
+    return name_;
+  }
 
   std::vector<BasicNode> const&
   args() const& noexcept
-  { return args_; }
+  {
+    return args_;
+  }
 
   std::vector<BasicNode>&
   args() & noexcept
-  { return args_; }
+  {
+    return args_;
+  }
 
   void
   add_arg(
       BasicNode const& new_arg
   )
-  { args_.push_back(new_arg); }
+  {
+    args_.push_back(new_arg);
+  }
 
   void
   add_arg(
       BasicNode&& new_arg
   )
-  { args_.push_back(std::move(new_arg)); }
+  {
+    args_.push_back(std::move(new_arg));
+  }
 
   void
   set_name(
       std::string&& name
   )
-  { name_ = std::move(name); }
+  {
+    name_ = std::move(name);
+  }
 };
 
 //--------------------------------------------------------------------------------------------------------------------------------------

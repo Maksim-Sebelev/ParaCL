@@ -106,13 +106,17 @@ decltype(auto)
 generate_statement(
     BasicNode const& node, llvmIrTranslatorContext& context
 )
-{ return visit<void, llvmIrTranslatorContext&>(node, context); }
+{
+  return visit<void, llvmIrTranslatorContext&>(node, context);
+}
 
 decltype(auto)
 generate_expression(
     BasicNode const& node, llvmIrTranslatorContext& context
 )
-{ return visit<llvm::Value*, llvmIrTranslatorContext&>(node, context); }
+{
+  return visit<llvm::Value*, llvmIrTranslatorContext&>(node, context);
+}
 
 decltype(auto)
 generate_if_statement(
@@ -139,7 +143,9 @@ llvm::Value*
 visit(
     NumberLiteral const& node, llvmIrTranslatorContext& context
 )
-{ return llvm::ConstantInt::get(context.builder.getInt32Ty(), node.value()); }
+{
+  return llvm::ConstantInt::get(context.builder.getInt32Ty(), node.value());
+}
 
 template <>
 void
@@ -818,7 +824,9 @@ void
 visit(
     Semicolon const& node, llvmIrTranslatorContext& context
 )
-{ warning::useless_semicolon(node); }
+{
+  warning::useless_semicolon(node);
+}
 
 //-----------------------------------------------------------------------------
 // CONTINUE
